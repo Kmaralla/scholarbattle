@@ -68,7 +68,7 @@ export interface PresenceState {
 }
 
 export const RANK_THRESHOLDS: Record<RankTier, [number, number]> = {
-  bronze:   [0,    1199],
+  bronze:   [1000, 1199],
   silver:   [1200, 1399],
   gold:     [1400, 1599],
   platinum: [1600, 1799],
