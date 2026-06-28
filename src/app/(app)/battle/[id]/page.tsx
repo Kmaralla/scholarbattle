@@ -85,7 +85,7 @@ export default function BattlePage() {
       completed_at: new Date().toISOString(),
     }).eq('id', battle.id)
 
-    const { data: myProfile } = await supabase.from('users').select('elo_rating').eq('id', currentUser.id).single()
+    const { data: myProfile } = await supabase.from('users').select('elo_rating, total_wins, total_battles').eq('id', currentUser.id).single()
     const currentElo = myProfile?.elo_rating ?? 1000
     let eloDelta = 0
 
@@ -101,13 +101,13 @@ export default function BattlePage() {
       await supabase.from('users').update({
         elo_rating: newElo,
         rank_tier: getRankTier(newElo),
-        ...(iWon ? { total_wins: supabase.rpc('increment', { x: 1 }) } : {}),
-        total_battles: supabase.rpc('increment', { x: 1 }),
+        total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
+        total_battles: (myProfile?.total_battles ?? 0) + 1,
       }).eq('id', currentUser.id)
     } else {
       // Real PvP — full ELO formula
       const loserId = winnerId === battle.challenger_id ? battle.opponent_id : battle.challenger_id
-      const { data: loserProfile } = await supabase.from('users').select('elo_rating').eq('id', loserId).single()
+      const { data: loserProfile } = await supabase.from('users').select('elo_rating, total_wins, total_battles').eq('id', loserId).single()
 
       if (loserProfile && !tied) {
         const [newWinnerElo, newLoserElo] = calculateElo(currentElo, loserProfile.elo_rating)
@@ -118,13 +118,13 @@ export default function BattlePage() {
         await supabase.from('users').update({
           elo_rating: myNewElo,
           rank_tier: getRankTier(myNewElo),
-          ...(iWon ? { total_wins: supabase.rpc('increment', { x: 1 }) } : {}),
-          total_battles: supabase.rpc('increment', { x: 1 }),
+          total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
+          total_battles: (myProfile?.total_battles ?? 0) + 1,
         }).eq('id', currentUser.id)
         await supabase.from('users').update({
           elo_rating: theirNewElo,
           rank_tier: getRankTier(theirNewElo),
-          total_battles: supabase.rpc('increment', { x: 1 }),
+          total_battles: (loserProfile.total_battles ?? 0) + 1,
         }).eq('id', loserId)
       }
     }
