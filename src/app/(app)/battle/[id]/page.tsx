@@ -41,22 +41,20 @@ export default function BattlePage() {
       if (opponentId !== user.id) {
         const { data: opp } = await supabase.from('users').select('*').eq('id', opponentId).single()
         if (opp) { setOpponent(opp); setIsSolo(false) }
-        // If battle is still pending, show waiting screen
+        // If battle is still pending, poll until opponent accepts
         if (battleData.status === 'pending') {
           setWaitingForOpponent(true)
-          // Listen for opponent accepting (status → in_progress)
-          const statusChannel = supabase
-            .channel(`battle-status:${id}`)
-            .on('postgres_changes', {
-              event: 'UPDATE', schema: 'public', table: 'battles',
-              filter: `id=eq.${id}`,
-            }, (payload) => {
-              if (payload.new.status === 'in_progress') {
-                setWaitingForOpponent(false)
-                supabase.removeChannel(statusChannel)
-              }
-            })
-            .subscribe()
+          const poll = setInterval(async () => {
+            const { data } = await supabase
+              .from('battles')
+              .select('status')
+              .eq('id', id)
+              .single()
+            if (data?.status === 'in_progress') {
+              clearInterval(poll)
+              setWaitingForOpponent(false)
+            }
+          }, 2000)
         }
       } else {
         setOpponent({ ...profile, username: 'Scholar Bot 🎓' })
