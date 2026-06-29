@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/layout/Navbar'
 import { ChallengeNotification } from '@/components/ChallengeNotification'
+import { PresenceTracker } from '@/components/PresenceTracker'
 import { headers } from 'next/headers'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -12,7 +13,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const { data: profile } = await supabase
     .from('users')
-    .select('id')
+    .select('id, username')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -29,6 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
         {children}
       </main>
+      {profile && <PresenceTracker userId={profile.id} username={profile.username} />}
       {profile && <ChallengeNotification userId={user.id} />}
     </div>
   )

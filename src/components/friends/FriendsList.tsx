@@ -22,21 +22,15 @@ export function FriendsList({ currentUserId, onChallenge }: {
   useEffect(() => {
     loadFriends()
 
-    const channel = supabase.channel('presence:global', {
-      config: { presence: { key: currentUserId } },
-    })
-
+    // Join presence channel read-only — PresenceTracker in layout handles tracking
+    const channel = supabase.channel('presence:global')
     channel
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState<PresenceState>()
         const ids = new Set(Object.keys(state))
         setOnlineIds(ids)
       })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          await channel.track({ user_id: currentUserId, online_at: new Date().toISOString() })
-        }
-      })
+      .subscribe()
 
     return () => { supabase.removeChannel(channel) }
   }, [currentUserId])

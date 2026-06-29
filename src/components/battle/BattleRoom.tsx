@@ -77,8 +77,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
     return () => { if (botTimerRef.current) clearTimeout(botTimerRef.current) }
   }, [qIndex, isSolo, botDifficulty])
 
-  // Real-time: listen for opponent answers (multiplayer)
-  // One persistent channel for the whole battle — store ref so handleSubmit can send on it
+  // Real-time: one persistent channel for the whole battle
   useEffect(() => {
     if (isSolo) return
     const channel = supabase.channel(`battle:${battleId}`, { config: { broadcast: { self: false } } })
@@ -88,6 +87,12 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
         if (payload.user_id !== currentUser.id && payload.is_correct) {
           setOpponentScore(s => s + 1)
           opponentScoreRef.current += 1
+        }
+      })
+      .on('broadcast', { event: 'battle_done' }, ({ payload }) => {
+        // Opponent finished all their questions — end our game too
+        if (payload.user_id !== currentUser.id) {
+          onComplete(myScoreRef.current, opponentScoreRef.current)
         }
       })
       .subscribe()
@@ -162,8 +167,18 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
     setShowResult(true)
 
     const nextIndex = qIndex + 1
+    const isLastQuestion = nextIndex >= TOTAL_QUESTIONS || nextIndex >= questions.length
+
+    if (!isSolo && isLastQuestion && channelRef.current) {
+      await channelRef.current.send({
+        type: 'broadcast',
+        event: 'battle_done',
+        payload: { user_id: currentUser.id },
+      })
+    }
+
     setTimeout(() => {
-      if (nextIndex >= TOTAL_QUESTIONS || nextIndex >= questions.length) {
+      if (isLastQuestion) {
         onComplete(myScoreRef.current, opponentScoreRef.current)
       } else {
         setQIndex(nextIndex)
