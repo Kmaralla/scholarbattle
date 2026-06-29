@@ -125,10 +125,10 @@ export default async function DashboardPage() {
             <h2 className="font-bold text-gray-900 mb-3">Recent Battles</h2>
             <div className="space-y-2">
               {recentBattles.map((battle: any) => {
-                const isTie = battle.winner_id === null
-                const isWinner = battle.winner_id === user.id
                 const myScore = battle.challenger_id === user.id ? battle.challenger_score : battle.opponent_score
                 const theirScore = battle.challenger_id === user.id ? battle.opponent_score : battle.challenger_score
+                const isTie = myScore === theirScore
+                const isWinner = myScore > theirScore
                 const dotColor = isTie ? 'bg-yellow-400' : isWinner ? 'bg-green-400' : 'bg-red-400'
                 const scoreColor = isTie ? 'text-yellow-600' : isWinner ? 'text-green-600' : 'text-red-500'
                 const badgeClass = isTie ? 'bg-yellow-100 text-yellow-700' : isWinner ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
