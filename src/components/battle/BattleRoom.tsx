@@ -169,6 +169,10 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
     const nextIndex = qIndex + 1
     const isLastQuestion = nextIndex >= TOTAL_QUESTIONS || nextIndex >= questions.length
 
+    // Compute final scores directly — don't rely on async state
+    const finalMyScore = myScoreRef.current
+    const finalOpponentScore = opponentScoreRef.current
+
     if (!isSolo && isLastQuestion && channelRef.current) {
       await channelRef.current.send({
         type: 'broadcast',
@@ -179,7 +183,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
 
     setTimeout(() => {
       if (isLastQuestion) {
-        onComplete(myScoreRef.current, opponentScoreRef.current)
+        onComplete(finalMyScore, finalOpponentScore)
       } else {
         setQIndex(nextIndex)
       }

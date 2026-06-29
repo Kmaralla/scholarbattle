@@ -91,7 +91,8 @@ export default function BattlePage() {
     const iAmChallenger = battle.challenger_id === currentUser.id
     const iWon = myScore > theirScore
     const tied = myScore === theirScore
-    const winnerId = iWon ? currentUser.id : !tied ? battle.opponent_id : null
+    const opponentId = iAmChallenger ? battle.opponent_id : battle.challenger_id
+    const winnerId = iWon ? currentUser.id : !tied ? opponentId : null
 
     await supabase.from('battles').update({
       status: 'completed',
