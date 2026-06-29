@@ -125,22 +125,27 @@ export default async function DashboardPage() {
             <h2 className="font-bold text-gray-900 mb-3">Recent Battles</h2>
             <div className="space-y-2">
               {recentBattles.map((battle: any) => {
+                const isTie = battle.winner_id === null
                 const isWinner = battle.winner_id === user.id
                 const myScore = battle.challenger_id === user.id ? battle.challenger_score : battle.opponent_score
                 const theirScore = battle.challenger_id === user.id ? battle.opponent_score : battle.challenger_score
+                const dotColor = isTie ? 'bg-yellow-400' : isWinner ? 'bg-green-400' : 'bg-red-400'
+                const scoreColor = isTie ? 'text-yellow-600' : isWinner ? 'text-green-600' : 'text-red-500'
+                const badgeClass = isTie ? 'bg-yellow-100 text-yellow-700' : isWinner ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
+                const label = isTie ? 'TIE' : isWinner ? 'WIN' : 'LOSS'
                 return (
                   <div key={battle.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${isWinner ? 'bg-green-400' : 'bg-red-400'}`} />
+                      <span className={`w-2 h-2 rounded-full ${dotColor}`} />
                       <span className="text-sm capitalize text-gray-700">{battle.subject}</span>
                       <span className="text-xs text-gray-400">Gr.{battle.grade_level}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm font-bold ${isWinner ? 'text-green-600' : 'text-red-500'}`}>
+                      <span className={`text-sm font-bold ${scoreColor}`}>
                         {myScore}–{theirScore}
                       </span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${isWinner ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-                        {isWinner ? 'WIN' : 'LOSS'}
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${badgeClass}`}>
+                        {label}
                       </span>
                     </div>
                   </div>
