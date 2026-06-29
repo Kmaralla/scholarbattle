@@ -42,7 +42,8 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
   const [showResult, setShowResult] = useState(false)
   const startTime = useRef(Date.now())
   const botTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const answeredRef = useRef(false)   // sync ref so bot callback can check without stale closure
+  const answeredRef = useRef(false)
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
   const supabase = createClient()
   const q = questions[qIndex]
   const myScoreRef = useRef(myScore)
@@ -77,18 +78,24 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
   }, [qIndex, isSolo, botDifficulty])
 
   // Real-time: listen for opponent answers (multiplayer)
+  // One persistent channel for the whole battle — store ref so handleSubmit can send on it
   useEffect(() => {
     if (isSolo) return
-    const channel = supabase.channel(`battle:${battleId}:${qIndex}`)
+    const channel = supabase.channel(`battle:${battleId}`, { config: { broadcast: { self: false } } })
+    channelRef.current = channel
     channel
       .on('broadcast', { event: 'answer' }, ({ payload }) => {
-        if (payload.user_id !== currentUser.id) {
-          if (payload.is_correct) setOpponentScore(s => s + 1)
+        if (payload.user_id !== currentUser.id && payload.is_correct) {
+          setOpponentScore(s => s + 1)
+          opponentScoreRef.current += 1
         }
       })
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
-  }, [battleId, qIndex, currentUser.id, isSolo])
+    return () => {
+      supabase.removeChannel(channel)
+      channelRef.current = null
+    }
+  }, [battleId, currentUser.id, isSolo])
 
   // Timer
   useEffect(() => {
@@ -135,9 +142,12 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
       // Bot didn't answer in time — no point for bot on this one (player was faster)
     }
 
-    if (!isSolo) {
-      const channel = supabase.channel(`battle:${battleId}:${qIndex}`)
-      await channel.send({ type: 'broadcast', event: 'answer', payload: { user_id: currentUser.id, is_correct: isCorrect } })
+    if (!isSolo && channelRef.current) {
+      await channelRef.current.send({
+        type: 'broadcast',
+        event: 'answer',
+        payload: { user_id: currentUser.id, is_correct: isCorrect, q_index: qIndex },
+      })
     }
 
     await supabase.from('battle_answers').insert({
