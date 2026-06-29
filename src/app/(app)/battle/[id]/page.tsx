@@ -5,6 +5,7 @@ import { BattleRoom, type BotDifficulty } from '@/components/battle/BattleRoom'
 import { User, Question, Battle, Subject } from '@/types'
 import { getQuestionsForBattle } from '@/lib/questions'
 import { calculateElo, getRankTier } from '@/types'
+import { COIN_REWARDS } from '@/lib/games'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 
 export default function BattlePage() {
@@ -15,7 +16,7 @@ export default function BattlePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [opponent, setOpponent] = useState<User | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
-  const [done, setDone] = useState<{ myScore: number; theirScore: number; eloDelta: number } | null>(null)
+  const [done, setDone] = useState<{ myScore: number; theirScore: number; eloDelta: number; coinsEarned: number } | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isSolo, setIsSolo] = useState(true)
   const [waitingForOpponent, setWaitingForOpponent] = useState(false)
@@ -87,17 +88,20 @@ export default function BattlePage() {
       completed_at: new Date().toISOString(),
     }).eq('id', battle.id)
 
-    const { data: myProfile } = await supabase.from('users').select('elo_rating, total_wins, total_battles').eq('id', currentUser.id).single()
+    const { data: myProfile } = await supabase.from('users').select('elo_rating, total_wins, total_battles, coins').eq('id', currentUser.id).single()
     const currentElo = myProfile?.elo_rating ?? 1000
+    const currentCoins = myProfile?.coins ?? 0
     let eloDelta = 0
+    let coinsEarned = 0
 
     if (isSolo) {
-      // Bot ELO: fixed points based on difficulty and result
       const difficultyBonus: Record<string, number> = { easy: 6, medium: 10, hard: 16 }
       const base = difficultyBonus[botDifficulty] ?? 10
       if (iWon) eloDelta = base
       else if (!tied) eloDelta = -Math.floor(base / 2)
-      // tie = 0
+
+      const coinKey = `bot_${botDifficulty}` as keyof typeof COIN_REWARDS
+      coinsEarned = iWon ? (COIN_REWARDS[coinKey] ?? 10) : Math.floor((COIN_REWARDS[coinKey] ?? 10) / 2)
 
       const newElo = Math.max(100, currentElo + eloDelta)
       await supabase.from('users').update({
@@ -105,11 +109,13 @@ export default function BattlePage() {
         rank_tier: getRankTier(newElo),
         total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
         total_battles: (myProfile?.total_battles ?? 0) + 1,
+        coins: currentCoins + coinsEarned,
       }).eq('id', currentUser.id)
     } else {
-      // Real PvP — full ELO formula
+      coinsEarned = iWon ? COIN_REWARDS.pvp_win : tied ? COIN_REWARDS.pvp_tie : COIN_REWARDS.pvp_loss
+
       const loserId = winnerId === battle.challenger_id ? battle.opponent_id : battle.challenger_id
-      const { data: loserProfile } = await supabase.from('users').select('elo_rating, total_wins, total_battles').eq('id', loserId).single()
+      const { data: loserProfile } = await supabase.from('users').select('elo_rating, total_wins, total_battles, coins').eq('id', loserId).single()
 
       if (loserProfile && !tied) {
         const [newWinnerElo, newLoserElo] = calculateElo(currentElo, loserProfile.elo_rating)
@@ -122,16 +128,23 @@ export default function BattlePage() {
           rank_tier: getRankTier(myNewElo),
           total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
           total_battles: (myProfile?.total_battles ?? 0) + 1,
+          coins: currentCoins + coinsEarned,
         }).eq('id', currentUser.id)
         await supabase.from('users').update({
           elo_rating: theirNewElo,
           rank_tier: getRankTier(theirNewElo),
           total_battles: (loserProfile.total_battles ?? 0) + 1,
+          coins: (loserProfile.coins ?? 0) + COIN_REWARDS.pvp_loss,
         }).eq('id', loserId)
+      } else if (tied) {
+        await supabase.from('users').update({
+          total_battles: (myProfile?.total_battles ?? 0) + 1,
+          coins: currentCoins + coinsEarned,
+        }).eq('id', currentUser.id)
       }
     }
 
-    setDone({ myScore, theirScore, eloDelta })
+    setDone({ myScore, theirScore, eloDelta, coinsEarned })
   }
 
   if (done) {
@@ -156,13 +169,20 @@ export default function BattlePage() {
             </div>
           </div>
 
-          {done.eloDelta !== 0 && (
-            <div className={`py-2 px-4 rounded-xl text-sm font-bold ${done.eloDelta > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
-              {done.eloDelta > 0 ? `⬆️ +${done.eloDelta} ELO` : `⬇️ ${done.eloDelta} ELO`}
-              {isSolo && <span className="font-normal text-xs ml-1 opacity-70">(vs bot)</span>}
-            </div>
-          )}
-          {done.eloDelta === 0 && <p className="text-xs text-gray-400">No ELO change (tie)</p>}
+          <div className="flex gap-2 justify-center">
+            {done.eloDelta !== 0 && (
+              <div className={`py-2 px-4 rounded-xl text-sm font-bold ${done.eloDelta > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                {done.eloDelta > 0 ? `⬆️ +${done.eloDelta} ELO` : `⬇️ ${done.eloDelta} ELO`}
+                {isSolo && <span className="font-normal text-xs ml-1 opacity-70">(vs bot)</span>}
+              </div>
+            )}
+            {done.coinsEarned > 0 && (
+              <div className="py-2 px-4 rounded-xl text-sm font-bold bg-yellow-50 text-yellow-700">
+                🪙 +{done.coinsEarned} coins
+              </div>
+            )}
+          </div>
+          {done.eloDelta === 0 && done.coinsEarned === 0 && <p className="text-xs text-gray-400">No ELO change (tie)</p>}
           <div className="flex gap-2">
             <button onClick={() => router.push('/battle')} className="flex-1 border border-gray-200 rounded-xl py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition">
               Play Again
