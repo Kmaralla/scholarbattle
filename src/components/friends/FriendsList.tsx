@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { User, Friendship, PresenceState } from '@/types'
+import { useOnlineUsers } from '@/components/PresenceTracker'
 import { RankBadge } from '@/components/RankBadge'
 import { Button } from '@/components/ui/button'
 import { Swords, UserPlus } from 'lucide-react'
@@ -16,23 +17,11 @@ export function FriendsList({ currentUserId, onChallenge }: {
   onChallenge: (friend: User) => void
 }) {
   const [friends, setFriends] = useState<FriendWithPresence[]>([])
-  const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set())
+  const onlineIds = useOnlineUsers()
   const supabase = createClient()
 
   useEffect(() => {
     loadFriends()
-
-    // Join presence channel read-only — PresenceTracker in layout handles tracking
-    const channel = supabase.channel('presence:global')
-    channel
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState<PresenceState>()
-        const ids = new Set(Object.keys(state))
-        setOnlineIds(ids)
-      })
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
   }, [currentUserId])
 
   async function loadFriends() {

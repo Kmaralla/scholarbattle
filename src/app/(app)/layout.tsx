@@ -24,14 +24,22 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect('/onboarding')
   }
 
+  if (!profile) {
+    return (
+      <div className="flex flex-col md:flex-row h-full min-h-screen">
+        <Navbar />
+        <main className="flex-1 overflow-y-auto pb-20 md:pb-0">{children}</main>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-col md:flex-row h-full min-h-screen">
-      <Navbar />
-      <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
-        {children}
-      </main>
-      {profile && <PresenceTracker userId={profile.id} username={profile.username} />}
-      {profile && <ChallengeNotification userId={user.id} />}
-    </div>
+    <PresenceTracker userId={profile.id} username={profile.username}>
+      <div className="flex flex-col md:flex-row h-full min-h-screen">
+        <Navbar />
+        <main className="flex-1 overflow-y-auto pb-20 md:pb-0">{children}</main>
+        <ChallengeNotification userId={user.id} />
+      </div>
+    </PresenceTracker>
   )
 }
