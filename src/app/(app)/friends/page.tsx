@@ -60,19 +60,39 @@ export default function FriendsPage() {
 
   async function handleStartBattle(subject: Subject, grade: number) {
     if (!challenging || !currentUser) return
-    // Create battle record
+
+    // Create battle with pending status
     const { data: battle } = await supabase.from('battles').insert({
       challenger_id: currentUser.id,
       opponent_id: challenging.id,
       subject,
       grade_level: grade,
-      status: 'in_progress',
+      status: 'pending',
       challenger_score: 0,
       opponent_score: 0,
       question_ids: [],
     }).select().single()
 
-    if (battle) router.push(`/battle/${battle.id}`)
+    if (!battle) return
+
+    // Broadcast challenge notification to opponent's personal channel
+    const notifChannel = supabase.channel(`challenge:${challenging.id}`)
+    await notifChannel.subscribe()
+    await notifChannel.send({
+      type: 'broadcast',
+      event: 'incoming_challenge',
+      payload: {
+        battle_id: battle.id,
+        challenger_username: currentUser.username,
+        subject,
+        grade_level: grade,
+      },
+    })
+    supabase.removeChannel(notifChannel)
+
+    setChallenging(null)
+    // Challenger waits in the battle room for opponent to accept
+    router.push(`/battle/${battle.id}`)
   }
 
   if (!currentUser) return <div className="p-4 text-center text-gray-400">Loading...</div>

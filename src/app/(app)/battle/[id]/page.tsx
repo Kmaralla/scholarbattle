@@ -18,6 +18,7 @@ export default function BattlePage() {
   const [done, setDone] = useState<{ myScore: number; theirScore: number; eloDelta: number } | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isSolo, setIsSolo] = useState(true)
+  const [waitingForOpponent, setWaitingForOpponent] = useState(false)
   const supabase = createClient()
   const router = useRouter()
 
@@ -40,6 +41,23 @@ export default function BattlePage() {
       if (opponentId !== user.id) {
         const { data: opp } = await supabase.from('users').select('*').eq('id', opponentId).single()
         if (opp) { setOpponent(opp); setIsSolo(false) }
+        // If battle is still pending, show waiting screen
+        if (battleData.status === 'pending') {
+          setWaitingForOpponent(true)
+          // Listen for opponent accepting (status → in_progress)
+          const statusChannel = supabase
+            .channel(`battle-status:${id}`)
+            .on('postgres_changes', {
+              event: 'UPDATE', schema: 'public', table: 'battles',
+              filter: `id=eq.${id}`,
+            }, (payload) => {
+              if (payload.new.status === 'in_progress') {
+                setWaitingForOpponent(false)
+                supabase.removeChannel(statusChannel)
+              }
+            })
+            .subscribe()
+        }
       } else {
         setOpponent({ ...profile, username: 'Scholar Bot 🎓' })
         setIsSolo(true)
@@ -182,6 +200,29 @@ export default function BattlePage() {
           <p className="font-bold text-gray-800">{loadError}</p>
           <button onClick={() => router.push('/battle')} className="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold">
             Back to Battle
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (waitingForOpponent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-sm w-full text-center space-y-4">
+          <div className="text-5xl animate-pulse">⏳</div>
+          <h2 className="text-xl font-black text-gray-900">Waiting for opponent...</h2>
+          <p className="text-sm text-gray-500">
+            Challenge sent to <span className="font-bold text-gray-700">{opponent?.username}</span>.
+            <br />They'll see a notification to accept.
+          </p>
+          <div className="flex gap-1 justify-center">
+            {[0,1,2].map(i => (
+              <div key={i} className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+            ))}
+          </div>
+          <button onClick={() => router.push('/friends')} className="text-sm text-gray-400 underline">
+            Cancel
           </button>
         </div>
       </div>
