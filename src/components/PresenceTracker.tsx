@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, createContext, useContext, useState } from 'react'
+import { useEffect, createContext, useContext, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 const OnlineUsersContext = createContext<Set<string>>(new Set())
@@ -12,11 +12,18 @@ export function PresenceTracker({ userId, username, children }: {
 }) {
   const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set())
   const supabase = createClient()
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
   useEffect(() => {
+    // Remove any stale channel with this name before creating a fresh one
+    const stale = supabase.getChannels().find(c => c.topic === 'realtime:presence:global')
+    if (stale) supabase.removeChannel(stale)
+
     const channel = supabase.channel('presence:global', {
       config: { presence: { key: userId } },
     })
+    channelRef.current = channel
+
     channel
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState()
@@ -27,7 +34,13 @@ export function PresenceTracker({ userId, username, children }: {
           await channel.track({ user_id: userId, username, online_at: new Date().toISOString() })
         }
       })
-    return () => { supabase.removeChannel(channel) }
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
+    }
   }, [userId, username])
 
   return (
