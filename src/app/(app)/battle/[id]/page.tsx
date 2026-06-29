@@ -88,10 +88,13 @@ export default function BattlePage() {
       completed_at: new Date().toISOString(),
     }).eq('id', battle.id)
 
-    const { data: myProfile, error: profileErr } = await supabase.from('users').select('elo_rating, total_wins, total_battles, coins').eq('id', currentUser.id).single()
+    const { data: myProfile, error: profileErr } = await supabase.from('users').select('elo_rating, total_wins, total_battles').eq('id', currentUser.id).single()
     if (profileErr) console.error('[Battle] profile fetch failed:', profileErr.message)
     const currentElo = myProfile?.elo_rating ?? currentUser.elo_rating ?? 1000
-    const currentCoins = myProfile?.coins ?? 0
+
+    // Fetch coins separately so a missing column doesn't break ELO updates
+    const { data: coinsRow } = await supabase.from('users').select('coins, unlocked_games').eq('id', currentUser.id).single()
+    const currentCoins = (coinsRow as any)?.coins ?? 0
     let eloDelta = 0
     let coinsEarned = 0
 
@@ -111,14 +114,15 @@ export default function BattlePage() {
         total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
         total_battles: (myProfile?.total_battles ?? 0) + 1,
       }
-      if (myProfile?.coins !== undefined) soloUpdate.coins = currentCoins + coinsEarned
+      if ((coinsRow as any)?.coins !== undefined) soloUpdate.coins = currentCoins + coinsEarned
       const { error: updateErr } = await supabase.from('users').update(soloUpdate).eq('id', currentUser.id)
       if (updateErr) console.error('[Battle] ELO update failed:', updateErr.message)
     } else {
       coinsEarned = iWon ? COIN_REWARDS.pvp_win : tied ? COIN_REWARDS.pvp_tie : COIN_REWARDS.pvp_loss
 
       const loserId = winnerId === battle.challenger_id ? battle.opponent_id : battle.challenger_id
-      const { data: loserProfile } = await supabase.from('users').select('elo_rating, total_wins, total_battles, coins').eq('id', loserId).single()
+      const { data: loserProfile } = await supabase.from('users').select('elo_rating, total_wins, total_battles').eq('id', loserId).single()
+      const { data: loserCoinsRow } = await supabase.from('users').select('coins').eq('id', loserId).single()
 
       if (loserProfile && !tied) {
         const [newWinnerElo, newLoserElo] = calculateElo(currentElo, loserProfile.elo_rating)
@@ -132,14 +136,14 @@ export default function BattlePage() {
           total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
           total_battles: (myProfile?.total_battles ?? 0) + 1,
         }
-        if (myProfile?.coins !== undefined) pvpUpdate.coins = currentCoins + coinsEarned
+        if ((coinsRow as any)?.coins !== undefined) pvpUpdate.coins = currentCoins + coinsEarned
         const { error: pvpErr } = await supabase.from('users').update(pvpUpdate).eq('id', currentUser.id)
         if (pvpErr) console.error('[Battle] PvP ELO update failed:', pvpErr.message)
         await supabase.from('users').update({
           elo_rating: theirNewElo,
           rank_tier: getRankTier(theirNewElo),
           total_battles: (loserProfile.total_battles ?? 0) + 1,
-          coins: (loserProfile.coins ?? 0) + COIN_REWARDS.pvp_loss,
+          ...((loserCoinsRow as any)?.coins !== undefined ? { coins: ((loserCoinsRow as any).coins ?? 0) + COIN_REWARDS.pvp_loss } : {}),
         }).eq('id', loserId)
       } else if (tied) {
         await supabase.from('users').update({
