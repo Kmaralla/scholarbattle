@@ -88,8 +88,9 @@ export default function BattlePage() {
       completed_at: new Date().toISOString(),
     }).eq('id', battle.id)
 
-    const { data: myProfile } = await supabase.from('users').select('elo_rating, total_wins, total_battles, coins').eq('id', currentUser.id).single()
-    const currentElo = myProfile?.elo_rating ?? 1000
+    const { data: myProfile, error: profileErr } = await supabase.from('users').select('elo_rating, total_wins, total_battles, coins').eq('id', currentUser.id).single()
+    if (profileErr) console.error('[Battle] profile fetch failed:', profileErr.message)
+    const currentElo = myProfile?.elo_rating ?? currentUser.elo_rating ?? 1000
     const currentCoins = myProfile?.coins ?? 0
     let eloDelta = 0
     let coinsEarned = 0
@@ -104,13 +105,15 @@ export default function BattlePage() {
       coinsEarned = iWon ? (COIN_REWARDS[coinKey] ?? 10) : Math.floor((COIN_REWARDS[coinKey] ?? 10) / 2)
 
       const newElo = Math.max(100, currentElo + eloDelta)
-      await supabase.from('users').update({
+      const soloUpdate: Record<string, unknown> = {
         elo_rating: newElo,
         rank_tier: getRankTier(newElo),
         total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
         total_battles: (myProfile?.total_battles ?? 0) + 1,
-        coins: currentCoins + coinsEarned,
-      }).eq('id', currentUser.id)
+      }
+      if (myProfile?.coins !== undefined) soloUpdate.coins = currentCoins + coinsEarned
+      const { error: updateErr } = await supabase.from('users').update(soloUpdate).eq('id', currentUser.id)
+      if (updateErr) console.error('[Battle] ELO update failed:', updateErr.message)
     } else {
       coinsEarned = iWon ? COIN_REWARDS.pvp_win : tied ? COIN_REWARDS.pvp_tie : COIN_REWARDS.pvp_loss
 
@@ -123,13 +126,15 @@ export default function BattlePage() {
         const myNewElo = iWon ? newWinnerElo : newLoserElo
         const theirNewElo = iWon ? newLoserElo : newWinnerElo
 
-        await supabase.from('users').update({
+        const pvpUpdate: Record<string, unknown> = {
           elo_rating: myNewElo,
           rank_tier: getRankTier(myNewElo),
           total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
           total_battles: (myProfile?.total_battles ?? 0) + 1,
-          coins: currentCoins + coinsEarned,
-        }).eq('id', currentUser.id)
+        }
+        if (myProfile?.coins !== undefined) pvpUpdate.coins = currentCoins + coinsEarned
+        const { error: pvpErr } = await supabase.from('users').update(pvpUpdate).eq('id', currentUser.id)
+        if (pvpErr) console.error('[Battle] PvP ELO update failed:', pvpErr.message)
         await supabase.from('users').update({
           elo_rating: theirNewElo,
           rank_tier: getRankTier(theirNewElo),
