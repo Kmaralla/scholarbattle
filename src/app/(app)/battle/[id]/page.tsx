@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { BattleRoom, type BotDifficulty } from '@/components/battle/BattleRoom'
 import { User, Question, Battle, Subject } from '@/types'
-import { SEED_QUESTIONS } from '@/lib/questions'
+import { getQuestionsForBattle } from '@/lib/questions'
 import { calculateElo, getRankTier } from '@/types'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 
@@ -61,23 +61,7 @@ export default function BattlePage() {
         setIsSolo(true)
       }
 
-      // Load questions — exact grade match first, then nearest available grade
-      const subject = battleData.subject
-      const targetGrade = battleData.grade_level
-      let pool = SEED_QUESTIONS.filter(q => q.subject === subject && q.grade_level === targetGrade)
-
-      if (pool.length === 0) {
-        // Find nearest grade that has questions for this subject
-        const availableGrades = [...new Set(SEED_QUESTIONS.filter(q => q.subject === subject).map(q => q.grade_level))]
-        const nearest = availableGrades.reduce((prev, curr) =>
-          Math.abs(curr - targetGrade) < Math.abs(prev - targetGrade) ? curr : prev
-        )
-        pool = SEED_QUESTIONS.filter(q => q.subject === subject && q.grade_level === nearest)
-      }
-
-      const selected = pool
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 10)
+      const selected = getQuestionsForBattle(battleData.subject as Subject, battleData.grade_level)
         .map((q, i) => ({ ...q, id: `q-${i}` }))
 
       setQuestions(selected)

@@ -1,57 +1,223 @@
 import { Subject, Question } from '@/types'
 
 export const SEED_QUESTIONS: Omit<Question, 'id'>[] = [
-  // Math - Grade 3
+
+  // ── MATH Grade 3 ──────────────────────────────────────────────
   { subject: 'math', grade_level: 3, question_text: 'What is 7 × 8?', type: 'typed', options: null, correct_answer: '56', difficulty: 2, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'What is 9 × 6?', type: 'typed', options: null, correct_answer: '54', difficulty: 2, source: 'curated' },
   { subject: 'math', grade_level: 3, question_text: 'What is 144 ÷ 12?', type: 'typed', options: null, correct_answer: '12', difficulty: 2, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'What is 8 × 8?', type: 'typed', options: null, correct_answer: '64', difficulty: 2, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'What is 63 ÷ 7?', type: 'typed', options: null, correct_answer: '9', difficulty: 2, source: 'curated' },
   { subject: 'math', grade_level: 3, question_text: 'Which fraction is larger: 1/2 or 1/3?', type: 'multiple_choice', options: ['1/2', '1/3', 'They are equal', 'Cannot compare'], correct_answer: '1/2', difficulty: 2, source: 'curated' },
   { subject: 'math', grade_level: 3, question_text: 'What is the perimeter of a square with side 5 cm?', type: 'multiple_choice', options: ['10 cm', '15 cm', '20 cm', '25 cm'], correct_answer: '20 cm', difficulty: 2, source: 'curated' },
-  // Math - Grade 5
+  { subject: 'math', grade_level: 3, question_text: 'What is 4 × 7?', type: 'typed', options: null, correct_answer: '28', difficulty: 1, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'What is 36 ÷ 6?', type: 'typed', options: null, correct_answer: '6', difficulty: 1, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'How many sides does a pentagon have?', type: 'multiple_choice', options: ['4', '5', '6', '8'], correct_answer: '5', difficulty: 1, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'Round 47 to the nearest ten.', type: 'multiple_choice', options: ['40', '45', '50', '47'], correct_answer: '50', difficulty: 2, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'What is 3 × 9?', type: 'typed', options: null, correct_answer: '27', difficulty: 1, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'What is 48 ÷ 8?', type: 'typed', options: null, correct_answer: '6', difficulty: 2, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'What is 125 + 75?', type: 'typed', options: null, correct_answer: '200', difficulty: 2, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'Which shape has 0 corners?', type: 'multiple_choice', options: ['Square', 'Triangle', 'Circle', 'Rectangle'], correct_answer: 'Circle', difficulty: 1, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'What is 200 - 85?', type: 'typed', options: null, correct_answer: '115', difficulty: 2, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'What is 6 × 6?', type: 'typed', options: null, correct_answer: '36', difficulty: 1, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'What fraction of a pizza is 2 out of 4 slices?', type: 'multiple_choice', options: ['1/4', '1/2', '3/4', '2/3'], correct_answer: '1/2', difficulty: 2, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'What is 7 × 3?', type: 'typed', options: null, correct_answer: '21', difficulty: 1, source: 'curated' },
+  { subject: 'math', grade_level: 3, question_text: 'How many minutes in an hour?', type: 'typed', options: null, correct_answer: '60', difficulty: 1, source: 'curated' },
+
+  // ── MATH Grade 5 ──────────────────────────────────────────────
   { subject: 'math', grade_level: 5, question_text: 'What is 25% of 80?', type: 'typed', options: null, correct_answer: '20', difficulty: 3, source: 'curated' },
   { subject: 'math', grade_level: 5, question_text: 'What is the area of a rectangle 6m × 9m?', type: 'typed', options: null, correct_answer: '54', difficulty: 3, source: 'curated' },
   { subject: 'math', grade_level: 5, question_text: 'What is 3/4 + 1/2?', type: 'multiple_choice', options: ['4/6', '5/4', '1 1/4', '1/2'], correct_answer: '5/4', difficulty: 3, source: 'curated' },
   { subject: 'math', grade_level: 5, question_text: 'Which number is prime?', type: 'multiple_choice', options: ['9', '15', '17', '21'], correct_answer: '17', difficulty: 3, source: 'curated' },
-  // Math - Grade 8
+  { subject: 'math', grade_level: 5, question_text: 'What is 50% of 120?', type: 'typed', options: null, correct_answer: '60', difficulty: 2, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'What is 2/3 of 90?', type: 'typed', options: null, correct_answer: '60', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'What is the LCM of 4 and 6?', type: 'multiple_choice', options: ['8', '10', '12', '24'], correct_answer: '12', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'What is 1.5 × 4?', type: 'typed', options: null, correct_answer: '6', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'What is 7/8 - 1/4?', type: 'multiple_choice', options: ['5/8', '6/8', '3/4', '1/2'], correct_answer: '5/8', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'Which is greatest: 0.9, 0.09, 0.99?', type: 'multiple_choice', options: ['0.9', '0.09', '0.99', 'All equal'], correct_answer: '0.99', difficulty: 2, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'What is 10% of 250?', type: 'typed', options: null, correct_answer: '25', difficulty: 2, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'What is the GCF of 12 and 18?', type: 'multiple_choice', options: ['3', '6', '9', '12'], correct_answer: '6', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'What is 0.75 as a fraction?', type: 'multiple_choice', options: ['1/4', '1/2', '3/4', '7/5'], correct_answer: '3/4', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'What is the volume of a box 3×4×5?', type: 'typed', options: null, correct_answer: '60', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'What is 15% of 200?', type: 'typed', options: null, correct_answer: '30', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'How many faces does a cube have?', type: 'typed', options: null, correct_answer: '6', difficulty: 2, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'What is 4² + 3²?', type: 'typed', options: null, correct_answer: '25', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'Convert 3/5 to a decimal.', type: 'multiple_choice', options: ['0.35', '0.6', '0.53', '0.65'], correct_answer: '0.6', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'What is 1000 ÷ 25?', type: 'typed', options: null, correct_answer: '40', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 5, question_text: 'What is the perimeter of a triangle with sides 5, 7, and 9?', type: 'typed', options: null, correct_answer: '21', difficulty: 2, source: 'curated' },
+
+  // ── MATH Grade 8 ──────────────────────────────────────────────
   { subject: 'math', grade_level: 8, question_text: 'Solve for x: 2x + 6 = 18', type: 'typed', options: null, correct_answer: '6', difficulty: 4, source: 'curated' },
   { subject: 'math', grade_level: 8, question_text: 'What is the square root of 169?', type: 'typed', options: null, correct_answer: '13', difficulty: 4, source: 'curated' },
   { subject: 'math', grade_level: 8, question_text: 'What is the slope of y = 3x - 7?', type: 'multiple_choice', options: ['-7', '3', '7', '-3'], correct_answer: '3', difficulty: 4, source: 'curated' },
   { subject: 'math', grade_level: 8, question_text: 'What is 2³ × 2²?', type: 'multiple_choice', options: ['2⁵', '2⁶', '4⁵', '8'], correct_answer: '2⁵', difficulty: 4, source: 'curated' },
-  // Science - Grade 4
+  { subject: 'math', grade_level: 8, question_text: 'Solve: 3x - 5 = 16', type: 'typed', options: null, correct_answer: '7', difficulty: 4, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'What is the y-intercept of y = 2x + 5?', type: 'typed', options: null, correct_answer: '5', difficulty: 4, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'What is √64?', type: 'typed', options: null, correct_answer: '8', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'What is the area of a circle with radius 7? (use π≈3.14)', type: 'multiple_choice', options: ['43.96', '153.86', '21.98', '49'], correct_answer: '153.86', difficulty: 4, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'Simplify: 4x + 3x - 2x', type: 'typed', options: null, correct_answer: '5x', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'What is (-3)²?', type: 'typed', options: null, correct_answer: '9', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'If y = 2x and x = 5, what is y?', type: 'typed', options: null, correct_answer: '10', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'What is 5² - 4²?', type: 'typed', options: null, correct_answer: '9', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'What is the Pythagorean theorem?', type: 'multiple_choice', options: ['a+b=c', 'a²+b²=c²', 'a×b=c²', '2a+b=c'], correct_answer: 'a²+b²=c²', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'Solve: x/4 = 8', type: 'typed', options: null, correct_answer: '32', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'What is 3⁴?', type: 'typed', options: null, correct_answer: '81', difficulty: 4, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'What is the mean of 4, 8, 12, 16?', type: 'typed', options: null, correct_answer: '10', difficulty: 3, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'In a right triangle, legs are 3 and 4. What is the hypotenuse?', type: 'typed', options: null, correct_answer: '5', difficulty: 4, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'What is the slope between (0,0) and (4,8)?', type: 'typed', options: null, correct_answer: '2', difficulty: 4, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'Solve: 2(x + 3) = 14', type: 'typed', options: null, correct_answer: '4', difficulty: 4, source: 'curated' },
+  { subject: 'math', grade_level: 8, question_text: 'What is the median of 3, 7, 9, 11, 15?', type: 'typed', options: null, correct_answer: '9', difficulty: 3, source: 'curated' },
+
+  // ── SCIENCE Grade 4 ──────────────────────────────────────────
   { subject: 'science', grade_level: 4, question_text: 'What planet is closest to the Sun?', type: 'multiple_choice', options: ['Venus', 'Earth', 'Mercury', 'Mars'], correct_answer: 'Mercury', difficulty: 2, source: 'curated' },
   { subject: 'science', grade_level: 4, question_text: 'What gas do plants absorb during photosynthesis?', type: 'multiple_choice', options: ['Oxygen', 'Nitrogen', 'Carbon Dioxide', 'Hydrogen'], correct_answer: 'Carbon Dioxide', difficulty: 2, source: 'curated' },
   { subject: 'science', grade_level: 4, question_text: 'How many bones are in the adult human body?', type: 'multiple_choice', options: ['196', '206', '216', '226'], correct_answer: '206', difficulty: 3, source: 'curated' },
   { subject: 'science', grade_level: 4, question_text: 'What is the center of an atom called?', type: 'multiple_choice', options: ['Electron', 'Proton', 'Nucleus', 'Neutron'], correct_answer: 'Nucleus', difficulty: 3, source: 'curated' },
-  // Science - Grade 7
+  { subject: 'science', grade_level: 4, question_text: 'What do plants need to make food?', type: 'multiple_choice', options: ['Moonlight and water', 'Sunlight, water and CO2', 'Oxygen and soil', 'Rain and wind'], correct_answer: 'Sunlight, water and CO2', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'What is the largest planet in our solar system?', type: 'multiple_choice', options: ['Saturn', 'Neptune', 'Jupiter', 'Uranus'], correct_answer: 'Jupiter', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'What state of matter has no definite shape or volume?', type: 'multiple_choice', options: ['Solid', 'Liquid', 'Gas', 'Plasma'], correct_answer: 'Gas', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'Which animal is a mammal?', type: 'multiple_choice', options: ['Salmon', 'Eagle', 'Dolphin', 'Frog'], correct_answer: 'Dolphin', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'What do we call animals that eat only plants?', type: 'multiple_choice', options: ['Carnivore', 'Omnivore', 'Herbivore', 'Predator'], correct_answer: 'Herbivore', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'What is the process of water turning into vapor called?', type: 'multiple_choice', options: ['Condensation', 'Evaporation', 'Precipitation', 'Sublimation'], correct_answer: 'Evaporation', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'How many planets are in our solar system?', type: 'typed', options: null, correct_answer: '8', difficulty: 1, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'What organ pumps blood through the body?', type: 'multiple_choice', options: ['Lungs', 'Brain', 'Heart', 'Liver'], correct_answer: 'Heart', difficulty: 1, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'What is the hardest natural substance on Earth?', type: 'multiple_choice', options: ['Gold', 'Iron', 'Diamond', 'Quartz'], correct_answer: 'Diamond', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'What gas do humans breathe out?', type: 'multiple_choice', options: ['Oxygen', 'Nitrogen', 'Carbon Dioxide', 'Hydrogen'], correct_answer: 'Carbon Dioxide', difficulty: 1, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'Which part of the plant absorbs water from the soil?', type: 'multiple_choice', options: ['Leaves', 'Stem', 'Roots', 'Flowers'], correct_answer: 'Roots', difficulty: 1, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'What type of rock is formed from cooled lava?', type: 'multiple_choice', options: ['Sedimentary', 'Metamorphic', 'Igneous', 'Limestone'], correct_answer: 'Igneous', difficulty: 3, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'What is the closest star to Earth?', type: 'multiple_choice', options: ['Sirius', 'Alpha Centauri', 'The Sun', 'Polaris'], correct_answer: 'The Sun', difficulty: 1, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'What layer of the Earth do we live on?', type: 'multiple_choice', options: ['Mantle', 'Core', 'Crust', 'Magma'], correct_answer: 'Crust', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'What force pulls objects toward Earth?', type: 'multiple_choice', options: ['Magnetism', 'Gravity', 'Friction', 'Tension'], correct_answer: 'Gravity', difficulty: 1, source: 'curated' },
+  { subject: 'science', grade_level: 4, question_text: 'Which planet has rings around it?', type: 'multiple_choice', options: ['Mars', 'Venus', 'Saturn', 'Mercury'], correct_answer: 'Saturn', difficulty: 2, source: 'curated' },
+
+  // ── SCIENCE Grade 7 ──────────────────────────────────────────
   { subject: 'science', grade_level: 7, question_text: 'What is the chemical symbol for water?', type: 'typed', options: null, correct_answer: 'H2O', difficulty: 2, source: 'curated' },
-  { subject: 'science', grade_level: 7, question_text: 'What organelle is called the powerhouse of the cell?', type: 'multiple_choice', options: ['Nucleus', 'Ribosome', 'Mitochondria', 'Vacuole'], correct_answer: 'Mitochondria', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What organelle is the powerhouse of the cell?', type: 'multiple_choice', options: ['Nucleus', 'Ribosome', 'Mitochondria', 'Vacuole'], correct_answer: 'Mitochondria', difficulty: 2, source: 'curated' },
   { subject: 'science', grade_level: 7, question_text: 'What force keeps planets in orbit?', type: 'multiple_choice', options: ['Magnetism', 'Friction', 'Gravity', 'Nuclear force'], correct_answer: 'Gravity', difficulty: 2, source: 'curated' },
-  { subject: 'science', grade_level: 7, question_text: 'What is the speed of light (approximate)?', type: 'multiple_choice', options: ['300,000 km/s', '150,000 km/s', '3,000 km/s', '30,000 km/s'], correct_answer: '300,000 km/s', difficulty: 3, source: 'curated' },
-  // History - Grade 5
-  { subject: 'history', grade_level: 5, question_text: 'In what year did the United States declare independence?', type: 'typed', options: null, correct_answer: '1776', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What is the speed of light?', type: 'multiple_choice', options: ['300,000 km/s', '150,000 km/s', '3,000 km/s', '30,000 km/s'], correct_answer: '300,000 km/s', difficulty: 3, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What is the chemical symbol for oxygen?', type: 'typed', options: null, correct_answer: 'O', difficulty: 1, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What is DNA?', type: 'multiple_choice', options: ['A type of protein', 'Genetic material', 'A cell membrane', 'An enzyme'], correct_answer: 'Genetic material', difficulty: 3, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'How many chromosomes do humans have?', type: 'multiple_choice', options: ['23', '46', '48', '22'], correct_answer: '46', difficulty: 3, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What is Newton\'s first law about?', type: 'multiple_choice', options: ['Gravity', 'Inertia', 'Acceleration', 'Friction'], correct_answer: 'Inertia', difficulty: 3, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What part of the cell controls its activities?', type: 'multiple_choice', options: ['Cell wall', 'Nucleus', 'Ribosome', 'Cytoplasm'], correct_answer: 'Nucleus', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What is the process plants use to make food?', type: 'multiple_choice', options: ['Respiration', 'Digestion', 'Photosynthesis', 'Fermentation'], correct_answer: 'Photosynthesis', difficulty: 1, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What is H₂SO₄?', type: 'multiple_choice', options: ['Water', 'Sulfuric acid', 'Hydrochloric acid', 'Salt water'], correct_answer: 'Sulfuric acid', difficulty: 4, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What type of energy does a moving object have?', type: 'multiple_choice', options: ['Potential', 'Chemical', 'Kinetic', 'Nuclear'], correct_answer: 'Kinetic', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What is the atomic number of carbon?', type: 'typed', options: null, correct_answer: '6', difficulty: 3, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What organ removes waste from blood?', type: 'multiple_choice', options: ['Liver', 'Heart', 'Kidneys', 'Lungs'], correct_answer: 'Kidneys', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What is the outermost layer of the Earth?', type: 'multiple_choice', options: ['Mantle', 'Crust', 'Inner core', 'Outer core'], correct_answer: 'Crust', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What do we call organisms that make their own food?', type: 'multiple_choice', options: ['Consumers', 'Decomposers', 'Producers', 'Predators'], correct_answer: 'Producers', difficulty: 3, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What is the unit of electric current?', type: 'multiple_choice', options: ['Volt', 'Watt', 'Ampere', 'Ohm'], correct_answer: 'Ampere', difficulty: 3, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What gas makes up most of Earth\'s atmosphere?', type: 'multiple_choice', options: ['Oxygen', 'Carbon dioxide', 'Nitrogen', 'Argon'], correct_answer: 'Nitrogen', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What is the formula for speed?', type: 'multiple_choice', options: ['Speed = mass × time', 'Speed = distance ÷ time', 'Speed = force × time', 'Speed = distance × time'], correct_answer: 'Speed = distance ÷ time', difficulty: 2, source: 'curated' },
+  { subject: 'science', grade_level: 7, question_text: 'What are the building blocks of proteins?', type: 'multiple_choice', options: ['Fatty acids', 'Amino acids', 'Glucose', 'Nucleotides'], correct_answer: 'Amino acids', difficulty: 4, source: 'curated' },
+
+  // ── HISTORY Grade 5 ──────────────────────────────────────────
+  { subject: 'history', grade_level: 5, question_text: 'In what year did the US declare independence?', type: 'typed', options: null, correct_answer: '1776', difficulty: 2, source: 'curated' },
   { subject: 'history', grade_level: 5, question_text: 'Who was the first President of the United States?', type: 'multiple_choice', options: ['John Adams', 'Thomas Jefferson', 'George Washington', 'Benjamin Franklin'], correct_answer: 'George Washington', difficulty: 1, source: 'curated' },
   { subject: 'history', grade_level: 5, question_text: 'What ocean did Columbus cross to reach the Americas?', type: 'multiple_choice', options: ['Pacific', 'Atlantic', 'Indian', 'Arctic'], correct_answer: 'Atlantic', difficulty: 2, source: 'curated' },
-  { subject: 'history', grade_level: 5, question_text: 'Which ancient wonder was located in Egypt?', type: 'multiple_choice', options: ['Colosseum', 'Great Pyramid of Giza', 'Parthenon', 'Stonehenge'], correct_answer: 'Great Pyramid of Giza', difficulty: 2, source: 'curated' },
-  // History - Grade 8
+  { subject: 'history', grade_level: 5, question_text: 'Which ancient wonder was in Egypt?', type: 'multiple_choice', options: ['Colosseum', 'Great Pyramid of Giza', 'Parthenon', 'Stonehenge'], correct_answer: 'Great Pyramid of Giza', difficulty: 2, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'What ship did the Pilgrims sail to America?', type: 'multiple_choice', options: ['Santa Maria', 'Mayflower', 'Titanic', 'Pinta'], correct_answer: 'Mayflower', difficulty: 2, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'Which country gifted the Statue of Liberty to the US?', type: 'multiple_choice', options: ['England', 'Spain', 'France', 'Italy'], correct_answer: 'France', difficulty: 2, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'Who wrote the Declaration of Independence?', type: 'multiple_choice', options: ['George Washington', 'Benjamin Franklin', 'Thomas Jefferson', 'John Adams'], correct_answer: 'Thomas Jefferson', difficulty: 2, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'What civilisation built the pyramids?', type: 'multiple_choice', options: ['Romans', 'Greeks', 'Ancient Egyptians', 'Aztecs'], correct_answer: 'Ancient Egyptians', difficulty: 1, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'In what year did Columbus reach the Americas?', type: 'typed', options: null, correct_answer: '1492', difficulty: 2, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'What war was fought between the North and South of the US?', type: 'multiple_choice', options: ['Revolutionary War', 'Civil War', 'War of 1812', 'World War I'], correct_answer: 'Civil War', difficulty: 2, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'What is the name of the document that freed enslaved people in Confederate states?', type: 'multiple_choice', options: ['Declaration of Independence', 'Constitution', 'Emancipation Proclamation', 'Bill of Rights'], correct_answer: 'Emancipation Proclamation', difficulty: 3, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'Who was the 16th President of the US?', type: 'multiple_choice', options: ['Ulysses Grant', 'Abraham Lincoln', 'Andrew Jackson', 'James Polk'], correct_answer: 'Abraham Lincoln', difficulty: 2, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'What did the Boston Tea Party protest?', type: 'multiple_choice', options: ['Slavery', 'Taxation without representation', 'The King of England', 'Religious laws'], correct_answer: 'Taxation without representation', difficulty: 3, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'What is the capital of the United States?', type: 'multiple_choice', options: ['New York', 'Los Angeles', 'Washington D.C.', 'Chicago'], correct_answer: 'Washington D.C.', difficulty: 1, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'Which Native American helped the Pilgrims survive?', type: 'multiple_choice', options: ['Pocahontas', 'Squanto', 'Sitting Bull', 'Geronimo'], correct_answer: 'Squanto', difficulty: 3, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'What river did George Washington cross on Christmas night 1776?', type: 'multiple_choice', options: ['Mississippi', 'Ohio', 'Delaware', 'Hudson'], correct_answer: 'Delaware', difficulty: 3, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'How many original colonies were there?', type: 'typed', options: null, correct_answer: '13', difficulty: 1, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'What was the main crop grown in the Southern colonies?', type: 'multiple_choice', options: ['Wheat', 'Corn', 'Tobacco', 'Rice only'], correct_answer: 'Tobacco', difficulty: 3, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'Who was the first woman to fly solo across the Atlantic?', type: 'multiple_choice', options: ['Marie Curie', 'Amelia Earhart', 'Rosa Parks', 'Susan B. Anthony'], correct_answer: 'Amelia Earhart', difficulty: 2, source: 'curated' },
+  { subject: 'history', grade_level: 5, question_text: 'What invention by Gutenberg changed history?', type: 'multiple_choice', options: ['Steam engine', 'Printing press', 'Telephone', 'Compass'], correct_answer: 'Printing press', difficulty: 3, source: 'curated' },
+
+  // ── HISTORY Grade 8 ──────────────────────────────────────────
   { subject: 'history', grade_level: 8, question_text: 'What year did World War II end?', type: 'typed', options: null, correct_answer: '1945', difficulty: 2, source: 'curated' },
-  { subject: 'history', grade_level: 8, question_text: 'Which document ended slavery in the US?', type: 'multiple_choice', options: ['Declaration of Independence', 'Emancipation Proclamation', 'Bill of Rights', 'Constitution'], correct_answer: 'Emancipation Proclamation', difficulty: 3, source: 'curated' },
   { subject: 'history', grade_level: 8, question_text: 'What caused the Great Depression?', type: 'multiple_choice', options: ['World War I', 'Stock market crash of 1929', 'Hurricane of 1928', 'Drought in 1930'], correct_answer: 'Stock market crash of 1929', difficulty: 3, source: 'curated' },
-  { subject: 'history', grade_level: 8, question_text: 'Who wrote the Declaration of Independence?', type: 'multiple_choice', options: ['George Washington', 'Benjamin Franklin', 'Thomas Jefferson', 'John Adams'], correct_answer: 'Thomas Jefferson', difficulty: 2, source: 'curated' },
-  // English - Grade 4
+  { subject: 'history', grade_level: 8, question_text: 'What year did World War I begin?', type: 'typed', options: null, correct_answer: '1914', difficulty: 2, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'Who was the US President during World War II?', type: 'multiple_choice', options: ['Woodrow Wilson', 'Harry Truman', 'Franklin D. Roosevelt', 'Dwight Eisenhower'], correct_answer: 'Franklin D. Roosevelt', difficulty: 3, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'What was the name of the Nazi leader of Germany?', type: 'multiple_choice', options: ['Mussolini', 'Stalin', 'Hitler', 'Franco'], correct_answer: 'Hitler', difficulty: 2, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'What event triggered the US entry into WWII?', type: 'multiple_choice', options: ['D-Day', 'Attack on Pearl Harbor', 'Invasion of Poland', 'Fall of Berlin'], correct_answer: 'Attack on Pearl Harbor', difficulty: 2, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'What was the Cold War?', type: 'multiple_choice', options: ['A war fought in Antarctica', 'Tension between US and Soviet Union', 'A World War III', 'A war about oil'], correct_answer: 'Tension between US and Soviet Union', difficulty: 3, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'In what year did the Berlin Wall fall?', type: 'typed', options: null, correct_answer: '1989', difficulty: 3, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'What was the Holocaust?', type: 'multiple_choice', options: ['A battle in WWI', 'Nazi genocide of Jewish people', 'The bombing of Hiroshima', 'The Great Depression'], correct_answer: 'Nazi genocide of Jewish people', difficulty: 3, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'Which country did Germany first invade to start WWII?', type: 'multiple_choice', options: ['France', 'USSR', 'Poland', 'Belgium'], correct_answer: 'Poland', difficulty: 3, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'What was the Marshall Plan?', type: 'multiple_choice', options: ['A military strategy', 'US aid to rebuild Europe after WWII', 'A peace treaty', 'A nuclear agreement'], correct_answer: 'US aid to rebuild Europe after WWII', difficulty: 4, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'What was the name of the first atomic bomb dropped on Japan?', type: 'multiple_choice', options: ['Fat Man', 'Little Boy', 'Big Bang', 'Thunder'], correct_answer: 'Little Boy', difficulty: 4, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'Who was Martin Luther King Jr.?', type: 'multiple_choice', options: ['A US President', 'A Civil Rights leader', 'A war general', 'A scientist'], correct_answer: 'A Civil Rights leader', difficulty: 1, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'What year did the US land on the Moon?', type: 'typed', options: null, correct_answer: '1969', difficulty: 2, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'What was the name of the first artificial satellite launched into space?', type: 'multiple_choice', options: ['Apollo 11', 'Explorer 1', 'Sputnik', 'Vostok'], correct_answer: 'Sputnik', difficulty: 3, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'What movement fought for African American civil rights in the 1950s–60s?', type: 'multiple_choice', options: ['Suffrage Movement', 'Civil Rights Movement', 'Labor Movement', 'Prohibition'], correct_answer: 'Civil Rights Movement', difficulty: 2, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'Who was the first Black President of the US?', type: 'multiple_choice', options: ['Bill Clinton', 'Barack Obama', 'Joe Biden', 'Jesse Jackson'], correct_answer: 'Barack Obama', difficulty: 1, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'What was the name of the operation to liberate Western Europe on June 6, 1944?', type: 'multiple_choice', options: ['Operation Overlord', 'Operation Torch', 'Operation Market Garden', 'D-Plan'], correct_answer: 'Operation Overlord', difficulty: 4, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'What was the League of Nations?', type: 'multiple_choice', options: ['A sports league', 'An early international peace organization', 'A trade union', 'A military alliance'], correct_answer: 'An early international peace organization', difficulty: 4, source: 'curated' },
+  { subject: 'history', grade_level: 8, question_text: 'What does "suffrage" mean?', type: 'multiple_choice', options: ['The right to work', 'The right to vote', 'The right to education', 'The right to bear arms'], correct_answer: 'The right to vote', difficulty: 3, source: 'curated' },
+
+  // ── ENGLISH Grade 4 ──────────────────────────────────────────
   { subject: 'english', grade_level: 4, question_text: 'What is a synonym for "happy"?', type: 'multiple_choice', options: ['Sad', 'Joyful', 'Angry', 'Tired'], correct_answer: 'Joyful', difficulty: 1, source: 'curated' },
   { subject: 'english', grade_level: 4, question_text: 'Which of these is a noun?', type: 'multiple_choice', options: ['Run', 'Quickly', 'Beautiful', 'Apple'], correct_answer: 'Apple', difficulty: 1, source: 'curated' },
   { subject: 'english', grade_level: 4, question_text: 'What punctuation ends a question?', type: 'multiple_choice', options: ['Period', 'Exclamation mark', 'Question mark', 'Comma'], correct_answer: 'Question mark', difficulty: 1, source: 'curated' },
   { subject: 'english', grade_level: 4, question_text: 'What is the plural of "child"?', type: 'typed', options: null, correct_answer: 'children', difficulty: 2, source: 'curated' },
-  // English - Grade 7
-  { subject: 'english', grade_level: 7, question_text: 'What literary device is "The wind whispered through the trees"?', type: 'multiple_choice', options: ['Simile', 'Metaphor', 'Personification', 'Alliteration'], correct_answer: 'Personification', difficulty: 3, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'Which word is an adjective?', type: 'multiple_choice', options: ['Jump', 'Slowly', 'Bright', 'They'], correct_answer: 'Bright', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'What is the plural of "mouse"?', type: 'typed', options: null, correct_answer: 'mice', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'What is an antonym of "hot"?', type: 'multiple_choice', options: ['Warm', 'Boiling', 'Cold', 'Spicy'], correct_answer: 'Cold', difficulty: 1, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'Which sentence is correct?', type: 'multiple_choice', options: ['She go to school.', 'She goes to school.', 'She going to school.', 'She gone to school.'], correct_answer: 'She goes to school.', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'What does the prefix "un-" mean?', type: 'multiple_choice', options: ['Again', 'Before', 'Not', 'Under'], correct_answer: 'Not', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'Which word is a verb?', type: 'multiple_choice', options: ['Happy', 'Quickly', 'Dance', 'Blue'], correct_answer: 'Dance', difficulty: 1, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'What is a sentence that asks something called?', type: 'multiple_choice', options: ['Exclamatory', 'Declarative', 'Interrogative', 'Imperative'], correct_answer: 'Interrogative', difficulty: 3, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'What is the past tense of "run"?', type: 'typed', options: null, correct_answer: 'ran', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'What do you call words that sound the same but mean different things?', type: 'multiple_choice', options: ['Synonyms', 'Antonyms', 'Homophones', 'Prefixes'], correct_answer: 'Homophones', difficulty: 3, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'Which word completes: "The dog wagged ___ tail"?', type: 'multiple_choice', options: ['it', 'his', 'their', 'our'], correct_answer: 'his', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'What is the plural of "leaf"?', type: 'typed', options: null, correct_answer: 'leaves', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'What mark goes at the end of an exclamation?', type: 'multiple_choice', options: ['Period', 'Question mark', 'Exclamation mark', 'Comma'], correct_answer: 'Exclamation mark', difficulty: 1, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'What is the opposite of "ancient"?', type: 'multiple_choice', options: ['Old', 'Modern', 'Historic', 'Dusty'], correct_answer: 'Modern', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'What type of word is "she", "he", "they"?', type: 'multiple_choice', options: ['Noun', 'Verb', 'Pronoun', 'Adjective'], correct_answer: 'Pronoun', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'What is the past tense of "eat"?', type: 'typed', options: null, correct_answer: 'ate', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 4, question_text: 'A word that describes a verb is called a(n)...', type: 'multiple_choice', options: ['Adjective', 'Adverb', 'Pronoun', 'Conjunction'], correct_answer: 'Adverb', difficulty: 3, source: 'curated' },
+
+  // ── ENGLISH Grade 7 ──────────────────────────────────────────
+  { subject: 'english', grade_level: 7, question_text: '"The wind whispered through the trees" is an example of?', type: 'multiple_choice', options: ['Simile', 'Metaphor', 'Personification', 'Alliteration'], correct_answer: 'Personification', difficulty: 3, source: 'curated' },
   { subject: 'english', grade_level: 7, question_text: 'What is the main clause in: "Although it rained, we played outside"?', type: 'multiple_choice', options: ['Although it rained', 'We played outside', 'It rained', 'Although we played'], correct_answer: 'We played outside', difficulty: 3, source: 'curated' },
   { subject: 'english', grade_level: 7, question_text: 'What is an antonym for "ancient"?', type: 'multiple_choice', options: ['Old', 'Modern', 'Historic', 'Vintage'], correct_answer: 'Modern', difficulty: 2, source: 'curated' },
-  { subject: 'english', grade_level: 7, question_text: 'Which sentence uses the correct form: "They ____ going to the store"?', type: 'multiple_choice', options: ['is', 'was', 'are', 'be'], correct_answer: 'are', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: '"As brave as a lion" is a?', type: 'multiple_choice', options: ['Metaphor', 'Simile', 'Hyperbole', 'Alliteration'], correct_answer: 'Simile', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'What is the theme of a story?', type: 'multiple_choice', options: ['The setting', 'The central message', 'The main character', 'The plot twist'], correct_answer: 'The central message', difficulty: 3, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: '"I\'ve told you a million times" is an example of?', type: 'multiple_choice', options: ['Simile', 'Personification', 'Hyperbole', 'Alliteration'], correct_answer: 'Hyperbole', difficulty: 3, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'What does "protagonist" mean?', type: 'multiple_choice', options: ['The villain', 'The main character', 'The narrator', 'The setting'], correct_answer: 'The main character', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'What is foreshadowing?', type: 'multiple_choice', options: ['A flashback to the past', 'A hint of what will happen', 'A description of the setting', 'Dialogue between characters'], correct_answer: 'A hint of what will happen', difficulty: 3, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'Which is an example of alliteration?', type: 'multiple_choice', options: ['The sun set slowly', 'Peter Piper picked peppers', 'She is like a rose', 'Time flies'], correct_answer: 'Peter Piper picked peppers', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'What is a synonym for "melancholy"?', type: 'multiple_choice', options: ['Joyful', 'Sad', 'Angry', 'Confused'], correct_answer: 'Sad', difficulty: 3, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'What is the difference between "their", "there", and "they\'re"?', type: 'multiple_choice', options: ['No difference', 'Possessive, place, contraction', 'All are contractions', 'All are possessives'], correct_answer: 'Possessive, place, contraction', difficulty: 3, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'What does the suffix "-tion" typically indicate?', type: 'multiple_choice', options: ['An adjective', 'A noun', 'A verb', 'An adverb'], correct_answer: 'A noun', difficulty: 3, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'What is the antagonist in a story?', type: 'multiple_choice', options: ['The hero', 'The narrator', 'The opponent of the protagonist', 'The setting'], correct_answer: 'The opponent of the protagonist', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: '"Life is a rollercoaster" is a?', type: 'multiple_choice', options: ['Simile', 'Metaphor', 'Hyperbole', 'Personification'], correct_answer: 'Metaphor', difficulty: 3, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'What is the correct word: "I (accept/except) your apology"?', type: 'multiple_choice', options: ['except', 'accept', 'Both work', 'Neither works'], correct_answer: 'accept', difficulty: 3, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'What narrative point of view uses "I" and "we"?', type: 'multiple_choice', options: ['Second person', 'Third person', 'First person', 'Omniscient'], correct_answer: 'First person', difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'What is the climax of a story?', type: 'multiple_choice', options: ['The beginning', 'The turning point of highest tension', 'The resolution', 'The setting introduction'], correct_answer: 'The turning point of highest tension', difficulty: 3, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'Which sentence uses correct punctuation?', type: 'multiple_choice', options: ["Its a great day.", "It's a great day.", "Its' a great day.", "Its a great day!"], correct_answer: "It's a great day.", difficulty: 2, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'What is an inference?', type: 'multiple_choice', options: ['A direct quote', 'A conclusion drawn from evidence', 'A summary', 'A character description'], correct_answer: 'A conclusion drawn from evidence', difficulty: 3, source: 'curated' },
+  { subject: 'english', grade_level: 7, question_text: 'What does "irony" mean?', type: 'multiple_choice', options: ['Repeating a sound', 'The opposite of what is expected', 'A very sad event', 'A comparison using "like"'], correct_answer: 'The opposite of what is expected', difficulty: 4, source: 'curated' },
 ]
 
 export function getQuestionsForBattle(subject: Subject, gradeLevel: number, count = 10): Omit<Question, 'id'>[] {
-  const pool = SEED_QUESTIONS.filter(
-    q => q.subject === subject && q.grade_level === gradeLevel
-  )
-  const shuffled = [...pool].sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, Math.min(count, shuffled.length))
+  let pool = SEED_QUESTIONS.filter(q => q.subject === subject && q.grade_level === gradeLevel)
+
+  // Fall back to nearest grade if not enough questions
+  if (pool.length < count) {
+    const availableGrades = [...new Set(SEED_QUESTIONS.filter(q => q.subject === subject).map(q => q.grade_level))]
+    const nearest = availableGrades.reduce((prev, curr) =>
+      Math.abs(curr - gradeLevel) < Math.abs(prev - gradeLevel) ? curr : prev
+    )
+    pool = SEED_QUESTIONS.filter(q => q.subject === subject && q.grade_level === nearest)
+  }
+
+  // Fisher-Yates shuffle for true randomness
+  const arr = [...pool]
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr.slice(0, count)
 }
