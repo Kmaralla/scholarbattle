@@ -73,9 +73,10 @@ export function TrainingSession({
   const [coachTipIdx] = useState(() => Math.floor(Math.random() * coach.tips.length))
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // Puzzle hints — eliminated wrong options
+  // Puzzle hints
   const [hintsLeft, setHintsLeft] = useState(MAX_HINTS)
   const [eliminatedOptions, setEliminatedOptions] = useState<string[]>([])
+  const [typedHintLevel, setTypedHintLevel] = useState(0) // 0=none, 1=first letter, 2=half revealed
 
   const q = questions[qIndex]
   const opts = optionSets[qIndex] ?? []
@@ -146,12 +147,28 @@ export function TrainingSession({
   }
 
   function applyHint() {
-    if (hintsLeft <= 0 || answered || opts.length === 0) return
-    const wrong = opts.filter(o => o.toLowerCase() !== q.correct_answer.toLowerCase() && !eliminatedOptions.includes(o))
-    if (wrong.length === 0) return
-    const toElim = wrong[Math.floor(Math.random() * wrong.length)]
-    setEliminatedOptions(prev => [...prev, toElim])
-    setHintsLeft(h => h - 1)
+    if (hintsLeft <= 0 || answered) return
+    if (q.type === 'typed') {
+      setTypedHintLevel(l => l + 1)
+      setHintsLeft(h => h - 1)
+    } else if (opts.length > 0) {
+      const wrong = opts.filter(o => o.toLowerCase() !== q.correct_answer.toLowerCase() && !eliminatedOptions.includes(o))
+      if (wrong.length === 0) return
+      const toElim = wrong[Math.floor(Math.random() * wrong.length)]
+      setEliminatedOptions(prev => [...prev, toElim])
+      setHintsLeft(h => h - 1)
+    }
+  }
+
+  function getTypedHint(): string {
+    const ans = q?.correct_answer ?? ''
+    if (typedHintLevel === 0) return ''
+    if (typedHintLevel === 1) {
+      // Reveal first letter only
+      return ans[0] + ' ' + '_ '.repeat(ans.length - 1).trim()
+    }
+    // Reveal ~half the letters (every other one)
+    return ans.split('').map((ch, i) => (i === 0 || i % 2 === 0 ? ch : '_')).join(' ')
   }
 
   async function advance() {
@@ -179,6 +196,7 @@ export function TrainingSession({
     setShowCoachMessage(false)
     setEliminatedOptions([])
     setHintsLeft(MAX_HINTS)
+    setTypedHintLevel(0)
   }
 
   const timerPct = mode.seconds === 99 ? 100 : (timeLeft / mode.seconds) * 100
@@ -427,6 +445,12 @@ export function TrainingSession({
           {/* Typed */}
           {!isFlashcard && q.type === 'typed' && (
             <form onSubmit={handleTypedSubmit} className="space-y-3">
+              {typedHintLevel > 0 && !answered && (
+                <div className="bg-amber-900/30 border border-amber-500/30 rounded-xl px-4 py-2.5 text-center">
+                  <p className="text-xs text-amber-400/70 font-semibold mb-0.5">💡 Hint</p>
+                  <p className="text-amber-300 font-black text-lg tracking-widest">{getTypedHint()}</p>
+                </div>
+              )}
               <input
                 value={typedAnswer}
                 onChange={e => setTypedAnswer(e.target.value)}
