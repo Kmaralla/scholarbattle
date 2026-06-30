@@ -25,11 +25,7 @@ export function Navbar() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
       const { data, error } = await supabase.from('users').select('coins').eq('id', user.id).single()
-      if (error) {
-        console.error('[Navbar] coins fetch error:', error.message)
-        setCoins(0)
-        return
-      }
+      if (error) { setCoins(0); return }
       setCoins((data as any)?.coins ?? 0)
     }
     loadCoins()
@@ -37,7 +33,7 @@ export function Navbar() {
     const handler = () => loadCoins()
     window.addEventListener('focus', handler)
     return () => window.removeEventListener('focus', handler)
-  }, [])
+  }, [path])  // re-fetch whenever the route changes
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 shadow-lg md:relative md:bottom-auto md:border-t-0 md:border-r md:w-64 md:h-screen md:flex md:flex-col md:shadow-none">
