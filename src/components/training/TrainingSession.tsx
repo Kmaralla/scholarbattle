@@ -145,9 +145,9 @@ export function TrainingSession({
     registerAnswer(typedAnswer.trim().toLowerCase() === q.correct_answer.toLowerCase())
   }
 
-  function useHint() {
-    if (hintsLeft <= 0 || answered || !q.options) return
-    const wrong = opts.filter(o => o !== q.correct_answer && !eliminatedOptions.includes(o))
+  function applyHint() {
+    if (hintsLeft <= 0 || answered || opts.length === 0) return
+    const wrong = opts.filter(o => o.toLowerCase() !== q.correct_answer.toLowerCase() && !eliminatedOptions.includes(o))
     if (wrong.length === 0) return
     const toElim = wrong[Math.floor(Math.random() * wrong.length)]
     setEliminatedOptions(prev => [...prev, toElim])
@@ -309,7 +309,7 @@ export function TrainingSession({
             <span className="text-xs font-bold text-violet-300">Daily Puzzle</span>
           </div>
           <button
-            onClick={useHint}
+            onClick={applyHint}
             disabled={hintsLeft <= 0 || answered}
             className={cn(
               'flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold border transition',
