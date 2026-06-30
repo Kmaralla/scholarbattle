@@ -24,12 +24,16 @@ export function Navbar() {
     async function loadCoins() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      const { data } = await supabase.from('users').select('coins').eq('id', user.id).single()
-      if (data) setCoins(data.coins ?? 0)
+      const { data, error } = await supabase.from('users').select('coins').eq('id', user.id).single()
+      if (error) {
+        console.error('[Navbar] coins fetch error:', error.message)
+        setCoins(0)
+        return
+      }
+      setCoins((data as any)?.coins ?? 0)
     }
     loadCoins()
 
-    // Refresh coins when window regains focus (e.g. after a battle)
     const handler = () => loadCoins()
     window.addEventListener('focus', handler)
     return () => window.removeEventListener('focus', handler)
