@@ -160,43 +160,43 @@ export default function BattlePage() {
     const won = done.myScore > done.theirScore
     const tied = done.myScore === done.theirScore
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-sm w-full text-center space-y-4">
-          <div className="text-6xl">{won ? '🏆' : tied ? '🤝' : '😤'}</div>
-          <h1 className="text-2xl font-black text-gray-900">
-            {won ? 'You Won!' : tied ? 'It\'s a Tie!' : 'You Lost!'}
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0f0a1e]">
+        <div className="rounded-3xl p-8 max-w-sm w-full text-center space-y-5 bg-white/5 border border-white/10 shadow-2xl backdrop-blur">
+          <div className="text-7xl float">{won ? '🏆' : tied ? '🤝' : '😤'}</div>
+          <h1 className={`text-3xl font-black ${won ? 'shimmer-text' : tied ? 'text-yellow-300' : 'text-red-400'}`}>
+            {won ? 'You Won!' : tied ? "It's a Tie!" : 'You Lost!'}
           </h1>
-          <div className="flex justify-center gap-6 py-2">
+          <div className="flex justify-center gap-8 py-2">
             <div>
-              <p className="text-4xl font-black text-indigo-600">{done.myScore}</p>
-              <p className="text-xs text-gray-500">You</p>
+              <p className="text-5xl font-black text-violet-400">{done.myScore}</p>
+              <p className="text-xs text-white/40 mt-1">You</p>
             </div>
-            <div className="text-2xl font-black text-gray-300 self-center">vs</div>
+            <div className="text-2xl font-black text-white/20 self-center">vs</div>
             <div>
-              <p className="text-4xl font-black text-orange-500">{done.theirScore}</p>
-              <p className="text-xs text-gray-500">Opponent</p>
+              <p className="text-5xl font-black text-orange-400">{done.theirScore}</p>
+              <p className="text-xs text-white/40 mt-1">Opponent</p>
             </div>
           </div>
 
-          <div className="flex gap-2 justify-center">
+          <div className="flex gap-2 justify-center flex-wrap">
             {done.eloDelta !== 0 && (
-              <div className={`py-2 px-4 rounded-xl text-sm font-bold ${done.eloDelta > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+              <div className={`py-2 px-4 rounded-xl text-sm font-bold ${done.eloDelta > 0 ? 'bg-green-400/20 text-green-300 border border-green-400/30' : 'bg-red-400/20 text-red-300 border border-red-400/30'}`}>
                 {done.eloDelta > 0 ? `⬆️ +${done.eloDelta} ELO` : `⬇️ ${done.eloDelta} ELO`}
                 {isSolo && <span className="font-normal text-xs ml-1 opacity-70">(vs bot)</span>}
               </div>
             )}
             {done.coinsEarned > 0 && (
-              <div className="py-2 px-4 rounded-xl text-sm font-bold bg-yellow-50 text-yellow-700">
+              <div className="py-2 px-4 rounded-xl text-sm font-bold bg-yellow-400/20 text-yellow-300 border border-yellow-400/30">
                 🪙 +{done.coinsEarned} coins
               </div>
             )}
           </div>
-          {done.eloDelta === 0 && done.coinsEarned === 0 && <p className="text-xs text-gray-400">No ELO change (tie)</p>}
-          <div className="flex gap-2">
-            <button onClick={() => router.push('/battle')} className="flex-1 border border-gray-200 rounded-xl py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition">
+          {done.eloDelta === 0 && done.coinsEarned === 0 && <p className="text-xs text-white/30">No ELO change (tie)</p>}
+          <div className="flex gap-3">
+            <button onClick={() => router.push('/battle')} className="flex-1 border border-white/20 rounded-2xl py-3 text-sm font-bold text-white/70 hover:bg-white/10 transition">
               Play Again
             </button>
-            <button onClick={() => router.push('/dashboard')} className="flex-1 bg-indigo-600 text-white rounded-xl py-3 text-sm font-bold hover:bg-indigo-700 transition">
+            <button onClick={() => router.push('/dashboard')} className="flex-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-2xl py-3 text-sm font-bold hover:opacity-90 transition shadow-lg shadow-violet-500/30">
               Dashboard
             </button>
           </div>
@@ -207,11 +207,11 @@ export default function BattlePage() {
 
   if (loadError) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0f0a1e]">
         <div className="text-center space-y-3">
           <div className="text-4xl">😵</div>
-          <p className="font-bold text-gray-800">{loadError}</p>
-          <button onClick={() => router.push('/battle')} className="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold">
+          <p className="font-bold text-white">{loadError}</p>
+          <button onClick={() => router.push('/battle')} className="px-5 py-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-xl text-sm font-bold">
             Back to Battle
           </button>
         </div>
@@ -221,22 +221,20 @@ export default function BattlePage() {
 
   if (waitingForOpponent) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-sm w-full text-center space-y-4">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0f0a1e]">
+        <div className="rounded-3xl p-8 max-w-sm w-full text-center space-y-4 bg-white/5 border border-white/10">
           <div className="text-5xl animate-pulse">⏳</div>
-          <h2 className="text-xl font-black text-gray-900">Waiting for opponent...</h2>
-          <p className="text-sm text-gray-500">
-            Challenge sent to <span className="font-bold text-gray-700">{opponent?.username}</span>.
+          <h2 className="text-xl font-black text-white">Waiting for opponent...</h2>
+          <p className="text-sm text-white/50">
+            Challenge sent to <span className="font-bold text-violet-300">{opponent?.username}</span>.
             <br />They'll see a notification to accept.
           </p>
           <div className="flex gap-1 justify-center">
             {[0,1,2].map(i => (
-              <div key={i} className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+              <div key={i} className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
             ))}
           </div>
-          <button onClick={() => router.push('/friends')} className="text-sm text-gray-400 underline">
-            Cancel
-          </button>
+          <button onClick={() => router.push('/friends')} className="text-sm text-white/30 underline">Cancel</button>
         </div>
       </div>
     )
@@ -244,10 +242,10 @@ export default function BattlePage() {
 
   if (!currentUser || !opponent || !battle || questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#0f0a1e]">
         <div className="text-center space-y-2">
           <div className="text-4xl animate-bounce">⚔️</div>
-          <p className="text-gray-500 font-semibold">Loading battle...</p>
+          <p className="text-white/50 font-semibold">Loading battle...</p>
         </div>
       </div>
     )

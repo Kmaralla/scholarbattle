@@ -35,9 +35,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <PresenceTracker userId={profile.id} username={profile.username}>
-      <div className="flex flex-col md:flex-row h-full min-h-screen">
+      <div className="flex flex-col md:flex-row h-full min-h-screen bg-[#0f0a1e]">
         <Navbar />
-        <main className="flex-1 overflow-y-auto pb-20 md:pb-0">{children}</main>
+        <main className="flex-1 overflow-y-auto pb-24 md:pb-0 min-h-screen">{children}</main>
         <ChallengeNotification userId={user.id} />
       </div>
     </PresenceTracker>
