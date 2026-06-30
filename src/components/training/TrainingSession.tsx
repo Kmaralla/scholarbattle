@@ -160,15 +160,20 @@ export function TrainingSession({
     }
   }
 
-  function getTypedHint(): string {
+  function getTypedHint(level: number): string {
     const ans = q?.correct_answer ?? ''
-    if (typedHintLevel === 0) return ''
-    if (typedHintLevel === 1) {
-      // Reveal first letter only
-      return ans[0] + ' ' + '_ '.repeat(ans.length - 1).trim()
+    if (level === 0 || !ans) return ''
+    if (level === 1) {
+      // First letter of each word + blanks for rest
+      return ans.split(' ').map(word =>
+        word[0] + '_'.repeat(Math.max(0, word.length - 1))
+      ).join(' ')
     }
-    // Reveal ~half the letters (every other one)
-    return ans.split('').map((ch, i) => (i === 0 || i % 2 === 0 ? ch : '_')).join(' ')
+    // Reveal first half of each word
+    return ans.split(' ').map(word => {
+      const show = Math.ceil(word.length / 2)
+      return word.slice(0, show) + '_'.repeat(word.length - show)
+    }).join(' ')
   }
 
   async function advance() {
@@ -448,7 +453,7 @@ export function TrainingSession({
               {typedHintLevel > 0 && !answered && (
                 <div className="bg-amber-900/30 border border-amber-500/30 rounded-xl px-4 py-2.5 text-center">
                   <p className="text-xs text-amber-400/70 font-semibold mb-0.5">💡 Hint</p>
-                  <p className="text-amber-300 font-black text-lg tracking-widest">{getTypedHint()}</p>
+                  <p className="text-amber-300 font-black text-lg tracking-widest">{getTypedHint(typedHintLevel)}</p>
                 </div>
               )}
               <input
