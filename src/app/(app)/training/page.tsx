@@ -20,6 +20,70 @@ export type Coach = {
   endLine: (score: number, total: number) => string
 }
 
+export type TrainingMode = {
+  id: string
+  emoji: string
+  name: string
+  description: string
+  questions: number
+  seconds: number
+  tag: string
+  tagColor: string
+}
+
+export const TRAINING_MODES: TrainingMode[] = [
+  {
+    id: 'puzzles',
+    emoji: '🧩',
+    name: 'Puzzles',
+    description: 'Tricky brain-teaser questions that make you think deep. No rush — take your time.',
+    questions: 5,
+    seconds: 40,
+    tag: 'Think Deep',
+    tagColor: 'bg-violet-500/30 text-violet-300',
+  },
+  {
+    id: 'speed',
+    emoji: '⚡',
+    name: 'Speed Drill',
+    description: 'Answer as fast as you can! 10 seconds per question. Go go go!',
+    questions: 8,
+    seconds: 10,
+    tag: 'Fast Pace',
+    tagColor: 'bg-orange-500/30 text-orange-300',
+  },
+  {
+    id: 'flashcards',
+    emoji: '🃏',
+    name: 'Flashcards',
+    description: 'See the question, think about it, then reveal the answer. Great for memorizing.',
+    questions: 6,
+    seconds: 99,
+    tag: 'Study Mode',
+    tagColor: 'bg-sky-500/30 text-sky-300',
+  },
+  {
+    id: 'streak',
+    emoji: '🔥',
+    name: 'Streak Challenge',
+    description: 'Keep answering until you get 3 wrong. How long can your streak last?',
+    questions: 10,
+    seconds: 20,
+    tag: 'Survival',
+    tagColor: 'bg-red-500/30 text-red-300',
+  },
+  {
+    id: 'endurance',
+    emoji: '💪',
+    name: 'Endurance',
+    description: '15 questions back to back. Build serious stamina for real battles.',
+    questions: 15,
+    seconds: 20,
+    tag: 'Stamina',
+    tagColor: 'bg-emerald-500/30 text-emerald-300',
+  },
+]
+
 export const COACHES: Coach[] = [
   {
     id: 'max',
@@ -137,72 +201,145 @@ export const COACHES: Coach[] = [
 const SUBJECTS: Subject[] = ['math', 'science', 'history', 'english']
 const GRADES = Array.from({ length: 12 }, (_, i) => i + 1)
 
+type Step = 'mode' | 'coach' | 'subject'
+
 export default function TrainingPage() {
+  const [step, setStep] = useState<Step>('mode')
+  const [selectedMode, setSelectedMode] = useState<TrainingMode | null>(null)
   const [selectedCoach, setSelectedCoach] = useState<Coach | null>(null)
   const [subject, setSubject] = useState<Subject>('math')
   const [grade, setGrade] = useState(5)
   const [started, setStarted] = useState(false)
 
-  if (started && selectedCoach) {
+  if (started && selectedCoach && selectedMode) {
     return (
       <TrainingSession
         coach={selectedCoach}
+        mode={selectedMode}
         subject={subject}
         grade={grade}
-        onBack={() => { setStarted(false); setSelectedCoach(null) }}
+        onBack={() => { setStarted(false); setStep('mode'); setSelectedMode(null); setSelectedCoach(null) }}
       />
     )
   }
 
   return (
-    <div className="max-w-lg mx-auto p-4 space-y-6 pb-24">
+    <div className="max-w-lg mx-auto p-4 space-y-5 pb-24">
       <h1 className="text-xl font-black text-white">💪 Training</h1>
-      <p className="text-sm text-slate-400">Pick a coach, choose your subject, and start training to improve your rank!</p>
 
-      {/* Coach selection */}
-      <div className="space-y-3">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Choose Your Coach</p>
-        {COACHES.map(coach => (
-          <button
-            key={coach.id}
-            onClick={() => setSelectedCoach(coach)}
-            className={cn(
-              'w-full text-left rounded-3xl p-4 border-2 transition-all',
-              selectedCoach?.id === coach.id
-                ? `border-transparent bg-gradient-to-r ${coach.gradient} shadow-xl ${coach.glow}`
-                : 'border-white/10 bg-white/5 hover:bg-white/10'
-            )}
-          >
-            <div className="flex items-center gap-4">
-              <div className={cn(
-                'w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0',
-                selectedCoach?.id === coach.id ? 'bg-white/20' : 'bg-white/10'
-              )}>
-                {coach.emoji}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-black text-white text-base">{coach.name}</p>
-                  <span className={cn(
-                    'text-xs font-bold px-2 py-0.5 rounded-full',
-                    selectedCoach?.id === coach.id ? 'bg-white/20 text-white' : `${coach.color} bg-white/5`
-                  )}>{coach.title}</span>
-                </div>
-                <p className="text-xs text-white/60 mt-0.5 leading-relaxed">{coach.personality}</p>
-              </div>
-              {selectedCoach?.id === coach.id && (
-                <div className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-xs font-black">✓</span>
-                </div>
-              )}
+      {/* Step indicator */}
+      <div className="flex items-center gap-2">
+        {(['mode', 'coach', 'subject'] as Step[]).map((s, i) => (
+          <div key={s} className="flex items-center gap-2">
+            <div className={cn(
+              'w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all',
+              step === s ? 'bg-indigo-500 text-white' :
+              (['mode', 'coach', 'subject'].indexOf(step) > i) ? 'bg-green-500 text-white' :
+              'bg-white/10 text-white/30'
+            )}>
+              {(['mode', 'coach', 'subject'].indexOf(step) > i) ? '✓' : i + 1}
             </div>
-          </button>
+            <span className={cn('text-xs font-semibold capitalize', step === s ? 'text-white' : 'text-white/30')}>
+              {s === 'mode' ? 'Training Type' : s === 'coach' ? 'Coach' : 'Subject'}
+            </span>
+            {i < 2 && <div className="w-6 h-px bg-white/20" />}
+          </div>
         ))}
       </div>
 
-      {selectedCoach && (
-        <>
-          {/* Subject picker */}
+      {/* Step 1: Training mode */}
+      {step === 'mode' && (
+        <div className="space-y-3">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Choose Your Training Type</p>
+          {TRAINING_MODES.map(mode => (
+            <button
+              key={mode.id}
+              onClick={() => { setSelectedMode(mode); setStep('coach') }}
+              className="w-full text-left rounded-3xl p-4 border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all flex items-center gap-4"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-3xl flex-shrink-0">
+                {mode.emoji}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-black text-white text-base">{mode.name}</p>
+                  <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full', mode.tagColor)}>{mode.tag}</span>
+                </div>
+                <p className="text-xs text-white/50 mt-0.5 leading-relaxed">{mode.description}</p>
+                <p className="text-xs text-white/30 mt-1">{mode.questions} questions · {mode.seconds === 99 ? 'No timer' : `${mode.seconds}s each`}</p>
+              </div>
+              <span className="text-white/30 text-lg">→</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Step 2: Coach */}
+      {step === 'coach' && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <button onClick={() => setStep('mode')} className="text-slate-400 hover:text-white text-sm font-semibold transition">← Back</button>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-2">Choose Your Coach</p>
+          </div>
+          {/* Selected mode reminder */}
+          {selectedMode && (
+            <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5">
+              <span className="text-2xl">{selectedMode.emoji}</span>
+              <div>
+                <p className="text-xs text-white/40 font-semibold">Training Type</p>
+                <p className="text-sm font-black text-white">{selectedMode.name}</p>
+              </div>
+            </div>
+          )}
+          {COACHES.map(coach => (
+            <button
+              key={coach.id}
+              onClick={() => { setSelectedCoach(coach); setStep('subject') }}
+              className="w-full text-left rounded-3xl p-4 border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all flex items-center gap-4"
+            >
+              <div className={cn('w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 bg-gradient-to-br', coach.gradient)}>
+                {coach.emoji}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-black text-white text-base">{coach.name}</p>
+                  <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full bg-white/5', coach.color)}>{coach.title}</span>
+                </div>
+                <p className="text-xs text-white/50 mt-0.5 leading-relaxed">{coach.personality}</p>
+              </div>
+              <span className="text-white/30 text-lg">→</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Step 3: Subject + Grade */}
+      {step === 'subject' && selectedCoach && selectedMode && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <button onClick={() => setStep('coach')} className="text-slate-400 hover:text-white text-sm font-semibold transition">← Back</button>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-2">Subject & Grade</p>
+          </div>
+
+          {/* Summary */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-3 py-2.5">
+              <span className="text-xl">{selectedMode.emoji}</span>
+              <div>
+                <p className="text-xs text-white/40 font-semibold">Mode</p>
+                <p className="text-sm font-black text-white">{selectedMode.name}</p>
+              </div>
+            </div>
+            <div className={cn('flex items-center gap-3 rounded-2xl px-3 py-2.5 bg-gradient-to-r', selectedCoach.gradient)}>
+              <span className="text-xl">{selectedCoach.emoji}</span>
+              <div>
+                <p className="text-xs text-white/60 font-semibold">Coach</p>
+                <p className="text-sm font-black text-white">{selectedCoach.name}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Subject */}
           <div className="space-y-2">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Subject</p>
             <div className="flex gap-2 flex-wrap">
@@ -223,7 +360,7 @@ export default function TrainingPage() {
             </div>
           </div>
 
-          {/* Grade picker */}
+          {/* Grade */}
           <div className="space-y-2">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Grade</p>
             <div className="flex gap-2 flex-wrap">
@@ -244,17 +381,16 @@ export default function TrainingPage() {
             </div>
           </div>
 
-          {/* Start button */}
           <button
             onClick={() => setStarted(true)}
             className={cn(
-              'w-full py-4 rounded-3xl font-black text-white text-base shadow-xl transition-all hover:scale-[1.02] hover:opacity-90',
-              `bg-gradient-to-r ${selectedCoach.gradient} shadow-xl ${selectedCoach.glow}`
+              'w-full py-4 rounded-3xl font-black text-white text-base shadow-xl transition-all hover:scale-[1.02] hover:opacity-90 bg-gradient-to-r',
+              selectedCoach.gradient, selectedCoach.glow
             )}
           >
-            {selectedCoach.emoji} Start Training with {selectedCoach.name}
+            {selectedMode.emoji} Start {selectedMode.name} with {selectedCoach.name}
           </button>
-        </>
+        </div>
       )}
     </div>
   )
