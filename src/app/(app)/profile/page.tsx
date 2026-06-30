@@ -27,7 +27,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-4 pb-24">
-      <h1 className="text-xl font-black text-white">👤 Profile</h1>
+      <h1 className="text-xl font-black text-gray-900">👤 Profile</h1>
 
       {/* Profile card */}
       <div className="bg-white rounded-3xl p-6 flex flex-col items-center gap-4 shadow-sm">
@@ -65,12 +65,17 @@ export default async function ProfilePage() {
       {/* Info grid */}
       <div className="grid grid-cols-2 gap-3">
         {[
-          { label: 'Grade Level', value: `Grade ${profile.grade_level}` },
-          { label: 'Coins',       value: `🪙 ${(profile as any).coins ?? 0}` },
+          { label: 'ELO Rating',    value: profile.elo_rating },
+          { label: 'Rank',          value: tier.charAt(0).toUpperCase() + tier.slice(1) },
+          { label: 'Total Battles', value: profile.total_battles },
+          { label: 'Total Wins',    value: profile.total_wins },
+          { label: 'Win Rate',      value: `${winRate}%` },
+          { label: 'Grade Level',   value: `Grade ${profile.grade_level}` },
+          { label: 'Coins',         value: `🪙 ${(profile as any).coins ?? 0}` },
         ].map(({ label, value }) => (
           <div key={label} className="bg-white rounded-2xl p-4 shadow-sm">
             <p className="text-lg font-black text-gray-900">{value}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{label}</p>
           </div>
         ))}
       </div>
