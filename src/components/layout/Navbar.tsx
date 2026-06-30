@@ -1,18 +1,19 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Swords, Users, Trophy, User, Home, Gamepad2 } from 'lucide-react'
+import { Swords, Users, Trophy, User, Home, Gamepad2, Dumbbell } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV = [
   { href: '/dashboard',   label: 'Home',    icon: Home,      emoji: '🏠' },
-  { href: '/matchmaking', label: 'Battle',  icon: Swords,    emoji: '⚔️' },
-  { href: '/friends',     label: 'Friends', icon: Users,     emoji: '👥' },
-  { href: '/games',       label: 'Games',   icon: Gamepad2,  emoji: '🎮' },
-  { href: '/leaderboard', label: 'Ranks',   icon: Trophy,    emoji: '🏆' },
-  { href: '/profile',     label: 'Profile', icon: User,      emoji: '👤' },
+  { href: '/matchmaking', label: 'Battle',   icon: Swords,    emoji: '⚔️' },
+  { href: '/training',   label: 'Training', icon: Dumbbell,  emoji: '💪' },
+  { href: '/friends',    label: 'Friends',  icon: Users,     emoji: '👥' },
+  { href: '/games',      label: 'Games',    icon: Gamepad2,  emoji: '🎮' },
+  { href: '/leaderboard',label: 'Ranks',    icon: Trophy,    emoji: '🏆' },
+  { href: '/profile',    label: 'Profile',  icon: User,      emoji: '👤' },
 ]
 
 export function Navbar() {
