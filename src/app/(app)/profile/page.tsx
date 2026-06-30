@@ -20,14 +20,14 @@ export default async function ProfilePage() {
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-4">
-      <h1 className="text-xl font-black text-gray-900">Profile</h1>
+      <h1 className="text-xl font-black text-white">Profile</h1>
       <Card>
         <CardContent className="p-6 flex flex-col items-center text-center gap-3">
           <div className="w-20 h-20 rounded-full bg-indigo-100 flex items-center justify-center text-3xl font-black text-indigo-700">
             {profile.username[0].toUpperCase()}
           </div>
           <div>
-            <h2 className="text-xl font-black text-gray-900">{profile.username}</h2>
+            <h2 className="text-xl font-black text-white">{profile.username}</h2>
             <p className="text-sm text-gray-400">{user.email}</p>
           </div>
           <RankBadge tier={tier} elo={profile.elo_rating} showElo />
@@ -45,7 +45,7 @@ export default async function ProfilePage() {
         ].map(({ label, value }) => (
           <Card key={label}>
             <CardContent className="p-4">
-              <p className="text-lg font-black text-gray-900">{value}</p>
+              <p className="text-lg font-black text-white">{value}</p>
               <p className="text-xs text-gray-400 mt-0.5">{label}</p>
             </CardContent>
           </Card>

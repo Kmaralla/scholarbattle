@@ -136,12 +136,12 @@ export default function FriendsPage() {
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-4">
-      <h1 className="text-xl font-black text-gray-900">Friends</h1>
+      <h1 className="text-xl font-black text-white">Friends</h1>
 
       {/* Add friend */}
       <Card>
         <CardHeader>
-          <h2 className="font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="font-bold text-white flex items-center gap-2">
             <UserPlus className="w-4 h-4 text-indigo-600" /> Add Friend
           </h2>
         </CardHeader>
@@ -164,7 +164,7 @@ export default function FriendsPage() {
       {/* Friend Invites */}
       <Card>
         <CardHeader>
-          <h2 className="font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="font-bold text-white flex items-center gap-2">
             <Bell className="w-4 h-4 text-orange-500" />
             Friend Invites
             {invites.length > 0 && (
@@ -185,7 +185,7 @@ export default function FriendsPage() {
                     <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold text-sm">
                       {invite.username[0].toUpperCase()}
                     </div>
-                    <span className="text-sm font-semibold text-gray-800">{invite.username}</span>
+                    <span className="text-sm font-semibold text-slate-200">{invite.username}</span>
                     <span className="text-xs text-gray-400">wants to be friends</span>
                   </div>
                   <div className="flex gap-2">
@@ -227,7 +227,7 @@ export default function FriendsPage() {
       {/* Friends list */}
       <Card>
         <CardHeader>
-          <h2 className="font-bold text-gray-900">Your Friends</h2>
+          <h2 className="font-bold text-white">Your Friends</h2>
         </CardHeader>
         <CardContent>
           <FriendsList currentUserId={currentUser.id} onChallenge={setChallenging} />

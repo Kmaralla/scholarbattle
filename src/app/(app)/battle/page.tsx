@@ -49,19 +49,19 @@ export default function BattlePage() {
     <div className="max-w-lg mx-auto p-4 space-y-4">
       <div className="flex items-center gap-2">
         <Swords className="w-6 h-6 text-indigo-600" />
-        <h1 className="text-xl font-black text-gray-900">Practice Battle</h1>
+        <h1 className="text-xl font-black text-white">Practice Battle</h1>
       </div>
 
       <Card>
         <CardHeader>
           <p className="text-sm text-gray-500">
-            Battle <span className="font-semibold text-gray-700">Scholar Bot 🎓</span> — first to answer correctly wins the point!
+            Battle <span className="font-semibold text-slate-300">Scholar Bot 🎓</span> — first to answer correctly wins the point!
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Difficulty picker */}
           <div>
-            <p className="text-sm font-semibold text-gray-700 mb-2">Bot Difficulty</p>
+            <p className="text-sm font-semibold text-slate-300 mb-2">Bot Difficulty</p>
             <div className="grid grid-cols-3 gap-2">
               {DIFFICULTIES.map(d => (
                 <button
@@ -74,7 +74,7 @@ export default function BattlePage() {
                       : 'border-gray-200 hover:border-gray-300'
                   )}
                 >
-                  <span className="text-base font-bold text-gray-900">{d.label}</span>
+                  <span className="text-base font-bold text-white">{d.label}</span>
                   <span className="text-xs text-gray-500 leading-tight">{d.desc}</span>
                 </button>
               ))}
@@ -85,7 +85,7 @@ export default function BattlePage() {
           {step === 'finding' && (
             <div className="text-center py-8 space-y-2">
               <div className="text-4xl animate-bounce">⚔️</div>
-              <p className="font-bold text-gray-900">Setting up your battle...</p>
+              <p className="font-bold text-white">Setting up your battle...</p>
             </div>
           )}
         </CardContent>

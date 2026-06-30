@@ -56,7 +56,7 @@ export default function GamesPage() {
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-black text-gray-900">🎮 Games</h1>
+        <h1 className="text-xl font-black text-white">🎮 Games</h1>
         <div className="flex items-center gap-1 bg-yellow-50 border border-yellow-200 rounded-full px-3 py-1.5">
           <span>🪙</span>
           <span className="font-bold text-yellow-700">{profile.coins}</span>
