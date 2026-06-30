@@ -31,6 +31,8 @@ export default async function DashboardPage() {
     .from('battles').select('*')
     .or(`challenger_id.eq.${user.id},opponent_id.eq.${user.id}`)
     .eq('status', 'completed')
+    .not('completed_at', 'is', null)
+    .or(`challenger_score.gt.0,opponent_score.gt.0`)
     .order('completed_at', { ascending: false })
     .limit(5)
 
