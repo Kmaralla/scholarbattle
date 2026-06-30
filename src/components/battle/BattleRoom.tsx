@@ -110,6 +110,19 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
     return () => clearTimeout(t)
   }, [timeLeft, answered])
 
+  // Shuffle options once per question
+  const [shuffledOptions, setShuffledOptions] = useState<string[]>([])
+  useEffect(() => {
+    if (q?.options) {
+      const opts = [...q.options]
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]]
+      }
+      setShuffledOptions(opts)
+    }
+  }, [qIndex])
+
   // Reset per question
   useEffect(() => {
     setTimeLeft(SECONDS_PER_QUESTION)
@@ -251,9 +264,9 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
       <div className="rounded-3xl bg-slate-600 p-5 flex-1">
         <p className="text-slate-50 font-bold text-base leading-relaxed mb-5">{q.question_text}</p>
 
-        {q.type === 'multiple_choice' && q.options && (
+        {q.type === 'multiple_choice' && shuffledOptions.length > 0 && (
           <div className="grid gap-2.5">
-            {q.options.map((opt, i) => {
+            {shuffledOptions.map((opt, i) => {
               const isSelected = selectedAnswer === opt
               const correct = showResult && opt === q.correct_answer
               const wrong = showResult && isSelected && opt !== q.correct_answer
