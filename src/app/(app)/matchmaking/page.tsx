@@ -121,7 +121,7 @@ export default function MatchmakingPage() {
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-4">
-      <h1 className="text-xl font-black text-gray-900">⚔️ Random Online Battle</h1>
+      <h1 className="text-xl font-black text-white">⚔️ Random Online Battle</h1>
 
       {step === 'pick' && (
         <Card>
