@@ -209,23 +209,23 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
   const botAlreadyScored = botAnsweredFirst && botWasCorrect
 
   return (
-    <div className="flex flex-col min-h-screen max-w-lg mx-auto p-4 gap-4 bg-indigo-50">
+    <div className="flex flex-col min-h-screen max-w-lg mx-auto p-4 gap-4 bg-slate-700">
       {/* Header scoreboard */}
-      <div className="flex items-center justify-between bg-white rounded-3xl px-4 py-3 shadow-sm">
+      <div className="flex items-center justify-between bg-slate-600 rounded-3xl px-4 py-3">
         <div className="text-center min-w-[80px]">
-          <p className="font-semibold text-gray-400 text-xs truncate">{currentUser.username}</p>
-          <p className="text-4xl font-black text-indigo-600">{myScore}</p>
+          <p className="font-semibold text-slate-300 text-xs truncate">{currentUser.username}</p>
+          <p className="text-4xl font-black text-indigo-300">{myScore}</p>
         </div>
         <div className="text-center flex-1 px-2">
-          <p className="text-xs text-gray-400 capitalize mb-0.5">{subject} · {gradeLabel(gradeLevel)}</p>
-          <p className={cn('text-3xl font-black transition-colors', timeLeft <= 5 ? 'text-red-500 animate-pulse' : 'text-gray-700')}>{timeLeft}s</p>
-          <p className="text-xs text-gray-400 mt-0.5">Q {qIndex + 1} of {Math.min(TOTAL_QUESTIONS, questions.length)}</p>
+          <p className="text-xs text-slate-400 capitalize mb-0.5">{subject} · {gradeLabel(gradeLevel)}</p>
+          <p className={cn('text-3xl font-black transition-colors', timeLeft <= 5 ? 'text-red-400 animate-pulse' : 'text-slate-100')}>{timeLeft}s</p>
+          <p className="text-xs text-slate-400 mt-0.5">Q {qIndex + 1} of {Math.min(TOTAL_QUESTIONS, questions.length)}</p>
         </div>
         <div className="text-center min-w-[80px]">
-          <p className="font-semibold text-gray-400 text-xs truncate">{opponent.username}</p>
-          <p className="text-4xl font-black text-orange-500">{opponentScore}</p>
+          <p className="font-semibold text-slate-300 text-xs truncate">{opponent.username}</p>
+          <p className="text-4xl font-black text-orange-300">{opponentScore}</p>
           {isSolo && botAnsweredFirst && (
-            <p className={cn('text-xs font-bold', botWasCorrect ? 'text-green-500' : 'text-gray-400')}>
+            <p className={cn('text-xs font-bold', botWasCorrect ? 'text-green-400' : 'text-slate-400')}>
               {botWasCorrect ? '⚡ fast!' : '✗ wrong'}
             </p>
           )}
@@ -233,23 +233,23 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
       </div>
 
       {/* Timer bar */}
-      <div className="h-2.5 bg-indigo-100 rounded-full overflow-hidden">
+      <div className="h-2 bg-slate-600 rounded-full overflow-hidden">
         <div
-          className={cn('h-full rounded-full transition-all duration-1000', timeLeft <= 5 ? 'bg-red-400' : 'bg-indigo-500')}
+          className={cn('h-full rounded-full transition-all duration-1000', timeLeft <= 5 ? 'bg-red-400' : 'bg-indigo-400')}
           style={{ width: `${timerPct}%` }}
         />
       </div>
 
       {/* Bot answered first banner */}
       {isSolo && botAnsweredFirst && !showResult && (
-        <div className={cn('text-center text-xs font-semibold py-2 rounded-2xl', botWasCorrect ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500')}>
+        <div className={cn('text-center text-xs font-semibold py-2 rounded-2xl', botWasCorrect ? 'bg-orange-900/40 text-orange-300' : 'bg-slate-600 text-slate-300')}>
           {botWasCorrect ? '⚡ Scholar Bot answered first — still try for practice!' : '🤖 Scholar Bot got it wrong — steal the point!'}
         </div>
       )}
 
       {/* Question card */}
-      <div className="rounded-3xl bg-white shadow-sm p-5 flex-1">
-        <p className="text-gray-900 font-bold text-base leading-relaxed mb-5">{q.question_text}</p>
+      <div className="rounded-3xl bg-slate-600 p-5 flex-1">
+        <p className="text-slate-50 font-bold text-base leading-relaxed mb-5">{q.question_text}</p>
 
         {q.type === 'multiple_choice' && q.options && (
           <div className="grid gap-2.5">
@@ -258,26 +258,26 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
               const correct = showResult && opt === q.correct_answer
               const wrong = showResult && isSelected && opt !== q.correct_answer
               const labels = ['A', 'B', 'C', 'D']
-              const labelColors = ['bg-indigo-100 text-indigo-700', 'bg-violet-100 text-violet-700', 'bg-sky-100 text-sky-700', 'bg-pink-100 text-pink-700']
+              const labelColors = ['bg-indigo-500/40 text-indigo-200', 'bg-violet-500/40 text-violet-200', 'bg-sky-500/40 text-sky-200', 'bg-pink-500/40 text-pink-200']
               return (
                 <button
                   key={opt}
                   disabled={answered}
                   onClick={() => handleChoice(opt)}
                   className={cn(
-                    'w-full text-left px-4 py-3 rounded-2xl border-2 text-sm font-semibold transition-all flex items-center gap-3',
-                    !answered && !isSelected && 'border-gray-100 bg-gray-50 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50',
-                    !showResult && isSelected && 'border-indigo-400 bg-indigo-50 text-indigo-900',
-                    correct && 'border-green-400 bg-green-50 text-green-800',
-                    wrong && 'border-red-300 bg-red-50 text-red-700',
-                    !correct && !wrong && !isSelected && answered && 'border-gray-100 bg-gray-50 text-gray-400'
+                    'w-full text-left px-4 py-3 rounded-2xl border text-sm font-semibold transition-all flex items-center gap-3',
+                    !answered && !isSelected && 'border-slate-500 bg-slate-500/50 text-slate-100 hover:border-indigo-400 hover:bg-indigo-900/30',
+                    !showResult && isSelected && 'border-indigo-400 bg-indigo-800/50 text-indigo-100',
+                    correct && 'border-green-500 bg-green-900/50 text-green-200',
+                    wrong && 'border-red-400 bg-red-900/40 text-red-200',
+                    !correct && !wrong && !isSelected && answered && 'border-slate-600 bg-slate-600/30 text-slate-400'
                   )}
                 >
                   <span className={cn('w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0',
-                    correct ? 'bg-green-500 text-white' : wrong ? 'bg-red-400 text-white' : isSelected ? 'bg-indigo-500 text-white' : labelColors[i]
+                    correct ? 'bg-green-500 text-white' : wrong ? 'bg-red-500 text-white' : isSelected ? 'bg-indigo-500 text-white' : labelColors[i]
                   )}>{labels[i]}</span>
                   <span>{opt}</span>
-                  {correct && <span className="ml-auto text-green-600 font-black">✓</span>}
+                  {correct && <span className="ml-auto text-green-400 font-black">✓</span>}
                   {wrong && <span className="ml-auto text-red-400 font-black">✗</span>}
                 </button>
               )
@@ -293,21 +293,21 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
               disabled={answered}
               placeholder="Type your answer..."
               className={cn(
-                'w-full px-4 py-3 rounded-2xl border-2 text-sm font-semibold outline-none transition-all bg-gray-50 text-gray-900 placeholder:text-gray-400',
+                'w-full px-4 py-3 rounded-2xl border text-sm font-semibold outline-none transition-all bg-slate-500/50 text-slate-100 placeholder:text-slate-400',
                 showResult
-                  ? myAnswerCorrect ? 'border-green-400 bg-green-50' : 'border-red-300 bg-red-50'
-                  : 'border-gray-200 focus:border-indigo-400 focus:bg-white'
+                  ? myAnswerCorrect ? 'border-green-500 bg-green-900/40' : 'border-red-400 bg-red-900/30'
+                  : 'border-slate-500 focus:border-indigo-400'
               )}
               autoFocus
             />
             {!answered && (
-              <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-2xl font-bold transition">
+              <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-2xl font-bold transition">
                 Submit ↵
               </button>
             )}
             {showResult && (
-              <p className="text-sm text-center font-semibold text-gray-500">
-                Correct answer: <span className="text-green-600 font-bold">{q.correct_answer}</span>
+              <p className="text-sm text-center font-semibold text-slate-300">
+                Correct answer: <span className="text-green-400 font-bold">{q.correct_answer}</span>
               </p>
             )}
           </form>
@@ -316,9 +316,9 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
         {/* Result feedback */}
         {showResult && answered && (
           <div className={cn('mt-4 text-center text-sm font-semibold py-2.5 rounded-2xl',
-            myAnswerCorrect && !botAlreadyScored ? 'bg-green-50 text-green-700' :
-            myAnswerCorrect && botAlreadyScored ? 'bg-orange-50 text-orange-600' :
-            'bg-gray-100 text-gray-500'
+            myAnswerCorrect && !botAlreadyScored ? 'bg-green-900/50 text-green-300' :
+            myAnswerCorrect && botAlreadyScored ? 'bg-orange-900/40 text-orange-300' :
+            'bg-slate-700 text-slate-400'
           )}>
             {myAnswerCorrect && !botAlreadyScored && '⚡ You got it first! +1 point'}
             {myAnswerCorrect && botAlreadyScored && '✓ Correct — but Scholar Bot was faster'}
@@ -329,12 +329,12 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
 
       {/* Bot thinking */}
       {isSolo && !botAnsweredFirst && !answered && (
-        <p className="text-xs text-center text-indigo-400 animate-pulse">
+        <p className="text-xs text-center text-slate-400 animate-pulse">
           🤖 Scholar Bot is thinking...
         </p>
       )}
       {!isSolo && !answered && (
-        <p className="text-xs text-center text-indigo-400">
+        <p className="text-xs text-center text-slate-400">
           ⚡ First correct answer wins the point!
         </p>
       )}
