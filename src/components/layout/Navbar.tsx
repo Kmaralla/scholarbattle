@@ -1,10 +1,11 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Swords, Users, Trophy, User, Home, Gamepad2, Dumbbell } from 'lucide-react'
+import { Swords, Users, Trophy, User, Home, Gamepad2, Dumbbell, Sun, Moon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useTheme } from '@/components/ThemeProvider'
 
 const SECTIONS = [
   {
@@ -36,6 +37,7 @@ const ALL_NAV = SECTIONS.flatMap(s => s.items)
 export function Navbar() {
   const path = usePathname()
   const [coins, setCoins] = useState<number | null>(null)
+  const { theme, toggle } = useTheme()
   const supabase = createClient()
 
   useEffect(() => {
@@ -57,11 +59,19 @@ export function Navbar() {
       {/* Mobile bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#1a1035]/95 backdrop-blur border-t border-white/10">
         {coins !== null && (
-          <div className="flex justify-center pt-1.5">
+          <div className="flex items-center justify-center gap-3 pt-1.5 px-4">
             <div className="flex items-center gap-1.5 bg-yellow-400/10 border border-yellow-400/30 rounded-full px-4 py-0.5">
               <span className="text-sm">🪙</span>
               <span className="text-sm font-black text-yellow-300">{coins}</span>
             </div>
+            <button
+              onClick={toggle}
+              className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center hover:bg-white/20 transition-all"
+            >
+              {theme === 'dark'
+                ? <Sun className="w-3.5 h-3.5 text-yellow-300" />
+                : <Moon className="w-3.5 h-3.5 text-indigo-600" />}
+            </button>
           </div>
         )}
         <div className="flex justify-around px-1 pb-2 pt-1">
@@ -85,10 +95,19 @@ export function Navbar() {
             <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
               <Swords className="w-5 h-5 text-white/70" />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="font-black text-white text-lg leading-tight">Scholar</p>
               <p className="font-black text-white/40 text-lg leading-tight -mt-1">Battle</p>
             </div>
+            <button
+              onClick={toggle}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              className="w-9 h-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center hover:bg-white/20 transition-all"
+            >
+              {theme === 'dark'
+                ? <Sun className="w-4 h-4 text-yellow-300" />
+                : <Moon className="w-4 h-4 text-indigo-600" />}
+            </button>
           </div>
           {coins !== null && (
             <div className="mt-4 flex items-center gap-2 bg-yellow-400/10 border border-yellow-400/20 rounded-2xl px-4 py-2">

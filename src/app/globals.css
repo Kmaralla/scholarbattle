@@ -5,6 +5,11 @@
   --foreground: #f1f5f9;
 }
 
+html.light {
+  --background: #f0eeff;
+  --foreground: #1e1b4b;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -46,3 +51,51 @@ body {
   box-shadow: 0 0 20px rgba(139,92,246,0.3), 0 4px 24px rgba(0,0,0,0.4);
 }
 .btn-pop:active { animation: pop 0.2s ease; }
+
+/* ── Light mode overrides ───────────────────────────────────── */
+html.light body { background: #f0eeff; color: #1e1b4b; }
+
+/* Page & nav backgrounds */
+html.light .bg-\[#0f0a1e\]  { background-color: #f0eeff !important; }
+html.light .bg-\[#1a1035\]  { background-color: #e8e0ff !important; }
+html.light .bg-\[#1a1035\]\/95 { background-color: rgba(232,224,255,0.95) !important; }
+
+/* Glass cards */
+html.light .bg-white\/3   { background-color: rgba(99,88,200,0.04) !important; }
+html.light .bg-white\/5   { background-color: rgba(99,88,200,0.07) !important; }
+html.light .bg-white\/10  { background-color: rgba(99,88,200,0.10) !important; }
+html.light .bg-white\/15  { background-color: rgba(99,88,200,0.15) !important; }
+html.light .bg-white\/20  { background-color: rgba(99,88,200,0.20) !important; }
+html.light .bg-white\/25  { background-color: rgba(99,88,200,0.25) !important; }
+html.light .bg-white\/30  { background-color: rgba(99,88,200,0.30) !important; }
+html.light .bg-white\/40  { background-color: rgba(99,88,200,0.40) !important; }
+
+/* Borders */
+html.light .border-white\/5  { border-color: rgba(99,88,200,0.10) !important; }
+html.light .border-white\/10 { border-color: rgba(99,88,200,0.18) !important; }
+html.light .border-white\/15 { border-color: rgba(99,88,200,0.22) !important; }
+html.light .border-white\/20 { border-color: rgba(99,88,200,0.28) !important; }
+
+/* Text */
+html.light .text-white       { color: #1e1b4b !important; }
+html.light .text-white\/80   { color: rgba(30,27,75,0.80) !important; }
+html.light .text-white\/70   { color: rgba(30,27,75,0.70) !important; }
+html.light .text-white\/60   { color: rgba(30,27,75,0.60) !important; }
+html.light .text-white\/50   { color: rgba(30,27,75,0.50) !important; }
+html.light .text-white\/40   { color: rgba(30,27,75,0.40) !important; }
+html.light .text-white\/30   { color: rgba(30,27,75,0.30) !important; }
+html.light .text-white\/25   { color: rgba(30,27,75,0.25) !important; }
+html.light .text-white\/20   { color: rgba(30,27,75,0.20) !important; }
+
+/* Slate colors used in TrainingSession & BattleRoom */
+html.light .bg-slate-700  { background-color: #ede9ff !important; }
+html.light .bg-slate-600  { background-color: #e2dbff !important; }
+html.light .bg-slate-600\/80 { background-color: rgba(226,219,255,0.80) !important; }
+html.light .bg-slate-500\/50 { background-color: rgba(200,190,255,0.40) !important; }
+html.light .text-slate-50  { color: #1e1b4b !important; }
+html.light .text-slate-100 { color: #2d2a5e !important; }
+html.light .text-slate-300 { color: rgba(30,27,75,0.60) !important; }
+html.light .text-slate-400 { color: rgba(30,27,75,0.50) !important; }
+html.light .border-slate-500 { border-color: rgba(99,88,200,0.30) !important; }
+html.light .border-slate-600 { border-color: rgba(99,88,200,0.20) !important; }
+html.light .border-t-white\/10 { border-top-color: rgba(99,88,200,0.18) !important; }
