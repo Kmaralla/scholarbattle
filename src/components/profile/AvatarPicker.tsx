@@ -4,34 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { Check, X } from 'lucide-react'
 
-export const AVATARS = [
-  // ScholarBattle themed
-  { id: 'scholar',  emoji: '🎓', label: 'Scholar'      },
-  { id: 'warrior',  emoji: '⚔️', label: 'Warrior'      },
-  { id: 'champion', emoji: '🏆', label: 'Champion'     },
-  { id: 'bookworm', emoji: '📚', label: 'Bookworm'     },
-  { id: 'scientist',emoji: '🔬', label: 'Scientist'    },
-  { id: 'mathwhiz', emoji: '🧮', label: 'Math Whiz'    },
-  { id: 'owl',      emoji: '🦉', label: 'Wise Owl'     },
-  { id: 'speed',    emoji: '⚡', label: 'Speed Demon'  },
-  { id: 'puzzle',   emoji: '🧩', label: 'Puzzle Master'},
-  { id: 'gold',     emoji: '🥇', label: 'Gold Medal'   },
-  { id: 'diamond',  emoji: '💎', label: 'Diamond'      },
-  { id: 'luna',     emoji: '🌙', label: 'Luna'         },
-  // Fun / general
-  { id: 'fox',      emoji: '🦊', label: 'Fox'          },
-  { id: 'tiger',    emoji: '🐯', label: 'Tiger'        },
-  { id: 'lion',     emoji: '🦁', label: 'Lion'         },
-  { id: 'dragon',   emoji: '🐉', label: 'Dragon'       },
-  { id: 'rocket',   emoji: '🚀', label: 'Rocket'       },
-  { id: 'star',     emoji: '🌟', label: 'Star'         },
-  { id: 'robot',    emoji: '🤖', label: 'Robot'        },
-  { id: 'hero',     emoji: '🦸', label: 'Hero'         },
-  { id: 'frog',     emoji: '🐸', label: 'Frog'         },
-  { id: 'fire',     emoji: '🔥', label: 'Fire'         },
-  { id: 'ninja',    emoji: '🥷', label: 'Ninja'        },
-  { id: 'alien',    emoji: '👾', label: 'Alien'        },
-]
+export { AVATARS } from './avatars'
 
 export function AvatarPicker({
   userId,

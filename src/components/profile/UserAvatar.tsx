@@ -1,4 +1,4 @@
-import { AVATARS } from './AvatarPicker'
+import { AVATARS } from './avatars'
 import { cn } from '@/lib/utils'
 
 export function UserAvatar({
