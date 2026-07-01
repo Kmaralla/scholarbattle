@@ -108,9 +108,9 @@ export function TrainingSession({
 
   function buildFeedback(correct: boolean): string {
     const answer = q?.correct_answer ?? ''
+    const explanation = q?.explanation ?? ''
     if (correct) {
       const praise = pick(coach.correctLines)
-      // Reinforce what was right
       const reinforcements = [
         `"${answer}" — you nailed it!`,
         `That's the one: "${answer}". Keep going!`,
@@ -120,14 +120,13 @@ export function TrainingSession({
       return `${praise} ${pick(reinforcements)}`
     } else {
       const empathy = pick(coach.wrongLines)
-      // Coach-flavored explanation
-      const explanations: Record<string, string> = {
-        max:  `The answer was "${answer}". Remember it — champions don't miss the same one twice.`,
-        owl:  `The correct answer is "${answer}". Think about why that makes sense before the next question.`,
-        luna: `The answer was "${answer}" — now you know it for next time! You've got this 💛`,
+      const intros: Record<string, string> = {
+        max:  `The answer was "${answer}". Champions learn from every miss.`,
+        owl:  `The correct answer is "${answer}". Let's understand why.`,
+        luna: `The answer was "${answer}" — now you know! 💛`,
       }
-      const explanation = explanations[coach.id] ?? `The correct answer is "${answer}".`
-      return `${empathy} ${explanation}`
+      const intro = intros[coach.id] ?? `The correct answer is "${answer}".`
+      return explanation ? `${empathy} ${intro}` : `${empathy} ${intro}`
     }
   }
 
@@ -471,9 +470,16 @@ export function TrainingSession({
               })}
               {/* Wrong answer banner */}
               {showResult && !myAnswerCorrect && (
-                <div className="bg-red-900/30 border border-red-500/40 rounded-2xl px-4 py-3 text-center mt-1">
-                  <p className="text-xs text-red-400 font-bold mb-0.5">Correct answer</p>
-                  <p className="text-base font-black text-green-300">{q.correct_answer}</p>
+                <div className="bg-slate-600/80 border border-red-500/40 rounded-2xl px-4 py-3 mt-1 space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-red-400 font-bold">✗ Correct answer:</span>
+                    <span className="text-sm font-black text-green-300">{q.correct_answer}</span>
+                  </div>
+                  {q.explanation && (
+                    <div className="border-t border-white/10 pt-1.5">
+                      <p className="text-xs text-slate-300 leading-relaxed">💡 <span className="font-semibold text-white/70">How:</span> {q.explanation}</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -505,9 +511,19 @@ export function TrainingSession({
                 <button type="submit" className={cn('w-full py-3 rounded-2xl font-bold text-white transition bg-gradient-to-r', coach.gradient)}>Submit ↵</button>
               )}
               {showResult && (
-                <p className="text-sm text-center font-semibold text-slate-300">
-                  Correct: <span className="text-green-400 font-bold">{q.correct_answer}</span>
-                </p>
+                <div className={cn('rounded-2xl px-4 py-3 space-y-1.5', myAnswerCorrect ? 'bg-green-900/30 border border-green-500/40' : 'bg-slate-600/80 border border-red-500/40')}>
+                  <div className="flex items-center gap-2">
+                    <span className={cn('text-xs font-bold', myAnswerCorrect ? 'text-green-400' : 'text-red-400')}>
+                      {myAnswerCorrect ? '✓ Correct!' : '✗ Correct answer:'}
+                    </span>
+                    {!myAnswerCorrect && <span className="text-sm font-black text-green-300">{q.correct_answer}</span>}
+                  </div>
+                  {!myAnswerCorrect && q.explanation && (
+                    <div className="border-t border-white/10 pt-1.5">
+                      <p className="text-xs text-slate-300 leading-relaxed">💡 <span className="font-semibold text-white/70">How:</span> {q.explanation}</p>
+                    </div>
+                  )}
+                </div>
               )}
             </form>
           )}

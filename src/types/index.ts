@@ -24,6 +24,7 @@ export interface Question {
   type: QuestionType
   options: string[] | null
   correct_answer: string
+  explanation?: string
   difficulty: number
   source: 'curated' | 'ai_generated'
 }
