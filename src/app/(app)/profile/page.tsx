@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { getRankTier } from '@/types'
 import { LogOut } from 'lucide-react'
 import { AvatarUpload } from '@/components/profile/AvatarUpload'
-import { BADGES, BADGE_MAP, RARITY_STYLES } from '@/lib/badges'
+import { BADGES, RARITY_STYLES } from '@/lib/badges'
 
 const TIER_COLORS: Record<string, string> = {
   bronze:   'from-orange-900/70 to-amber-800/50',
@@ -11,6 +11,10 @@ const TIER_COLORS: Record<string, string> = {
   gold:     'from-yellow-900/70 to-amber-800/50',
   platinum: 'from-cyan-900/70 to-teal-800/50',
   diamond:  'from-violet-900/70 to-indigo-800/50',
+}
+
+const TIER_EMOJI: Record<string, string> = {
+  bronze: '🥉', silver: '🥈', gold: '🥇', platinum: '💎', diamond: '👑',
 }
 
 export default async function ProfilePage() {
@@ -25,90 +29,92 @@ export default async function ProfilePage() {
   const winRate = profile.total_battles > 0
     ? Math.round((profile.total_wins / profile.total_battles) * 100)
     : 0
+  const earnedBadges: string[] = (profile as any).badges ?? []
 
   return (
-    <div className="max-w-lg mx-auto p-4 space-y-4 pb-24">
+    <div className="max-w-lg mx-auto p-4 space-y-3 pb-24">
       <h1 className="text-xl font-black text-white">👤 Profile</h1>
 
-      {/* Profile card */}
-      <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col items-center gap-4">
+      {/* Compact profile header — avatar + info side by side */}
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
         <AvatarUpload
           userId={user.id}
           username={profile.username}
           currentUrl={(profile as any).avatar_url ?? null}
         />
-        <div className="text-center">
-          <h2 className="text-2xl font-black text-white">{profile.username}</h2>
-          <p className="text-sm text-white/50 mt-0.5">{user.email}</p>
-          <div className={`mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r ${TIER_COLORS[tier]} text-white font-bold text-sm shadow-lg`}>
-            <span>{tier === 'diamond' ? '👑' : tier === 'platinum' ? '💎' : tier === 'gold' ? '🥇' : tier === 'silver' ? '🥈' : '🥉'}</span>
+        <div className="flex-1 min-w-0">
+          <h2 className="text-lg font-black text-white truncate">{profile.username}</h2>
+          <p className="text-xs text-white/40 truncate">{user.email}</p>
+          <div className={`mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r ${TIER_COLORS[tier]} text-white font-bold text-xs`}>
+            <span>{TIER_EMOJI[tier]}</span>
             <span className="capitalize">{tier}</span>
-            <span className="text-white/70">· {profile.elo_rating} ELO</span>
+            <span className="text-white/60">· {profile.elo_rating} ELO</span>
           </div>
         </div>
+        <form action="/auth/signout" method="post">
+          <button type="submit" title="Sign out" className="p-2 rounded-xl border border-red-400/20 bg-red-900/10 text-red-400 hover:bg-red-900/30 transition">
+            <LogOut className="w-4 h-4" />
+          </button>
+        </form>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-3 gap-3">
+      {/* Stats + info in one tight grid */}
+      <div className="grid grid-cols-4 gap-2">
         {[
           { label: 'Battles', value: profile.total_battles, emoji: '⚔️' },
           { label: 'Wins',    value: profile.total_wins,    emoji: '🏆' },
           { label: 'Win Rate',value: `${winRate}%`,         emoji: '⚡' },
+          { label: 'Coins',   value: (profile as any).coins ?? 0, emoji: '🪙' },
         ].map(({ label, value, emoji }) => (
-          <div key={label} className="rounded-2xl p-4 text-center bg-white/5 border border-white/10">
-            <div className="text-2xl mb-1">{emoji}</div>
-            <p className="text-xl font-black text-white">{value}</p>
-            <p className="text-white/70 text-xs font-medium">{label}</p>
+          <div key={label} className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
+            <div className="text-lg mb-0.5">{emoji}</div>
+            <p className="text-base font-black text-white leading-none">{value}</p>
+            <p className="text-white/40 text-[10px] font-medium mt-0.5">{label}</p>
           </div>
         ))}
       </div>
 
-      {/* Info grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-2">
         {[
-          { label: 'ELO Rating',    value: profile.elo_rating },
-          { label: 'Rank',          value: tier.charAt(0).toUpperCase() + tier.slice(1) },
-          { label: 'Total Battles', value: profile.total_battles },
-          { label: 'Total Wins',    value: profile.total_wins },
-          { label: 'Win Rate',      value: `${winRate}%` },
-          { label: 'Grade Level',   value: `Grade ${profile.grade_level}` },
-          { label: 'Coins',         value: `🪙 ${(profile as any).coins ?? 0}` },
+          { label: 'ELO Rating', value: profile.elo_rating },
+          { label: 'Rank',       value: tier.charAt(0).toUpperCase() + tier.slice(1) },
+          { label: 'Grade',      value: `Grade ${profile.grade_level}` },
         ].map(({ label, value }) => (
-          <div key={label} className="bg-white/5 border border-white/10 rounded-2xl p-4">
-            <p className="text-lg font-black text-white">{value}</p>
-            <p className="text-xs text-white/50 mt-0.5">{label}</p>
+          <div key={label} className="bg-white/5 border border-white/10 rounded-xl p-3">
+            <p className="text-sm font-black text-white">{value}</p>
+            <p className="text-[10px] text-white/40 mt-0.5">{label}</p>
           </div>
         ))}
       </div>
 
-      {/* Badges */}
-      <div className="space-y-3">
-        <h2 className="font-black text-white text-base flex items-center gap-2">🎖️ Badges <span className="text-white/40 font-normal text-sm">({((profile as any).badges ?? []).length}/{BADGES.length})</span></h2>
-        <div className="grid grid-cols-3 gap-2">
+      {/* Badges — all 17 in a compact grid */}
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+        <h2 className="font-black text-white text-sm flex items-center gap-2 mb-3">
+          🎖️ Badges
+          <span className="text-white/30 font-normal text-xs">{earnedBadges.length}/{BADGES.length} earned</span>
+        </h2>
+        <div className="grid grid-cols-4 gap-1.5">
           {BADGES.map(badge => {
-            const earned = ((profile as any).badges ?? []).includes(badge.id)
+            const earned = earnedBadges.includes(badge.id)
             const s = RARITY_STYLES[badge.rarity]
             return (
               <div
                 key={badge.id}
-                className={`flex flex-col items-center text-center rounded-2xl border p-3 transition-all ${earned ? `${s.border} ${s.bg} ${s.glow ? `shadow-lg ${s.glow}` : ''}` : 'border-white/5 bg-white/3 opacity-30'}`}
+                title={`${badge.name} — ${badge.description}`}
+                className={`flex flex-col items-center text-center rounded-xl border p-2 transition-all ${
+                  earned
+                    ? `${s.border} ${s.bg} ${s.glow ? `shadow-sm ${s.glow}` : ''}`
+                    : 'border-white/5 bg-white/3 opacity-25'
+                }`}
               >
-                <span className={`text-3xl ${!earned && 'grayscale'}`}>{badge.emoji}</span>
-                <p className="font-black text-white text-xs leading-tight mt-1">{badge.name}</p>
-                <p className="text-xs text-white/40 mt-0.5 leading-tight">{badge.description}</p>
-                <span className={`text-xs font-bold capitalize mt-1 ${earned ? s.label : 'text-white/20'}`}>{badge.rarity}</span>
+                <span className={`text-2xl ${!earned && 'grayscale'}`}>{badge.emoji}</span>
+                <p className="font-bold text-white text-[9px] leading-tight mt-0.5 line-clamp-2">{badge.name}</p>
               </div>
             )
           })}
         </div>
+        <p className="text-[10px] text-white/25 text-center mt-2">Hover a badge to see its description</p>
       </div>
-
-      <form action="/auth/signout" method="post">
-        <button type="submit" className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-red-400/30 bg-red-900/20 text-red-400 text-sm font-bold hover:bg-red-900/40 transition">
-          <LogOut className="w-4 h-4" />
-          Sign Out
-        </button>
-      </form>
     </div>
   )
 }
