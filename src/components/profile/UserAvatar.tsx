@@ -28,7 +28,7 @@ export function UserAvatar({
     )}>
       {avatar
         ? <span>{avatar.emoji}</span>
-        : <span className="font-bold text-indigo-300 text-sm">{username[0].toUpperCase()}</span>
+        : <span className="font-bold text-indigo-300 text-sm">{(username?.[0] ?? '?').toUpperCase()}</span>
       }
     </div>
   )

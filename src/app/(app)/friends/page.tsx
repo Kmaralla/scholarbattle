@@ -182,7 +182,7 @@ export default function FriendsPage() {
                 <div key={invite.id} className="flex items-center justify-between py-2 px-1">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold text-sm">
-                      {invite.username[0].toUpperCase()}
+                      {(invite.username?.[0] ?? '?').toUpperCase()}
                     </div>
                     <span className="text-sm font-semibold text-white">{invite.username}</span>
                     <span className="text-xs text-white/50">wants to be friends</span>
