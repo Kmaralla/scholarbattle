@@ -43,27 +43,27 @@ export function FriendsList({ currentUserId, onChallenge }: {
   return (
     <div className="space-y-2">
       {sorted.length === 0 && (
-        <div className="text-center py-10 text-gray-400">
+        <div className="text-center py-10 text-white/40">
           <UserPlus className="w-10 h-10 mx-auto mb-2 opacity-40" />
           <p className="text-sm">No friends yet. Add some to start battling!</p>
         </div>
       )}
       {sorted.map(friend => (
-        <div key={friend.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
+        <div key={friend.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors">
           <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">
+            <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 font-bold text-sm">
               {friend.username[0].toUpperCase()}
             </div>
             <span className={cn(
-              'absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white',
-              friend.online ? 'bg-green-400' : 'bg-gray-300'
+              'absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-800',
+              friend.online ? 'bg-green-400' : 'bg-gray-600'
             )} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm text-gray-900 truncate">{friend.username}</p>
+            <p className="font-semibold text-sm text-white truncate">{friend.username}</p>
             <div className="flex items-center gap-2">
               <RankBadge tier={friend.rank_tier} elo={friend.elo_rating} showElo />
-              <span className={cn('text-xs', friend.online ? 'text-green-500' : 'text-gray-400')}>
+              <span className={cn('text-xs', friend.online ? 'text-green-400' : 'text-white/30')}>
                 {friend.online ? 'Online' : 'Offline'}
               </span>
             </div>

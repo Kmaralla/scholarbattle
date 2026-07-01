@@ -62,7 +62,7 @@ export function MathSprintGame({ subject, grade, onExit }: { subject: Subject; g
       <p className="text-gray-500">problems solved</p>
       <div className="flex gap-3">
         <button onClick={start} className="px-6 py-3 bg-green-500 text-white rounded-2xl font-bold">Try Again</button>
-        <button onClick={onExit} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-2xl font-bold">Exit</button>
+        <button onClick={onExit} className="px-6 py-3 bg-white/10 text-white rounded-2xl font-bold">Exit</button>
       </div>
     </div>
   )
@@ -85,7 +85,7 @@ export function MathSprintGame({ subject, grade, onExit }: { subject: Subject; g
           onChange={e => setInput(e.target.value)}
           type="number"
           placeholder="Answer..."
-          className="flex-1 px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-green-400 outline-none text-2xl font-black text-center"
+          className="flex-1 px-4 py-3 rounded-2xl border-2 border-white/20 bg-white/5 text-white focus:border-green-400 outline-none text-2xl font-black text-center"
         />
         <button type="submit" className="px-6 py-3 bg-green-500 text-white rounded-2xl font-bold text-lg">✓</button>
       </form>

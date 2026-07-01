@@ -88,7 +88,7 @@ export function HangmanGame({ subject, grade, onExit }: { subject: Subject; grad
             className={`w-9 h-9 rounded-lg text-sm font-bold uppercase transition ${
               guessed.has(l)
                 ? word.includes(l) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-500'
-                : 'bg-gray-100 hover:bg-indigo-100 hover:text-indigo-700 text-gray-700'
+                : 'bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-300 text-white/70'
             } disabled:cursor-not-allowed`}
           >
             {l}

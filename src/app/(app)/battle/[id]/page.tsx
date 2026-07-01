@@ -295,7 +295,7 @@ export default function BattlePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white">
+    <div className="min-h-screen bg-slate-700">
       <BattleRoom
         battleId={battle.id}
         questions={questions}

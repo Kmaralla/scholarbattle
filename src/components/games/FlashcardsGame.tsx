@@ -31,7 +31,7 @@ export function FlashcardsGame({ subject, grade, onExit }: { subject: Subject; g
       </div>
 
       <div className="relative h-64 cursor-pointer" onClick={() => setFlipped(f => !f)}>
-        <div className={`absolute inset-0 rounded-3xl shadow-lg flex flex-col items-center justify-center p-6 text-center transition-all duration-300 ${flipped ? 'bg-indigo-600 text-white' : 'bg-white border-2 border-indigo-100'}`}>
+        <div className={`absolute inset-0 rounded-3xl shadow-lg flex flex-col items-center justify-center p-6 text-center transition-all duration-300 ${flipped ? 'bg-indigo-600 text-white' : 'bg-slate-800 border-2 border-white/10'}`}>
           <p className="text-xs font-semibold uppercase tracking-wide mb-2 opacity-60">{flipped ? 'Answer' : 'Question'}</p>
           <p className="text-lg font-bold leading-snug">{flipped ? q.correct_answer : q.question_text}</p>
           {!flipped && <p className="mt-4 text-xs text-gray-400">Tap to reveal answer</p>}
@@ -39,7 +39,7 @@ export function FlashcardsGame({ subject, grade, onExit }: { subject: Subject; g
       </div>
 
       <div className="flex gap-3">
-        <button onClick={prev} disabled={index === 0} className="flex-1 flex items-center justify-center gap-1 py-3 rounded-2xl bg-gray-100 text-gray-700 disabled:opacity-30 font-semibold">
+        <button onClick={prev} disabled={index === 0} className="flex-1 flex items-center justify-center gap-1 py-3 rounded-2xl bg-white/10 text-white disabled:opacity-30 font-semibold">
           <ChevronLeft className="w-4 h-4" /> Prev
         </button>
         {index < questions.length - 1 ? (

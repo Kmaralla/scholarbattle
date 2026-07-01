@@ -40,7 +40,7 @@ export const TRAINING_MODES: TrainingMode[] = [
     questions: 5,
     seconds: 40,
     tag: 'Think Deep',
-    tagColor: 'bg-violet-500/30 text-violet-300',
+    tagColor: 'bg-white/10 text-white/50',
   },
   {
     id: 'speed',
@@ -50,7 +50,7 @@ export const TRAINING_MODES: TrainingMode[] = [
     questions: 8,
     seconds: 10,
     tag: 'Fast Pace',
-    tagColor: 'bg-orange-500/30 text-orange-300',
+    tagColor: 'bg-white/10 text-white/50',
   },
   {
     id: 'flashcards',
@@ -60,7 +60,7 @@ export const TRAINING_MODES: TrainingMode[] = [
     questions: 6,
     seconds: 99,
     tag: 'Study Mode',
-    tagColor: 'bg-sky-500/30 text-sky-300',
+    tagColor: 'bg-white/10 text-white/50',
   },
   {
     id: 'streak',
@@ -70,7 +70,7 @@ export const TRAINING_MODES: TrainingMode[] = [
     questions: 10,
     seconds: 20,
     tag: 'Survival',
-    tagColor: 'bg-red-500/30 text-red-300',
+    tagColor: 'bg-white/10 text-white/50',
   },
   {
     id: 'endurance',
@@ -80,7 +80,7 @@ export const TRAINING_MODES: TrainingMode[] = [
     questions: 15,
     seconds: 20,
     tag: 'Stamina',
-    tagColor: 'bg-emerald-500/30 text-emerald-300',
+    tagColor: 'bg-white/10 text-white/50',
   },
 ]
 
@@ -92,8 +92,8 @@ export const COACHES: Coach[] = [
     title: 'Speed & Power',
     personality: 'Intense, hype, competitive. Pushes you to answer fast and dominate.',
     color: 'text-orange-400',
-    gradient: 'from-orange-600 to-red-500',
-    glow: 'shadow-orange-500/40',
+    gradient: 'from-orange-900/60 to-red-900/40',
+    glow: '',
     tips: [
       "Don't overthink — your first instinct is usually right!",
       "Speed is a weapon. The faster you answer, the more you dominate.",
@@ -129,8 +129,8 @@ export const COACHES: Coach[] = [
     title: 'Deep Understanding',
     personality: 'Calm, intellectual. Explains concepts deeply so you truly understand.',
     color: 'text-violet-400',
-    gradient: 'from-violet-600 to-indigo-500',
-    glow: 'shadow-violet-500/40',
+    gradient: 'from-violet-900/60 to-indigo-900/40',
+    glow: '',
     tips: [
       "Understanding WHY is more powerful than memorizing WHAT.",
       "Connect new knowledge to what you already know.",
@@ -166,8 +166,8 @@ export const COACHES: Coach[] = [
     title: 'Confidence & Growth',
     personality: 'Warm, encouraging. Builds your confidence and celebrates every win.',
     color: 'text-pink-400',
-    gradient: 'from-pink-500 to-rose-400',
-    glow: 'shadow-pink-500/40',
+    gradient: 'from-pink-900/60 to-rose-900/40',
+    glow: '',
     tips: [
       "You are smarter than you think. Believe it! 💫",
       "Every question you try makes you better. No matter the result.",
@@ -233,8 +233,8 @@ export default function TrainingPage() {
           <div key={s} className="flex items-center gap-2">
             <div className={cn(
               'w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all',
-              step === s ? 'bg-indigo-500 text-white' :
-              (['mode', 'coach', 'subject'].indexOf(step) > i) ? 'bg-green-500 text-white' :
+              step === s ? 'bg-white/20 text-white' :
+              (['mode', 'coach', 'subject'].indexOf(step) > i) ? 'bg-white/30 text-white' :
               'bg-white/10 text-white/30'
             )}>
               {(['mode', 'coach', 'subject'].indexOf(step) > i) ? '✓' : i + 1}

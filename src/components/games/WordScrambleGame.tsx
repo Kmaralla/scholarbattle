@@ -58,7 +58,7 @@ export function WordScrambleGame({ subject, grade, onExit }: { subject: Subject;
       <p className="text-lg font-bold text-indigo-600">{score} / {words.length} correct</p>
       <div className="flex gap-3 mt-2">
         <button onClick={() => { setIndex(0); setScore(0); setDone(false); nextWord(0) }} className="px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold">Play Again</button>
-        <button onClick={onExit} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-2xl font-bold">Exit</button>
+        <button onClick={onExit} className="px-6 py-3 bg-white/10 text-white rounded-2xl font-bold">Exit</button>
       </div>
     </div>
   )
@@ -83,7 +83,7 @@ export function WordScrambleGame({ subject, grade, onExit }: { subject: Subject;
           onChange={e => setInput(e.target.value)}
           placeholder="Type your answer..."
           autoFocus
-          className="flex-1 px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-indigo-400 outline-none text-lg font-semibold"
+          className="flex-1 px-4 py-3 rounded-2xl border-2 border-white/20 bg-white/5 text-white focus:border-indigo-400 outline-none text-lg font-semibold"
         />
         <button type="submit" className="px-5 py-3 bg-indigo-600 text-white rounded-2xl font-bold">Go</button>
       </form>

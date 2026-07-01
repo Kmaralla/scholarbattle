@@ -54,7 +54,7 @@ export function ChallengeNotification({ userId }: { userId: string }) {
   return (
     <div className={cn(
       'fixed bottom-24 right-4 z-50 md:bottom-6',
-      'w-80 bg-white rounded-2xl shadow-2xl border border-indigo-100 overflow-hidden',
+      'w-80 bg-slate-900 rounded-2xl shadow-2xl border border-white/10 overflow-hidden',
       'animate-in slide-in-from-bottom-4 duration-300'
     )}>
       {/* Header */}
@@ -70,19 +70,19 @@ export function ChallengeNotification({ userId }: { userId: string }) {
 
       {/* Body */}
       <div className="p-4 space-y-3">
-        <p className="text-sm text-gray-700">
-          <span className="font-bold text-gray-900">{challenge.challenger_username}</span> challenged you to a battle!
+        <p className="text-sm text-white/70">
+          <span className="font-bold text-white">{challenge.challenger_username}</span> challenged you to a battle!
         </p>
         <div className="flex items-center gap-2">
-          <span className={cn('px-2.5 py-1 rounded-full text-xs font-bold border capitalize', SUBJECT_COLORS[challenge.subject])}>
+          <span className="px-2.5 py-1 rounded-full text-xs font-bold border border-indigo-400/30 bg-indigo-500/20 text-indigo-300 capitalize">
             {challenge.subject}
           </span>
-          <span className="text-xs text-gray-500">Grade {challenge.grade_level}</span>
+          <span className="text-xs text-white/40">Grade {challenge.grade_level}</span>
         </div>
         <div className="flex gap-2 pt-1">
           <button
             onClick={decline}
-            className="flex-1 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition"
+            className="flex-1 py-2 rounded-xl border border-white/10 text-sm font-semibold text-white/50 hover:bg-white/5 transition"
           >
             Decline
           </button>

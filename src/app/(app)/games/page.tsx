@@ -51,15 +51,15 @@ export default function GamesPage() {
     router.push(`/games/play?game=${game.id}&subject=${subject}&grade=${grade}`)
   }
 
-  if (!profile) return <div className="p-4 text-center text-gray-400">Loading...</div>
+  if (!profile) return <div className="p-4 text-center text-white/60">Loading...</div>
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-black text-white">🎮 Games</h1>
-        <div className="flex items-center gap-1 bg-yellow-50 border border-yellow-200 rounded-full px-3 py-1.5">
+        <div className="flex items-center gap-1 bg-yellow-400/10 border border-yellow-400/30 rounded-full px-3 py-1.5">
           <span>🪙</span>
-          <span className="font-bold text-yellow-700">{profile.coins}</span>
+          <span className="font-bold text-yellow-300">{profile.coins}</span>
         </div>
       </div>
 
@@ -74,7 +74,7 @@ export default function GamesPage() {
                 'px-4 py-1.5 rounded-full text-sm font-semibold capitalize transition',
                 subject === s
                   ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-white/5 text-white/60 hover:bg-white/10'
               )}
             >
               {s}
@@ -90,7 +90,7 @@ export default function GamesPage() {
                 'w-10 h-10 rounded-xl text-sm font-bold transition',
                 grade === g
                   ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-white/5 text-white/60 hover:bg-white/10'
               )}
             >
               {g}

@@ -132,7 +132,7 @@ export default function FriendsPage() {
     router.push(`/battle/${battle.id}`)
   }
 
-  if (!currentUser) return <div className="p-4 text-center text-gray-400">Loading...</div>
+  if (!currentUser) return <div className="p-4 text-center text-white/60">Loading...</div>
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-4">
@@ -151,13 +151,13 @@ export default function FriendsPage() {
               value={addUsername}
               onChange={e => setAddUsername(e.target.value)}
               placeholder="Enter username..."
-              className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-400"
+              className="flex-1 px-3 py-2 rounded-xl border border-white/20 bg-white/5 text-white placeholder:text-white/30 text-sm outline-none focus:border-indigo-400"
             />
             <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition">
               Send
             </button>
           </form>
-          {addStatus && <p className="mt-2 text-sm text-gray-600">{addStatus}</p>}
+          {addStatus && <p className="mt-2 text-sm text-white/70">{addStatus}</p>}
         </CardContent>
       </Card>
 
@@ -176,7 +176,7 @@ export default function FriendsPage() {
         </CardHeader>
         <CardContent>
           {invites.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-3">No pending invites</p>
+            <p className="text-sm text-white/40 text-center py-3">No pending invites</p>
           ) : (
             <div className="space-y-2">
               {invites.map(invite => (
@@ -185,8 +185,8 @@ export default function FriendsPage() {
                     <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold text-sm">
                       {invite.username[0].toUpperCase()}
                     </div>
-                    <span className="text-sm font-semibold text-slate-200">{invite.username}</span>
-                    <span className="text-xs text-gray-400">wants to be friends</span>
+                    <span className="text-sm font-semibold text-white">{invite.username}</span>
+                    <span className="text-xs text-white/50">wants to be friends</span>
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -211,12 +211,12 @@ export default function FriendsPage() {
 
       {/* Challenge modal */}
       {challenging && (
-        <Card className="border-indigo-200 bg-indigo-50">
+        <Card className="border-indigo-400/30 bg-indigo-500/10">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
-              <p className="font-bold text-indigo-900">Challenge {challenging.username}</p>
+              <p className="font-bold text-white">Challenge {challenging.username}</p>
               <button onClick={() => setChallenging(null)}>
-                <X className="w-4 h-4 text-gray-400" />
+                <X className="w-4 h-4 text-white/40" />
               </button>
             </div>
             <TopicPicker onSelect={handleStartBattle} onCancel={() => setChallenging(null)} />

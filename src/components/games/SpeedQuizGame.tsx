@@ -64,7 +64,7 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
         <p className="text-gray-500">{pct}% accuracy</p>
         <div className="flex gap-3">
           <button onClick={start} className="px-6 py-3 bg-rose-500 text-white rounded-2xl font-bold">Try Again</button>
-          <button onClick={onExit} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-2xl font-bold">Exit</button>
+          <button onClick={onExit} className="px-6 py-3 bg-white/10 text-white rounded-2xl font-bold">Exit</button>
         </div>
       </div>
     )
@@ -83,7 +83,7 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
       </div>
 
       {/* Timer bar */}
-      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
         <div className="h-full bg-rose-500 transition-all duration-1000 rounded-full" style={{ width: `${(timeLeft / TIME_PER_Q) * 100}%` }} />
       </div>
 
@@ -102,7 +102,7 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
                 selected === opt
                   ? opt === q.correct_answer ? 'bg-green-500 text-white' : 'bg-red-400 text-white'
                   : selected !== null && opt === q.correct_answer ? 'bg-green-100 text-green-800'
-                  : 'bg-white border-2 border-gray-100 hover:border-rose-300 text-gray-800'
+                  : 'bg-white/5 border-2 border-white/10 hover:border-rose-400 text-white'
               }`}
             >
               {opt}

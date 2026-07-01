@@ -6,11 +6,11 @@ import { Swords, Trophy, Zap, Users, Gamepad2, Target } from 'lucide-react'
 import Link from 'next/link'
 
 const TIER_CONFIG: Record<RankTier, { emoji: string; gradient: string; glow: string }> = {
-  bronze:   { emoji: '🥉', gradient: 'from-orange-700 to-amber-600',   glow: 'shadow-orange-500/40' },
-  silver:   { emoji: '🥈', gradient: 'from-slate-400 to-slate-300',    glow: 'shadow-slate-400/40' },
-  gold:     { emoji: '🥇', gradient: 'from-yellow-500 to-amber-400',   glow: 'shadow-yellow-400/40' },
-  platinum: { emoji: '💎', gradient: 'from-cyan-500 to-teal-400',      glow: 'shadow-cyan-400/40' },
-  diamond:  { emoji: '👑', gradient: 'from-violet-500 to-fuchsia-400', glow: 'shadow-violet-400/40' },
+  bronze:   { emoji: '🥉', gradient: 'from-orange-900/80 to-amber-800/60',   glow: '' },
+  silver:   { emoji: '🥈', gradient: 'from-slate-700 to-slate-600',          glow: '' },
+  gold:     { emoji: '🥇', gradient: 'from-yellow-900/80 to-amber-800/60',   glow: '' },
+  platinum: { emoji: '💎', gradient: 'from-cyan-900/80 to-teal-800/60',      glow: '' },
+  diamond:  { emoji: '👑', gradient: 'from-violet-900/80 to-indigo-800/60',  glow: '' },
 }
 
 export default async function DashboardPage() {
@@ -40,7 +40,7 @@ export default async function DashboardPage() {
     <div className="max-w-2xl mx-auto p-4 space-y-5 pb-24 md:pb-6">
 
       {/* Hero banner */}
-      <div className={`relative rounded-3xl p-6 bg-gradient-to-br ${tierCfg.gradient} shadow-2xl ${tierCfg.glow} overflow-hidden`}>
+      <div className={`relative rounded-3xl p-6 bg-gradient-to-br ${tierCfg.gradient} border border-white/10 overflow-hidden`}>
         {/* decorative blobs */}
         <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
         <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-black/10 rounded-full blur-2xl" />
@@ -82,11 +82,11 @@ export default async function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Battles', value: profile.total_battles, icon: '⚔️', bg: 'from-indigo-600 to-blue-500' },
-          { label: 'Wins',    value: profile.total_wins,    icon: '🏆', bg: 'from-yellow-500 to-orange-400' },
-          { label: 'Win Rate', value: `${winRate}%`,        icon: '⚡', bg: 'from-green-500 to-emerald-400' },
+          { label: 'Battles', value: profile.total_battles, icon: '⚔️', bg: 'bg-white/5 border border-white/10' },
+          { label: 'Wins',    value: profile.total_wins,    icon: '🏆', bg: 'bg-white/5 border border-white/10' },
+          { label: 'Win Rate', value: `${winRate}%`,        icon: '⚡', bg: 'bg-white/5 border border-white/10' },
         ].map(({ label, value, icon, bg }) => (
-          <div key={label} className={`rounded-2xl p-4 text-center bg-gradient-to-br ${bg} shadow-lg`}>
+          <div key={label} className={`rounded-2xl p-4 text-center ${bg}`}>
             <div className="text-2xl mb-1">{icon}</div>
             <p className="text-2xl font-black text-white">{value}</p>
             <p className="text-white/70 text-xs font-medium">{label}</p>
@@ -96,40 +96,40 @@ export default async function DashboardPage() {
 
       {/* Quick actions */}
       <div className="space-y-3">
-        <Link href="/matchmaking" className="btn-pop flex items-center gap-4 p-5 rounded-3xl bg-gradient-to-r from-violet-600 to-fuchsia-500 shadow-xl shadow-violet-500/30 hover:shadow-violet-500/50 transition-all hover:scale-[1.02]">
-          <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center flex-shrink-0">
-            <Swords className="w-6 h-6 text-white" />
+        <Link href="/matchmaking" className="btn-pop flex items-center gap-4 p-5 rounded-3xl bg-indigo-500/20 border border-indigo-400/20 hover:bg-indigo-500/30 transition-all hover:scale-[1.02]">
+          <div className="w-12 h-12 bg-indigo-400/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+            <Swords className="w-6 h-6 text-indigo-300" />
           </div>
           <div className="flex-1">
             <p className="font-black text-white text-base">Battle Online ⚔️</p>
-            <p className="text-violet-200 text-xs">Ranked · Match with a real player now</p>
+            <p className="text-white/40 text-xs">Ranked · Match with a real player now</p>
           </div>
-          <span className="text-2xl">→</span>
+          <span className="text-white/30 text-xl">→</span>
         </Link>
 
         <div className="grid grid-cols-2 gap-3">
-          <Link href="/battle" className="btn-pop flex flex-col gap-2 p-4 rounded-2xl bg-gradient-to-br from-pink-600 to-rose-500 shadow-lg shadow-pink-500/30 hover:scale-[1.02] transition-all">
+          <Link href="/battle" className="btn-pop flex flex-col gap-2 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:scale-[1.02] transition-all">
             <span className="text-3xl float">🎓</span>
             <p className="font-black text-white">Practice</p>
-            <p className="text-pink-200 text-xs">vs Scholar Bot</p>
+            <p className="text-white/40 text-xs">vs Scholar Bot</p>
           </Link>
-          <Link href="/friends" className="btn-pop flex flex-col gap-2 p-4 rounded-2xl bg-gradient-to-br from-cyan-600 to-blue-500 shadow-lg shadow-cyan-500/30 hover:scale-[1.02] transition-all">
-            <Users className="w-8 h-8 text-white" />
+          <Link href="/friends" className="btn-pop flex flex-col gap-2 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:scale-[1.02] transition-all">
+            <Users className="w-8 h-8 text-white/70" />
             <p className="font-black text-white">Challenge</p>
-            <p className="text-cyan-200 text-xs">Battle a friend</p>
+            <p className="text-white/40 text-xs">Battle a friend</p>
           </Link>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Link href="/games" className="btn-pop flex flex-col gap-2 p-4 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-400 shadow-lg shadow-amber-500/30 hover:scale-[1.02] transition-all">
-            <Gamepad2 className="w-8 h-8 text-white" />
+          <Link href="/games" className="btn-pop flex flex-col gap-2 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:scale-[1.02] transition-all">
+            <Gamepad2 className="w-8 h-8 text-white/70" />
             <p className="font-black text-white">Games 🎮</p>
-            <p className="text-amber-100 text-xs">Spend your coins</p>
+            <p className="text-white/40 text-xs">Spend your coins</p>
           </Link>
-          <Link href="/leaderboard" className="btn-pop flex flex-col gap-2 p-4 rounded-2xl bg-gradient-to-br from-emerald-600 to-green-500 shadow-lg shadow-emerald-500/30 hover:scale-[1.02] transition-all">
-            <Trophy className="w-8 h-8 text-white" />
+          <Link href="/leaderboard" className="btn-pop flex flex-col gap-2 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:scale-[1.02] transition-all">
+            <Trophy className="w-8 h-8 text-white/70" />
             <p className="font-black text-white">Rankings</p>
-            <p className="text-emerald-100 text-xs">See top scholars</p>
+            <p className="text-white/40 text-xs">See top scholars</p>
           </Link>
         </div>
       </div>

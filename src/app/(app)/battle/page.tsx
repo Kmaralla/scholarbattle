@@ -54,14 +54,14 @@ export default function BattlePage() {
 
       <Card>
         <CardHeader>
-          <p className="text-sm text-gray-500">
-            Battle <span className="font-semibold text-indigo-600">Scholar Bot 🎓</span> — first to answer correctly wins the point!
+          <p className="text-sm text-white/60">
+            Battle <span className="font-semibold text-indigo-400">Scholar Bot 🎓</span> — first to answer correctly wins the point!
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Difficulty picker */}
           <div>
-            <p className="text-sm font-semibold text-gray-700 mb-2">Bot Difficulty</p>
+            <p className="text-sm font-semibold text-white/70 mb-2">Bot Difficulty</p>
             <div className="grid grid-cols-3 gap-2">
               {DIFFICULTIES.map(d => (
                 <button
@@ -70,12 +70,12 @@ export default function BattlePage() {
                   className={cn(
                     'flex flex-col items-center gap-1 py-3 px-2 rounded-xl border-2 text-center transition-all',
                     difficulty === d.value
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-indigo-400 bg-indigo-500/20'
+                      : 'border-white/10 hover:border-white/20 bg-white/5'
                   )}
                 >
-                  <span className="text-base font-bold text-dark">{d.label}</span>
-                  <span className="text-xs text-gray-500 leading-tight">{d.desc}</span>
+                  <span className="text-base font-bold text-white">{d.label}</span>
+                  <span className="text-xs text-white/50 leading-tight">{d.desc}</span>
                 </button>
               ))}
             </div>
@@ -85,7 +85,7 @@ export default function BattlePage() {
           {step === 'finding' && (
             <div className="text-center py-8 space-y-2">
               <div className="text-4xl animate-bounce">⚔️</div>
-              <p className="font-bold text-white">Setting up your battle...</p>
+              <p className="font-bold text-white/70">Setting up your battle...</p>
             </div>
           )}
         </CardContent>

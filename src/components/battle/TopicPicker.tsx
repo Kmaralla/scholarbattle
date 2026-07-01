@@ -1,4 +1,5 @@
 'use client'
+import { useState } from 'react'
 import { Subject, SUBJECT_COLORS } from '@/types'
 import { gradeLabel } from '@/lib/utils'
 import { cn } from '@/lib/utils'
@@ -33,7 +34,7 @@ function SubjectGradePicker({ onSelect, onCancel }: TopicPickerProps) {
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-2">Pick a Subject</p>
+        <p className="text-sm font-semibold text-white/70 mb-2">Pick a Subject</p>
         <div className="grid grid-cols-2 gap-2">
           {SUBJECTS.map(s => (
             <button
@@ -42,9 +43,8 @@ function SubjectGradePicker({ onSelect, onCancel }: TopicPickerProps) {
               className={cn(
                 'flex items-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all',
                 subject === s.value
-                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                  : 'border-gray-200 hover:border-gray-300 text-gray-700',
-                SUBJECT_COLORS[s.value]
+                  ? 'border-indigo-400 bg-indigo-500/20 text-white'
+                  : 'border-white/10 hover:border-white/20 bg-white/5 text-white/70',
               )}
             >
               <span className="text-lg">{s.emoji}</span>
@@ -56,7 +56,7 @@ function SubjectGradePicker({ onSelect, onCancel }: TopicPickerProps) {
 
       {subject && (
         <div>
-          <p className="text-sm font-semibold text-gray-700 mb-2">Pick a Grade Level</p>
+          <p className="text-sm font-semibold text-white/70 mb-2">Pick a Grade Level</p>
           <div className="grid grid-cols-4 gap-1.5">
             {GRADES.map(g => (
               <button
@@ -65,8 +65,8 @@ function SubjectGradePicker({ onSelect, onCancel }: TopicPickerProps) {
                 className={cn(
                   'py-2 rounded-lg text-xs font-bold border-2 transition-all',
                   grade === g
-                    ? 'border-indigo-500 bg-indigo-600 text-white'
-                    : 'border-gray-200 hover:border-indigo-300 text-gray-700'
+                    ? 'border-indigo-400 bg-indigo-600 text-white'
+                    : 'border-white/10 hover:border-indigo-400/50 bg-white/5 text-white/70'
                 )}
               >
                 {gradeLabel(g).replace('Grade ', 'Gr.')}
@@ -78,11 +78,11 @@ function SubjectGradePicker({ onSelect, onCancel }: TopicPickerProps) {
 
       {subject && grade && (
         <div className="pt-2 space-y-2">
-          <div className="flex items-center gap-2 p-3 bg-indigo-50 rounded-xl">
+          <div className="flex items-center gap-2 p-3 bg-indigo-500/10 border border-indigo-400/20 rounded-xl">
             <span className="text-2xl">{SUBJECTS.find(s => s.value === subject)?.emoji}</span>
             <div>
-              <p className="font-bold text-indigo-800">{SUBJECTS.find(s => s.value === subject)?.label}</p>
-              <p className="text-xs text-indigo-600">{gradeLabel(grade)}</p>
+              <p className="font-bold text-white">{SUBJECTS.find(s => s.value === subject)?.label}</p>
+              <p className="text-xs text-indigo-300">{gradeLabel(grade)}</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -96,6 +96,3 @@ function SubjectGradePicker({ onSelect, onCancel }: TopicPickerProps) {
     </div>
   )
 }
-
-// Need useState import
-import { useState } from 'react'

@@ -152,10 +152,10 @@ export default function MatchmakingPage() {
             </div>
 
             <div className="text-center space-y-1">
-              <p className="font-black text-gray-900 text-lg">{statusMsg}</p>
+              <p className="font-black text-white text-lg">{statusMsg}</p>
               {step === 'searching' && (
-                <p className="text-gray-400 text-sm">
-                  Matching on <span className="font-semibold capitalize text-gray-600">{subject}</span> · Grade {grade}
+                <p className="text-white/50 text-sm">
+                  Matching on <span className="font-semibold capitalize text-white/80">{subject}</span> · Grade {grade}
                 </p>
               )}
             </div>
@@ -164,13 +164,13 @@ export default function MatchmakingPage() {
               <>
                 {/* Countdown bar */}
                 <div className="w-full space-y-1">
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-indigo-500 rounded-full transition-all duration-1000"
                       style={{ width: `${(timeLeft / 20) * 100}%` }}
                     />
                   </div>
-                  <p className="text-xs text-center text-gray-400">
+                  <p className="text-xs text-center text-white/40">
                     {timeLeft > 0 ? `Giving up in ${timeLeft}s if no match found` : 'No opponent found...'}
                   </p>
                 </div>

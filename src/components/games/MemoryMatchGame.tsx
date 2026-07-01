@@ -82,7 +82,7 @@ export function MemoryMatchGame({ subject, grade, onExit }: { subject: Subject; 
               className={`h-20 rounded-2xl text-xs font-semibold p-2 transition-all leading-tight ${
                 isMatched ? 'bg-green-100 text-green-800 border-2 border-green-300' :
                 isFlipped ? (card.type === 'q' ? 'bg-indigo-100 text-indigo-900 border-2 border-indigo-300' : 'bg-orange-100 text-orange-900 border-2 border-orange-300') :
-                'bg-gray-100 text-transparent hover:bg-gray-200'
+                'bg-white/5 text-transparent hover:bg-white/10'
               }`}
             >
               {isFlipped ? card.content : '?'}

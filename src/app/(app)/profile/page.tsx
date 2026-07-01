@@ -6,11 +6,11 @@ import { AvatarUpload } from '@/components/profile/AvatarUpload'
 import { BADGES, BADGE_MAP, RARITY_STYLES } from '@/lib/badges'
 
 const TIER_COLORS: Record<string, string> = {
-  bronze:   'from-orange-700 to-amber-600',
-  silver:   'from-slate-400 to-slate-300',
-  gold:     'from-yellow-500 to-amber-400',
-  platinum: 'from-cyan-500 to-teal-400',
-  diamond:  'from-violet-500 to-fuchsia-400',
+  bronze:   'from-orange-900/70 to-amber-800/50',
+  silver:   'from-slate-700 to-slate-600',
+  gold:     'from-yellow-900/70 to-amber-800/50',
+  platinum: 'from-cyan-900/70 to-teal-800/50',
+  diamond:  'from-violet-900/70 to-indigo-800/50',
 }
 
 export default async function ProfilePage() {
@@ -31,15 +31,15 @@ export default async function ProfilePage() {
       <h1 className="text-xl font-black text-white">👤 Profile</h1>
 
       {/* Profile card */}
-      <div className="bg-white rounded-3xl p-6 flex flex-col items-center gap-4 shadow-sm">
+      <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col items-center gap-4">
         <AvatarUpload
           userId={user.id}
           username={profile.username}
           currentUrl={(profile as any).avatar_url ?? null}
         />
         <div className="text-center">
-          <h2 className="text-2xl font-black text-dark">{profile.username}</h2>
-          <p className="text-sm text-gray-400 mt-0.5">{user.email}</p>
+          <h2 className="text-2xl font-black text-white">{profile.username}</h2>
+          <p className="text-sm text-white/50 mt-0.5">{user.email}</p>
           <div className={`mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r ${TIER_COLORS[tier]} text-white font-bold text-sm shadow-lg`}>
             <span>{tier === 'diamond' ? '👑' : tier === 'platinum' ? '💎' : tier === 'gold' ? '🥇' : tier === 'silver' ? '🥈' : '🥉'}</span>
             <span className="capitalize">{tier}</span>
@@ -51,11 +51,11 @@ export default async function ProfilePage() {
       {/* Stats grid */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Battles', value: profile.total_battles, emoji: '⚔️', bg: 'from-indigo-600 to-blue-500' },
-          { label: 'Wins',    value: profile.total_wins,    emoji: '🏆', bg: 'from-yellow-500 to-orange-400' },
-          { label: 'Win Rate',value: `${winRate}%`,         emoji: '⚡', bg: 'from-green-500 to-emerald-400' },
-        ].map(({ label, value, emoji, bg }) => (
-          <div key={label} className={`rounded-2xl p-4 text-center bg-gradient-to-br ${bg} shadow-lg`}>
+          { label: 'Battles', value: profile.total_battles, emoji: '⚔️' },
+          { label: 'Wins',    value: profile.total_wins,    emoji: '🏆' },
+          { label: 'Win Rate',value: `${winRate}%`,         emoji: '⚡' },
+        ].map(({ label, value, emoji }) => (
+          <div key={label} className="rounded-2xl p-4 text-center bg-white/5 border border-white/10">
             <div className="text-2xl mb-1">{emoji}</div>
             <p className="text-xl font-black text-white">{value}</p>
             <p className="text-white/70 text-xs font-medium">{label}</p>
@@ -74,9 +74,9 @@ export default async function ProfilePage() {
           { label: 'Grade Level',   value: `Grade ${profile.grade_level}` },
           { label: 'Coins',         value: `🪙 ${(profile as any).coins ?? 0}` },
         ].map(({ label, value }) => (
-          <div key={label} className="bg-white rounded-2xl p-4 shadow-sm">
-            <p className="text-lg font-black text-dark">{value}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+          <div key={label} className="bg-white/5 border border-white/10 rounded-2xl p-4">
+            <p className="text-lg font-black text-white">{value}</p>
+            <p className="text-xs text-white/50 mt-0.5">{label}</p>
           </div>
         ))}
       </div>
