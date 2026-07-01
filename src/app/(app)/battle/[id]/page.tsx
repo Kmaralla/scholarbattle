@@ -6,6 +6,8 @@ import { User, Question, Battle, Subject } from '@/types'
 import { getQuestionsForBattle } from '@/lib/questions'
 import { calculateElo, getRankTier } from '@/types'
 import { COIN_REWARDS } from '@/lib/games'
+import { checkNewBadges, BADGE_MAP } from '@/lib/badges'
+import { BadgeCard } from '@/components/BadgeCard'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 
 export default function BattlePage() {
@@ -16,7 +18,7 @@ export default function BattlePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [opponent, setOpponent] = useState<User | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
-  const [done, setDone] = useState<{ myScore: number; theirScore: number; eloDelta: number; coinsEarned: number } | null>(null)
+  const [done, setDone] = useState<{ myScore: number; theirScore: number; eloDelta: number; coinsEarned: number; newBadges: string[] } | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isSolo, setIsSolo] = useState(true)
   const [waitingForOpponent, setWaitingForOpponent] = useState(false)
@@ -153,7 +155,31 @@ export default function BattlePage() {
       }
     }
 
-    setDone({ myScore, theirScore, eloDelta, coinsEarned })
+    // Badge checking
+    const { data: badgeRow } = await supabase.from('users').select('badges, elo_rating, total_wins, total_battles').eq('id', currentUser.id).single()
+    const currentBadges: string[] = (badgeRow as any)?.badges ?? []
+    const newEloForBadge = (badgeRow as any)?.elo_rating ?? currentElo
+    const newTotalWins = (badgeRow as any)?.total_wins ?? 0
+    const newTotalBattles = (badgeRow as any)?.total_battles ?? 0
+
+    const newBadges = checkNewBadges({
+      iWon, tied,
+      myScore,
+      totalQuestions: questions.length,
+      subject: battle.subject,
+      isSolo,
+      botDifficulty,
+      newElo: newEloForBadge,
+      newTotalBattles,
+      newTotalWins,
+      currentBadges,
+    })
+
+    if (newBadges.length > 0) {
+      await supabase.from('users').update({ badges: [...currentBadges, ...newBadges] }).eq('id', currentUser.id)
+    }
+
+    setDone({ myScore, theirScore, eloDelta, coinsEarned, newBadges })
   }
 
   if (done) {
@@ -192,6 +218,23 @@ export default function BattlePage() {
             )}
           </div>
           {done.eloDelta === 0 && done.coinsEarned === 0 && <p className="text-xs text-white/30">No ELO change (tie)</p>}
+
+          {/* New badges earned */}
+          {done.newBadges.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 justify-center">
+                <span className="text-lg">🎖️</span>
+                <p className="text-sm font-black text-white">Badge{done.newBadges.length > 1 ? 's' : ''} Unlocked!</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {done.newBadges.map(id => {
+                  const badge = BADGE_MAP[id]
+                  return badge ? <BadgeCard key={id} badge={badge} size="sm" /> : null
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-3">
             <button onClick={() => router.push('/battle')} className="flex-1 border border-white/20 rounded-2xl py-3 text-sm font-bold text-white/70 hover:bg-white/10 transition">
               Play Again

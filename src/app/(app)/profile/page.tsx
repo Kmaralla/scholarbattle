@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { getRankTier } from '@/types'
 import { LogOut } from 'lucide-react'
 import { AvatarUpload } from '@/components/profile/AvatarUpload'
+import { BADGES, BADGE_MAP, RARITY_STYLES } from '@/lib/badges'
 
 const TIER_COLORS: Record<string, string> = {
   bronze:   'from-orange-700 to-amber-600',
@@ -78,6 +79,28 @@ export default async function ProfilePage() {
             <p className="text-xs text-gray-500 mt-0.5">{label}</p>
           </div>
         ))}
+      </div>
+
+      {/* Badges */}
+      <div className="space-y-3">
+        <h2 className="font-black text-white text-base flex items-center gap-2">🎖️ Badges <span className="text-white/40 font-normal text-sm">({((profile as any).badges ?? []).length}/{BADGES.length})</span></h2>
+        <div className="grid grid-cols-3 gap-2">
+          {BADGES.map(badge => {
+            const earned = ((profile as any).badges ?? []).includes(badge.id)
+            const s = RARITY_STYLES[badge.rarity]
+            return (
+              <div
+                key={badge.id}
+                className={`flex flex-col items-center text-center rounded-2xl border p-3 transition-all ${earned ? `${s.border} ${s.bg} ${s.glow ? `shadow-lg ${s.glow}` : ''}` : 'border-white/5 bg-white/3 opacity-30'}`}
+              >
+                <span className={`text-3xl ${!earned && 'grayscale'}`}>{badge.emoji}</span>
+                <p className="font-black text-white text-xs leading-tight mt-1">{badge.name}</p>
+                <p className="text-xs text-white/40 mt-0.5 leading-tight">{badge.description}</p>
+                <span className={`text-xs font-bold capitalize mt-1 ${earned ? s.label : 'text-white/20'}`}>{badge.rarity}</span>
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       <form action="/auth/signout" method="post">
