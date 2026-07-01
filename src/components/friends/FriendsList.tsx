@@ -47,11 +47,7 @@ export function FriendsList({ currentUserId, onChallenge }: {
 
   async function handleRemove(friendId: string) {
     setRemovingId(friendId)
-    // Delete both directions so both screens update
-    await supabase.from('friendships').delete()
-      .eq('user_id', currentUserId).eq('friend_id', friendId)
-    await supabase.from('friendships').delete()
-      .eq('user_id', friendId).eq('friend_id', currentUserId)
+    await supabase.rpc('remove_friend', { user_a: currentUserId, user_b: friendId })
     setFriends(prev => prev.filter(f => f.id !== friendId))
     setRemovingId(null)
   }

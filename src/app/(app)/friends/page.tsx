@@ -80,13 +80,11 @@ export default function FriendsPage() {
   }
 
   async function handleAccept(invite: PendingInvite) {
-    // Delete the pending row (Person B can delete since they are the friend_id)
-    await supabase.from('friendships').delete().eq('id', invite.id)
-    // Insert both directions as accepted so both users see each other
-    await supabase.from('friendships').insert([
-      { user_id: invite.user_id,    friend_id: currentUser!.id, status: 'accepted' },
-      { user_id: currentUser!.id,   friend_id: invite.user_id,  status: 'accepted' },
-    ])
+    await supabase.rpc('accept_friend', {
+      request_id: invite.id,
+      requester: invite.user_id,
+      accepter: currentUser!.id,
+    })
     setInvites(prev => prev.filter(i => i.id !== invite.id))
     setFriendsKey(k => k + 1)
   }
