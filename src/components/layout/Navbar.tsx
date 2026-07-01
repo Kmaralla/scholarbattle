@@ -10,23 +10,23 @@ const SECTIONS = [
   {
     label: null,
     items: [
-      { href: '/dashboard',   label: 'Home',     icon: Home,     emoji: '🏠' },
-      { href: '/matchmaking', label: 'Battle',   icon: Swords,   emoji: '⚔️' },
-      { href: '/friends',     label: 'Friends',  icon: Users,    emoji: '👥' },
-      { href: '/leaderboard', label: 'Rankings', icon: Trophy,   emoji: '🏆' },
+      { href: '/dashboard',   label: 'Home',     icon: Home,     emoji: '🏠', desc: 'Your overview — stats, rank, quick actions, and recent battles.' },
+      { href: '/matchmaking', label: 'Battle',   icon: Swords,   emoji: '⚔️', desc: 'Jump into a ranked match against a real player right now.' },
+      { href: '/friends',     label: 'Friends',  icon: Users,    emoji: '👥', desc: 'Add friends, accept invites, and challenge them to a battle.' },
+      { href: '/leaderboard', label: 'Rankings', icon: Trophy,   emoji: '🏆', desc: 'See where you stand against all scholars on the global leaderboard.' },
     ],
   },
   {
     label: 'Not ready for battle?',
     items: [
-      { href: '/training', label: 'Training', icon: Dumbbell,  emoji: '💪' },
-      { href: '/games',    label: 'Games',    icon: Gamepad2,  emoji: '🎮' },
+      { href: '/training', label: 'Training', icon: Dumbbell, emoji: '💪', desc: 'Practice with a coach using Puzzles, Speed Drills, Flashcards and more.' },
+      { href: '/games',    label: 'Games',    icon: Gamepad2, emoji: '🎮', desc: 'Spend your coins on fun mini-games to sharpen your skills.' },
     ],
   },
   {
     label: 'You',
     items: [
-      { href: '/profile', label: 'Profile', icon: User, emoji: '👤' },
+      { href: '/profile', label: 'Profile', icon: User, emoji: '👤', desc: 'View your profile, stats, badges, and upload a profile picture.' },
     ],
   },
 ]
@@ -111,23 +111,32 @@ export function Navbar() {
                 </p>
               )}
               <div className="space-y-1">
-                {section.items.map(({ href, label, emoji }) => {
+                {section.items.map(({ href, label, emoji, desc }) => {
                   const active = path.startsWith(href)
                   return (
-                    <Link
-                      key={href}
-                      href={href}
-                      className={cn(
-                        'flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-bold text-sm',
-                        active
-                          ? 'bg-white/10 border border-white/15 text-white'
-                          : 'text-white/50 hover:text-white hover:bg-white/5'
-                      )}
-                    >
-                      <span className="text-xl">{emoji}</span>
-                      <span>{label}</span>
-                      {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/60" />}
-                    </Link>
+                    <div key={href} className="relative group">
+                      <Link
+                        href={href}
+                        className={cn(
+                          'flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-bold text-sm',
+                          active
+                            ? 'bg-white/10 border border-white/15 text-white'
+                            : 'text-white/50 hover:text-white hover:bg-white/5'
+                        )}
+                      >
+                        <span className="text-xl">{emoji}</span>
+                        <span>{label}</span>
+                        {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/60" />}
+                      </Link>
+                      {/* Tooltip */}
+                      <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                        <div className="bg-[#1a1035] border border-white/15 rounded-xl px-3 py-2 w-48 shadow-xl">
+                          <p className="text-xs font-black text-white mb-0.5">{label}</p>
+                          <p className="text-xs text-white/50 leading-snug">{desc}</p>
+                        </div>
+                        <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[#1a1035]" />
+                      </div>
+                    </div>
                   )
                 })}
               </div>
