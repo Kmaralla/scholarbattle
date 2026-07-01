@@ -317,11 +317,6 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
                 Submit ↵
               </button>
             )}
-            {showResult && (
-              <p className="text-sm text-center font-semibold text-white/50">
-                Correct answer: <span className="text-green-400/80 font-bold">{q.correct_answer}</span>
-              </p>
-            )}
           </form>
         )}
 
