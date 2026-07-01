@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { Check, X } from 'lucide-react'
 
+import { AVATARS } from './avatars'
 export { AVATARS } from './avatars'
 
 export function AvatarPicker({
