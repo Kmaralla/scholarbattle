@@ -28,7 +28,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-4 pb-24">
-      <h1 className="text-xl font-black text-dark">👤 Profile</h1>
+      <h1 className="text-xl font-black text-white">👤 Profile</h1>
 
       {/* Profile card */}
       <div className="bg-white rounded-3xl p-6 flex flex-col items-center gap-4 shadow-sm">
