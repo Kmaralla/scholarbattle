@@ -121,12 +121,12 @@ export function TrainingSession({
     } else {
       const empathy = pick(coach.wrongLines)
       const intros: Record<string, string> = {
-        max:  `The answer was "${answer}". Champions learn from every miss.`,
-        owl:  `The correct answer is "${answer}". Let's understand why.`,
-        luna: `The answer was "${answer}" — now you know! 💛`,
+        max:  `The answer was "${answer}". Here's how: ${explanation}`,
+        owl:  `The correct answer is "${answer}". Here's the reasoning: ${explanation}`,
+        luna: `The answer was "${answer}" 💛 Here's how to remember it: ${explanation}`,
       }
-      const intro = intros[coach.id] ?? `The correct answer is "${answer}".`
-      return explanation ? `${empathy} ${intro}` : `${empathy} ${intro}`
+      const fallback = `The correct answer is "${answer}".${explanation ? ` Here's how: ${explanation}` : ''}`
+      return `${empathy} ${intros[coach.id] ?? fallback}`
     }
   }
 
