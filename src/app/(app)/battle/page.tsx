@@ -55,13 +55,13 @@ export default function BattlePage() {
       <Card>
         <CardHeader>
           <p className="text-sm text-gray-500">
-            Battle <span className="font-semibold text-slate-300">Scholar Bot 🎓</span> — first to answer correctly wins the point!
+            Battle <span className="font-semibold text-indigo-600">Scholar Bot 🎓</span> — first to answer correctly wins the point!
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Difficulty picker */}
           <div>
-            <p className="text-sm font-semibold text-slate-300 mb-2">Bot Difficulty</p>
+            <p className="text-sm font-semibold text-gray-700 mb-2">Bot Difficulty</p>
             <div className="grid grid-cols-3 gap-2">
               {DIFFICULTIES.map(d => (
                 <button
