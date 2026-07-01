@@ -153,7 +153,7 @@ export function TrainingSession({
     }
     setCoachMessage(buildFeedback(correct))
     setShowCoachMessage(true)
-    setTimeout(advance, isFlashcard ? 3500 : 3500)
+    // Don't auto-advance — user clicks Next
   }
 
   function handleChoice(opt: string) {
@@ -468,19 +468,23 @@ export function TrainingSession({
                   </button>
                 )
               })}
-              {/* Wrong answer banner */}
+                  {/* Wrong answer banner */}
               {showResult && !myAnswerCorrect && (
                 <div className="bg-slate-600/80 border border-red-500/40 rounded-2xl px-4 py-3 mt-1 space-y-1.5">
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-red-400 font-bold">✗ Correct answer:</span>
                     <span className="text-sm font-black text-green-300">{q.correct_answer}</span>
                   </div>
-                  {q.explanation && (
-                    <div className="border-t border-white/10 pt-1.5">
-                      <p className="text-xs text-slate-300 leading-relaxed">💡 <span className="font-semibold text-white/70">How:</span> {q.explanation}</p>
-                    </div>
-                  )}
                 </div>
+              )}
+              {/* Next button */}
+              {answered && (
+                <button
+                  onClick={advance}
+                  className={cn('w-full mt-3 py-3 rounded-2xl font-black text-white text-sm transition hover:opacity-90 bg-gradient-to-r', coach.gradient)}
+                >
+                  {qIndex + 1 >= questions.length ? 'See Results 🏆' : 'Next →'}
+                </button>
               )}
             </div>
           )}
@@ -511,19 +515,22 @@ export function TrainingSession({
                 <button type="submit" className={cn('w-full py-3 rounded-2xl font-bold text-white transition bg-gradient-to-r', coach.gradient)}>Submit ↵</button>
               )}
               {showResult && (
-                <div className={cn('rounded-2xl px-4 py-3 space-y-1.5', myAnswerCorrect ? 'bg-green-900/30 border border-green-500/40' : 'bg-slate-600/80 border border-red-500/40')}>
+                <div className={cn('rounded-2xl px-4 py-3', myAnswerCorrect ? 'bg-green-900/30 border border-green-500/40' : 'bg-slate-600/80 border border-red-500/40')}>
                   <div className="flex items-center gap-2">
                     <span className={cn('text-xs font-bold', myAnswerCorrect ? 'text-green-400' : 'text-red-400')}>
                       {myAnswerCorrect ? '✓ Correct!' : '✗ Correct answer:'}
                     </span>
                     {!myAnswerCorrect && <span className="text-sm font-black text-green-300">{q.correct_answer}</span>}
                   </div>
-                  {!myAnswerCorrect && q.explanation && (
-                    <div className="border-t border-white/10 pt-1.5">
-                      <p className="text-xs text-slate-300 leading-relaxed">💡 <span className="font-semibold text-white/70">How:</span> {q.explanation}</p>
-                    </div>
-                  )}
                 </div>
+              )}
+              {answered && (
+                <button
+                  onClick={advance}
+                  className={cn('w-full py-3 rounded-2xl font-black text-white text-sm transition hover:opacity-90 bg-gradient-to-r', coach.gradient)}
+                >
+                  {qIndex + 1 >= questions.length ? 'See Results 🏆' : 'Next →'}
+                </button>
               )}
             </form>
           )}

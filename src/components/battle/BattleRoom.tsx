@@ -182,10 +182,6 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
     const nextIndex = qIndex + 1
     const isLastQuestion = nextIndex >= TOTAL_QUESTIONS || nextIndex >= questions.length
 
-    // Compute final scores directly — don't rely on async state
-    const finalMyScore = myScoreRef.current
-    const finalOpponentScore = opponentScoreRef.current
-
     if (!isSolo && isLastQuestion && channelRef.current) {
       await channelRef.current.send({
         type: 'broadcast',
@@ -193,14 +189,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
         payload: { user_id: currentUser.id },
       })
     }
-
-    setTimeout(() => {
-      if (isLastQuestion) {
-        onComplete(finalMyScore, finalOpponentScore)
-      } else {
-        setQIndex(nextIndex)
-      }
-    }, 1800)
+    // Don't auto-advance — user clicks Next
   }, [answeredRef, q, qIndex, botAnsweredFirst, botWasCorrect, isSolo, botDifficulty, questions.length])
 
   const handleChoice = (option: string) => {
@@ -211,6 +200,16 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
   const handleTypedSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     handleSubmit(typedAnswer)
+  }
+
+  const handleNext = () => {
+    const nextIndex = qIndex + 1
+    const isLastQuestion = nextIndex >= TOTAL_QUESTIONS || nextIndex >= questions.length
+    if (isLastQuestion) {
+      onComplete(myScoreRef.current, opponentScoreRef.current)
+    } else {
+      setQIndex(nextIndex)
+    }
   }
 
   if (!q) return null
@@ -340,7 +339,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
         )}
       </div>
 
-      {/* Bot thinking */}
+      {/* Bot thinking / hint */}
       {isSolo && !botAnsweredFirst && !answered && (
         <p className="text-xs text-center text-slate-400 animate-pulse">
           🤖 Scholar Bot is thinking...
@@ -350,6 +349,16 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
         <p className="text-xs text-center text-slate-400">
           ⚡ First correct answer wins the point!
         </p>
+      )}
+
+      {/* Next button — shown after answering */}
+      {answered && showResult && (
+        <button
+          onClick={handleNext}
+          className="w-full py-3.5 rounded-2xl font-black text-white text-sm bg-indigo-500/80 hover:bg-indigo-500 border border-indigo-400/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+        >
+          {qIndex + 1 >= Math.min(TOTAL_QUESTIONS, questions.length) ? 'See Results 🏆' : 'Next →'}
+        </button>
       )}
     </div>
   )
