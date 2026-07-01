@@ -43,7 +43,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0f0a1e] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)] p-4">
       <div className="bg-white/5 border border-white/10 rounded-3xl shadow-2xl p-8 w-full max-w-sm space-y-6">
         <div className="text-center">
           <div className="w-14 h-14 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-violet-500/40">

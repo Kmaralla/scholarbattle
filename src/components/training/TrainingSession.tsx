@@ -237,7 +237,7 @@ export function TrainingSession({
   // Already done today — puzzle gate
   if (isPuzzle && puzzleAlreadyDone) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0f0a1e]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
         <div className="max-w-sm w-full space-y-5 text-center">
           <div className="text-7xl">🧩</div>
           <h2 className="text-2xl font-black text-white">Daily Puzzle Done!</h2>
@@ -266,7 +266,7 @@ export function TrainingSession({
     const finalTotal = isStreak ? qIndex + 1 : totalQ
     const pct = Math.round((score / finalTotal) * 100)
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0f0a1e]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
         <div className="max-w-sm w-full space-y-5 text-center">
           <div className={cn('w-20 h-20 rounded-3xl flex items-center justify-center text-5xl mx-auto shadow-2xl bg-gradient-to-br', coach.gradient)}>
             {coach.emoji}

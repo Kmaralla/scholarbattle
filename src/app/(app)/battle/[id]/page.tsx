@@ -186,7 +186,7 @@ export default function BattlePage() {
     const won = done.myScore > done.theirScore
     const tied = done.myScore === done.theirScore
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0f0a1e]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
         <div className="rounded-3xl p-8 max-w-sm w-full text-center space-y-5 bg-white/5 border border-white/10 shadow-2xl backdrop-blur">
           <div className="text-7xl float">{won ? '🏆' : tied ? '🤝' : '😤'}</div>
           <h1 className={`text-3xl font-black ${won ? 'shimmer-text' : tied ? 'text-yellow-300' : 'text-red-400'}`}>
@@ -250,7 +250,7 @@ export default function BattlePage() {
 
   if (loadError) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0f0a1e]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
         <div className="text-center space-y-3">
           <div className="text-4xl">😵</div>
           <p className="font-bold text-white">{loadError}</p>
@@ -264,7 +264,7 @@ export default function BattlePage() {
 
   if (waitingForOpponent) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0f0a1e]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
         <div className="rounded-3xl p-8 max-w-sm w-full text-center space-y-4 bg-white/5 border border-white/10">
           <div className="text-5xl animate-pulse">⏳</div>
           <h2 className="text-xl font-black text-white">Waiting for opponent...</h2>
@@ -285,7 +285,7 @@ export default function BattlePage() {
 
   if (!currentUser || !opponent || !battle || questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f0a1e]">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)]">
         <div className="text-center space-y-2">
           <div className="text-4xl animate-bounce">⚔️</div>
           <p className="text-white/50 font-semibold">Loading battle...</p>

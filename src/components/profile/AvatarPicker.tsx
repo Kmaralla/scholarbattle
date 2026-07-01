@@ -52,7 +52,7 @@ export function AvatarPicker({
       {/* Picker modal */}
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#1a1035] border border-white/15 rounded-3xl p-5 w-full max-w-sm shadow-2xl">
+          <div className="bg-[var(--bg-nav)] border border-white/15 rounded-3xl p-5 w-full max-w-sm shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-black text-white text-base">Choose your avatar</h3>
               <button onClick={() => setOpen(false)} className="text-white/40 hover:text-white transition">

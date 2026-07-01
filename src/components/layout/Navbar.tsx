@@ -57,7 +57,7 @@ export function Navbar() {
   return (
     <>
       {/* Mobile bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#1a1035]/95 backdrop-blur border-t border-white/10">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[var(--bg-nav)]/95 backdrop-blur border-t border-white/10">
         {coins !== null && (
           <div className="flex items-center justify-center gap-3 pt-1.5 px-4">
             <div className="flex items-center gap-1.5 bg-yellow-400/10 border border-yellow-400/30 rounded-full px-4 py-0.5">
@@ -88,7 +88,7 @@ export function Navbar() {
       </nav>
 
       {/* Desktop sidebar */}
-      <nav className="hidden md:flex flex-col w-64 h-screen bg-[#1a1035] border-r border-white/10 flex-shrink-0 overflow-visible">
+      <nav className="hidden md:flex flex-col w-64 h-screen bg-[var(--bg-nav)] border-r border-white/10 flex-shrink-0 overflow-visible">
         {/* Logo */}
         <div className="px-6 py-6 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -149,7 +149,7 @@ export function Navbar() {
                       </Link>
                       {/* Tooltip */}
                       <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                        <div className="bg-[#1a1035] border border-white/15 rounded-xl px-3 py-2 w-48 shadow-xl">
+                        <div className="bg-[var(--bg-nav)] border border-white/15 rounded-xl px-3 py-2 w-48 shadow-xl">
                           <p className="text-xs font-black text-white mb-0.5">{label}</p>
                           <p className="text-xs text-white/50 leading-snug">{desc}</p>
                         </div>

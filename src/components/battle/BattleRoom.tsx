@@ -222,7 +222,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
   const botAlreadyScored = botAnsweredFirst && botWasCorrect
 
   return (
-    <div className="flex flex-col min-h-screen max-w-lg mx-auto p-4 gap-4 bg-[#0f0a1e]">
+    <div className="flex flex-col min-h-screen max-w-lg mx-auto p-4 gap-4 bg-[var(--bg-base)]">
       {/* Header scoreboard */}
       <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-3xl px-4 py-3">
         <div className="text-center min-w-[80px]">
