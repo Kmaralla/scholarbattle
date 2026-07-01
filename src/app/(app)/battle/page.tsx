@@ -74,7 +74,7 @@ export default function BattlePage() {
                       : 'border-gray-200 hover:border-gray-300'
                   )}
                 >
-                  <span className="text-base font-bold text-gray-900">{d.label}</span>
+                  <span className="text-base font-bold text-dark">{d.label}</span>
                   <span className="text-xs text-gray-500 leading-tight">{d.desc}</span>
                 </button>
               ))}

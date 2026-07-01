@@ -27,7 +27,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-4 pb-24">
-      <h1 className="text-xl font-black text-gray-900">👤 Profile</h1>
+      <h1 className="text-xl font-black text-dark">👤 Profile</h1>
 
       {/* Profile card */}
       <div className="bg-white rounded-3xl p-6 flex flex-col items-center gap-4 shadow-sm">
@@ -37,7 +37,7 @@ export default async function ProfilePage() {
           currentUrl={(profile as any).avatar_url ?? null}
         />
         <div className="text-center">
-          <h2 className="text-2xl font-black text-gray-900">{profile.username}</h2>
+          <h2 className="text-2xl font-black text-dark">{profile.username}</h2>
           <p className="text-sm text-gray-400 mt-0.5">{user.email}</p>
           <div className={`mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r ${TIER_COLORS[tier]} text-white font-bold text-sm shadow-lg`}>
             <span>{tier === 'diamond' ? '👑' : tier === 'platinum' ? '💎' : tier === 'gold' ? '🥇' : tier === 'silver' ? '🥈' : '🥉'}</span>
@@ -74,7 +74,7 @@ export default async function ProfilePage() {
           { label: 'Coins',         value: `🪙 ${(profile as any).coins ?? 0}` },
         ].map(({ label, value }) => (
           <div key={label} className="bg-white rounded-2xl p-4 shadow-sm">
-            <p className="text-lg font-black text-gray-900">{value}</p>
+            <p className="text-lg font-black text-dark">{value}</p>
             <p className="text-xs text-gray-500 mt-0.5">{label}</p>
           </div>
         ))}
