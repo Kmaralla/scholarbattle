@@ -26,7 +26,7 @@ const SECTIONS = [
   {
     label: 'You',
     items: [
-      { href: '/profile', label: 'Profile', icon: User, emoji: '👤', desc: 'View your profile, stats, badges, and upload a profile picture.' },
+      { href: '/profile', label: 'Profile', icon: User, emoji: '👤', desc: 'View your profile, stats, badges, and choose a profile picture.' },
     ],
   },
 ]
