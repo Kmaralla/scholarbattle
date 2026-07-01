@@ -106,6 +106,31 @@ export function TrainingSession({
     registerAnswer(false)
   }
 
+  function buildFeedback(correct: boolean): string {
+    const answer = q?.correct_answer ?? ''
+    if (correct) {
+      const praise = pick(coach.correctLines)
+      // Reinforce what was right
+      const reinforcements = [
+        `"${answer}" — you nailed it!`,
+        `That's the one: "${answer}". Keep going!`,
+        `Correct — "${answer}" is exactly right.`,
+        `"${answer}" — locked in your brain now! 🧠`,
+      ]
+      return `${praise} ${pick(reinforcements)}`
+    } else {
+      const empathy = pick(coach.wrongLines)
+      // Coach-flavored explanation
+      const explanations: Record<string, string> = {
+        max:  `The answer was "${answer}". Remember it — champions don't miss the same one twice.`,
+        owl:  `The correct answer is "${answer}". Think about why that makes sense before the next question.`,
+        luna: `The answer was "${answer}" — now you know it for next time! You've got this 💛`,
+      }
+      const explanation = explanations[coach.id] ?? `The correct answer is "${answer}".`
+      return `${empathy} ${explanation}`
+    }
+  }
+
   function registerAnswer(correct: boolean) {
     setAnswered(true)
     setShowResult(true)
@@ -120,16 +145,16 @@ export function TrainingSession({
         const nl = lives - 1
         setLives(nl)
         if (nl <= 0) {
-          setCoachMessage(coach.wrongLines[0])
+          setCoachMessage(buildFeedback(false))
           setShowCoachMessage(true)
-          setTimeout(() => setPhase('done'), 1800)
+          setTimeout(() => setPhase('done'), 2500)
           return
         }
       }
     }
-    setCoachMessage(correct ? pick(coach.correctLines) : pick(coach.wrongLines))
+    setCoachMessage(buildFeedback(correct))
     setShowCoachMessage(true)
-    setTimeout(advance, isFlashcard ? 3000 : 2500)
+    setTimeout(advance, isFlashcard ? 3500 : 3500)
   }
 
   function handleChoice(opt: string) {
@@ -444,6 +469,13 @@ export function TrainingSession({
                   </button>
                 )
               })}
+              {/* Wrong answer banner */}
+              {showResult && !myAnswerCorrect && (
+                <div className="bg-red-900/30 border border-red-500/40 rounded-2xl px-4 py-3 text-center mt-1">
+                  <p className="text-xs text-red-400 font-bold mb-0.5">Correct answer</p>
+                  <p className="text-base font-black text-green-300">{q.correct_answer}</p>
+                </div>
+              )}
             </div>
           )}
 
