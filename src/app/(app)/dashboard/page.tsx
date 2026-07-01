@@ -2,16 +2,9 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getRankTier, RANK_THRESHOLDS, type RankTier } from '@/types'
-import { Swords, Trophy, Zap, Users, Gamepad2, Target } from 'lucide-react'
+import { Swords, Trophy, Users, Gamepad2, Target } from 'lucide-react'
 import Link from 'next/link'
-
-const TIER_CONFIG: Record<RankTier, { emoji: string; gradient: string; shadow: string; text: string; muted: string; badge: string }> = {
-  bronze:   { emoji: '🥉', gradient: 'from-amber-500   to-orange-400',  shadow: 'shadow-amber-400/40',   text: 'text-amber-950',  muted: 'text-amber-800/70',  badge: 'bg-amber-800/20 text-amber-950'  },
-  silver:   { emoji: '🥈', gradient: 'from-slate-300   to-slate-200',   shadow: 'shadow-slate-300/40',   text: 'text-slate-800',  muted: 'text-slate-600',     badge: 'bg-slate-500/20 text-slate-800'  },
-  gold:     { emoji: '🥇', gradient: 'from-yellow-400  to-amber-300',   shadow: 'shadow-yellow-300/40',  text: 'text-yellow-950', muted: 'text-yellow-800/70', badge: 'bg-yellow-800/20 text-yellow-950' },
-  platinum: { emoji: '💎', gradient: 'from-cyan-300    to-teal-200',    shadow: 'shadow-cyan-300/40',    text: 'text-cyan-950',   muted: 'text-cyan-700',      badge: 'bg-cyan-700/20 text-cyan-950'    },
-  diamond:  { emoji: '👑', gradient: 'from-violet-400  to-indigo-300',  shadow: 'shadow-violet-400/40',  text: 'text-violet-950', muted: 'text-violet-700',    badge: 'bg-violet-700/20 text-violet-950' },
-}
+import { TierBanner } from '@/components/dashboard/TierBanner'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -25,7 +18,6 @@ export default async function DashboardPage() {
   const [minElo, maxElo] = RANK_THRESHOLDS[tier]
   const progress = maxElo === 9999 ? 100 : Math.round(((profile.elo_rating - minElo) / (maxElo - minElo)) * 100)
   const winRate = profile.total_battles > 0 ? Math.round((profile.total_wins / profile.total_battles) * 100) : 0
-  const tierCfg = TIER_CONFIG[tier]
 
   const { data: recentBattles } = await supabase
     .from('battles').select('*')
@@ -40,44 +32,13 @@ export default async function DashboardPage() {
     <div className="max-w-2xl mx-auto p-4 space-y-5 pb-24 md:pb-6">
 
       {/* Hero banner */}
-      <div className={`relative rounded-3xl p-6 bg-gradient-to-br ${tierCfg.gradient} border border-black/10 overflow-hidden shadow-xl ${tierCfg.shadow}`}>
-        {/* decorative blobs */}
-        <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/20 rounded-full blur-2xl" />
-        <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-black/10 rounded-full blur-2xl" />
-
-        <div className="relative flex items-start justify-between">
-          <div>
-            <p className={`${tierCfg.muted} text-sm font-medium`}>Welcome back,</p>
-            <h1 className={`text-3xl font-black ${tierCfg.text} tracking-tight`}>{profile.username} 👋</h1>
-            <div className="mt-2 flex items-center gap-2">
-              <span className="text-2xl">{tierCfg.emoji}</span>
-              <span className={`font-bold capitalize text-sm ${tierCfg.badge} px-3 py-0.5 rounded-full`}>{tier}</span>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className={`text-4xl font-black ${tierCfg.text}`}>{profile.elo_rating}</p>
-            <p className={`${tierCfg.muted} text-xs`}>ELO Rating</p>
-            {(profile as any).coins !== undefined && (
-              <p className={`${tierCfg.text} font-bold text-sm mt-1 opacity-80`}>🪙 {(profile as any).coins ?? 0}</p>
-            )}
-          </div>
-        </div>
-
-        {tier !== 'diamond' && (
-          <div className="relative mt-5">
-            <div className={`flex justify-between ${tierCfg.muted} text-xs mb-1.5`}>
-              <span className="font-semibold capitalize">{tier}</span>
-              <span>{progress}% to next rank</span>
-            </div>
-            <div className="h-3 bg-black/15 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-black/30 rounded-full transition-all duration-700"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-        )}
-      </div>
+      <TierBanner
+        tier={tier}
+        username={profile.username}
+        eloRating={profile.elo_rating}
+        coins={(profile as any).coins}
+        progress={progress}
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
