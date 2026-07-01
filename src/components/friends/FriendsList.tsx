@@ -1,11 +1,11 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { User, Friendship, PresenceState } from '@/types'
+import { User } from '@/types'
 import { useOnlineUsers } from '@/components/PresenceTracker'
 import { RankBadge } from '@/components/RankBadge'
 import { Button } from '@/components/ui/button'
-import { Swords, UserPlus } from 'lucide-react'
+import { Swords, UserPlus, UserMinus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface FriendWithPresence extends User {
@@ -17,12 +17,12 @@ export function FriendsList({ currentUserId, onChallenge }: {
   onChallenge: (friend: User) => void
 }) {
   const [friends, setFriends] = useState<FriendWithPresence[]>([])
+  const [removingId, setRemovingId] = useState<string | null>(null)
   const onlineIds = useOnlineUsers()
   const supabase = createClient()
 
   useEffect(() => {
     loadFriends()
-    // Re-check every 5s so the sender sees the friend appear when request is accepted
     const interval = setInterval(loadFriends, 5000)
     return () => clearInterval(interval)
   }, [currentUserId])
@@ -45,6 +45,17 @@ export function FriendsList({ currentUserId, onChallenge }: {
     if (users) setFriends(users.map((u: any) => ({ ...u, online: false })))
   }
 
+  async function handleRemove(friendId: string) {
+    setRemovingId(friendId)
+    // Delete both directions so both screens update
+    await supabase.from('friendships').delete()
+      .eq('user_id', currentUserId).eq('friend_id', friendId)
+    await supabase.from('friendships').delete()
+      .eq('user_id', friendId).eq('friend_id', currentUserId)
+    setFriends(prev => prev.filter(f => f.id !== friendId))
+    setRemovingId(null)
+  }
+
   const sorted = friends
     .map(f => ({ ...f, online: onlineIds.has(f.id) }))
     .sort((a, b) => Number(b.online) - Number(a.online))
@@ -58,7 +69,7 @@ export function FriendsList({ currentUserId, onChallenge }: {
         </div>
       )}
       {sorted.map(friend => (
-        <div key={friend.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors">
+        <div key={friend.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors group">
           <div className="relative">
             <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 font-bold text-sm">
               {friend.username[0].toUpperCase()}
@@ -77,12 +88,22 @@ export function FriendsList({ currentUserId, onChallenge }: {
               </span>
             </div>
           </div>
-          {friend.online && (
-            <Button size="sm" onClick={() => onChallenge(friend)}>
-              <Swords className="w-3.5 h-3.5 mr-1" />
-              Challenge
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {friend.online && (
+              <Button size="sm" onClick={() => onChallenge(friend)}>
+                <Swords className="w-3.5 h-3.5 mr-1" />
+                Challenge
+              </Button>
+            )}
+            <button
+              onClick={() => handleRemove(friend.id)}
+              disabled={removingId === friend.id}
+              title="Remove friend"
+              className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-400/10 disabled:opacity-30"
+            >
+              <UserMinus className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       ))}
     </div>
