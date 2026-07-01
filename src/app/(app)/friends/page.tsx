@@ -20,6 +20,7 @@ export default function FriendsPage() {
   const [addUsername, setAddUsername] = useState('')
   const [addStatus, setAddStatus] = useState<string | null>(null)
   const [invites, setInvites] = useState<PendingInvite[]>([])
+  const [friendsKey, setFriendsKey] = useState(0)
   const supabase = createClient()
   const router = useRouter()
 
@@ -88,6 +89,7 @@ export default function FriendsPage() {
       status: 'accepted',
     })
     setInvites(prev => prev.filter(i => i.id !== invite.id))
+    setFriendsKey(k => k + 1)
   }
 
   async function handleDecline(invite: PendingInvite) {
@@ -230,7 +232,7 @@ export default function FriendsPage() {
           <h2 className="font-bold text-white">Your Friends</h2>
         </CardHeader>
         <CardContent>
-          <FriendsList currentUserId={currentUser.id} onChallenge={setChallenging} />
+          <FriendsList key={friendsKey} currentUserId={currentUser.id} onChallenge={setChallenging} />
         </CardContent>
       </Card>
     </div>

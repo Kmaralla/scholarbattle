@@ -22,6 +22,9 @@ export function FriendsList({ currentUserId, onChallenge }: {
 
   useEffect(() => {
     loadFriends()
+    // Re-check every 5s so the sender sees the friend appear when request is accepted
+    const interval = setInterval(loadFriends, 5000)
+    return () => clearInterval(interval)
   }, [currentUserId])
 
   async function loadFriends() {
