@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getRankTier } from '@/types'
 import { LogOut } from 'lucide-react'
-import { AvatarUpload } from '@/components/profile/AvatarUpload'
+import { AvatarPicker, AVATARS } from '@/components/profile/AvatarPicker'
 import { BADGES, RARITY_STYLES } from '@/lib/badges'
 
 const TIER_COLORS: Record<string, string> = {
@@ -37,10 +37,10 @@ export default async function ProfilePage() {
 
       {/* Compact profile header — avatar + info side by side */}
       <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
-        <AvatarUpload
+        <AvatarPicker
           userId={user.id}
           username={profile.username}
-          currentUrl={(profile as any).avatar_url ?? null}
+          currentAvatar={(profile as any).avatar_url ?? null}
         />
         <div className="flex-1 min-w-0">
           <h2 className="text-lg font-black text-white truncate">{profile.username}</h2>
