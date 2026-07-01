@@ -78,7 +78,7 @@ export function Navbar() {
       </nav>
 
       {/* Desktop sidebar */}
-      <nav className="hidden md:flex flex-col w-64 h-screen bg-[#1a1035] border-r border-white/10 flex-shrink-0">
+      <nav className="hidden md:flex flex-col w-64 h-screen bg-[#1a1035] border-r border-white/10 flex-shrink-0 overflow-visible">
         {/* Logo */}
         <div className="px-6 py-6 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -102,7 +102,7 @@ export function Navbar() {
         </div>
 
         {/* Nav sections */}
-        <div className="flex-1 overflow-y-auto p-3 pt-4 space-y-5">
+        <div className="flex-1 overflow-visible p-3 pt-4 space-y-5">
           {SECTIONS.map((section, si) => (
             <div key={si}>
               {section.label && (
