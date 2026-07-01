@@ -7,6 +7,7 @@ import { RankBadge } from '@/components/RankBadge'
 import { Button } from '@/components/ui/button'
 import { Swords, UserPlus, UserMinus } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { UserAvatar } from '@/components/profile/UserAvatar'
 
 interface FriendWithPresence extends User {
   online: boolean
@@ -67,9 +68,7 @@ export function FriendsList({ currentUserId, onChallenge }: {
       {sorted.map(friend => (
         <div key={friend.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors group">
           <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 font-bold text-sm">
-              {friend.username[0].toUpperCase()}
-            </div>
+            <UserAvatar username={friend.username} avatarUrl={(friend as any).avatar_url} size="md" />
             <span className={cn(
               'absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-800',
               friend.online ? 'bg-green-400' : 'bg-gray-600'
