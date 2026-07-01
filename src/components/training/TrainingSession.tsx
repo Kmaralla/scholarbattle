@@ -418,7 +418,7 @@ export function TrainingSession({
               Reveal Answer 👁️
             </button>
           )}
-          {isFlashcard && flashRevealed && (
+          {isFlashcard && flashRevealed && !answered && (
             <div className="space-y-3">
               <div className="bg-green-900/40 border border-green-500/50 rounded-2xl p-4 text-center">
                 <p className="text-xs text-green-400 font-bold mb-1">Answer</p>
@@ -477,15 +477,6 @@ export function TrainingSession({
                   </div>
                 </div>
               )}
-              {/* Next button */}
-              {answered && (
-                <button
-                  onClick={advance}
-                  className={cn('w-full mt-3 py-3 rounded-2xl font-black text-white text-sm transition hover:opacity-90 bg-gradient-to-r', coach.gradient)}
-                >
-                  {qIndex + 1 >= questions.length ? 'See Results 🏆' : 'Next →'}
-                </button>
-              )}
             </div>
           )}
 
@@ -524,15 +515,17 @@ export function TrainingSession({
                   </div>
                 </div>
               )}
-              {answered && (
-                <button
-                  onClick={advance}
-                  className={cn('w-full py-3 rounded-2xl font-black text-white text-sm transition hover:opacity-90 bg-gradient-to-r', coach.gradient)}
-                >
-                  {qIndex + 1 >= questions.length ? 'See Results 🏆' : 'Next →'}
-                </button>
-              )}
             </form>
+          )}
+
+          {/* Universal Next button — shown after any answer in any mode */}
+          {answered && (
+            <button
+              onClick={advance}
+              className={cn('w-full mt-4 py-3.5 rounded-2xl font-black text-white text-sm transition hover:opacity-90 bg-gradient-to-r', coach.gradient)}
+            >
+              {qIndex + 1 >= questions.length ? 'See Results 🏆' : 'Next →'}
+            </button>
           )}
         </div>
       )}
