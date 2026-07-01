@@ -28,15 +28,21 @@ export function FriendsList({ currentUserId, onChallenge }: {
   }, [currentUserId])
 
   async function loadFriends() {
-    const { data } = await supabase
+    const { data: rows } = await supabase
       .from('friendships')
-      .select('*, friend:users!friendships_friend_id_fkey(*)')
+      .select('friend_id')
       .eq('user_id', currentUserId)
       .eq('status', 'accepted')
 
-    if (data) {
-      setFriends(data.map((f: any) => ({ ...f.friend, online: false })))
-    }
+    if (!rows || rows.length === 0) { setFriends([]); return }
+
+    const ids = rows.map((r: any) => r.friend_id)
+    const { data: users } = await supabase
+      .from('users')
+      .select('*')
+      .in('id', ids)
+
+    if (users) setFriends(users.map((u: any) => ({ ...u, online: false })))
   }
 
   const sorted = friends
