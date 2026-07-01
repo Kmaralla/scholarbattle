@@ -6,15 +6,32 @@ import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-const NAV = [
-  { href: '/dashboard',   label: 'Home',    icon: Home,      emoji: '🏠' },
-  { href: '/matchmaking', label: 'Battle',   icon: Swords,    emoji: '⚔️' },
-  { href: '/training',   label: 'Training', icon: Dumbbell,  emoji: '💪' },
-  { href: '/friends',    label: 'Friends',  icon: Users,     emoji: '👥' },
-  { href: '/games',      label: 'Games',    icon: Gamepad2,  emoji: '🎮' },
-  { href: '/leaderboard',label: 'Ranks',    icon: Trophy,    emoji: '🏆' },
-  { href: '/profile',    label: 'Profile',  icon: User,      emoji: '👤' },
+const SECTIONS = [
+  {
+    label: null,
+    items: [
+      { href: '/dashboard',   label: 'Home',     icon: Home,     emoji: '🏠' },
+      { href: '/matchmaking', label: 'Battle',   icon: Swords,   emoji: '⚔️' },
+      { href: '/friends',     label: 'Friends',  icon: Users,    emoji: '👥' },
+      { href: '/leaderboard', label: 'Rankings', icon: Trophy,   emoji: '🏆' },
+    ],
+  },
+  {
+    label: 'Not ready for battle?',
+    items: [
+      { href: '/training', label: 'Training', icon: Dumbbell,  emoji: '💪' },
+      { href: '/games',    label: 'Games',    icon: Gamepad2,  emoji: '🎮' },
+    ],
+  },
+  {
+    label: 'You',
+    items: [
+      { href: '/profile', label: 'Profile', icon: User, emoji: '👤' },
+    ],
+  },
 ]
+
+const ALL_NAV = SECTIONS.flatMap(s => s.items)
 
 export function Navbar() {
   const path = usePathname()
@@ -39,7 +56,6 @@ export function Navbar() {
     <>
       {/* Mobile bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#1a1035]/95 backdrop-blur border-t border-white/10">
-        {/* Coin bar on mobile */}
         {coins !== null && (
           <div className="flex justify-center pt-1.5">
             <div className="flex items-center gap-1.5 bg-yellow-400/10 border border-yellow-400/30 rounded-full px-4 py-0.5">
@@ -49,12 +65,12 @@ export function Navbar() {
           </div>
         )}
         <div className="flex justify-around px-1 pb-2 pt-1">
-          {NAV.map(({ href, label, emoji }) => {
+          {ALL_NAV.map(({ href, label, emoji }) => {
             const active = path.startsWith(href)
             return (
               <Link key={href} href={href} className="flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-xl transition-all">
                 <span className={cn('text-xl transition-transform', active && 'scale-125')}>{emoji}</span>
-                <span className={cn('text-[10px] font-bold', active ? 'text-violet-300' : 'text-white/40')}>{label}</span>
+                <span className={cn('text-[10px] font-bold', active ? 'text-white' : 'text-white/40')}>{label}</span>
               </Link>
             )
           })}
@@ -66,15 +82,14 @@ export function Navbar() {
         {/* Logo */}
         <div className="px-6 py-6 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/40">
-              <Swords className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
+              <Swords className="w-5 h-5 text-white/70" />
             </div>
             <div>
               <p className="font-black text-white text-lg leading-tight">Scholar</p>
-              <p className="font-black text-violet-400 text-lg leading-tight -mt-1">Battle</p>
+              <p className="font-black text-white/40 text-lg leading-tight -mt-1">Battle</p>
             </div>
           </div>
-          {/* Coins */}
           {coins !== null && (
             <div className="mt-4 flex items-center gap-2 bg-yellow-400/10 border border-yellow-400/20 rounded-2xl px-4 py-2">
               <span className="text-xl">🪙</span>
@@ -86,27 +101,39 @@ export function Navbar() {
           )}
         </div>
 
-        {/* Nav items */}
-        <div className="flex-1 p-3 space-y-1 pt-4">
-          {NAV.map(({ href, label, icon: Icon, emoji }) => {
-            const active = path.startsWith(href)
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-bold text-sm',
-                  active
-                    ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30'
-                    : 'text-white/50 hover:text-white hover:bg-white/5'
-                )}
-              >
-                <span className="text-xl">{emoji}</span>
-                <span>{label}</span>
-                {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/80" />}
-              </Link>
-            )
-          })}
+        {/* Nav sections */}
+        <div className="flex-1 overflow-y-auto p-3 pt-4 space-y-5">
+          {SECTIONS.map((section, si) => (
+            <div key={si}>
+              {section.label && (
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/25 px-4 mb-2">
+                  {section.label}
+                </p>
+              )}
+              <div className="space-y-1">
+                {section.items.map(({ href, label, emoji }) => {
+                  const active = path.startsWith(href)
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={cn(
+                        'flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-bold text-sm',
+                        active
+                          ? 'bg-white/10 border border-white/15 text-white'
+                          : 'text-white/50 hover:text-white hover:bg-white/5'
+                      )}
+                    >
+                      <span className="text-xl">{emoji}</span>
+                      <span>{label}</span>
+                      {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/60" />}
+                    </Link>
+                  )
+                })}
+              </div>
+              {si < SECTIONS.length - 1 && <div className="mt-4 border-t border-white/5" />}
+            </div>
+          ))}
         </div>
 
         <div className="p-4 border-t border-white/10">
