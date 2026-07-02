@@ -14,33 +14,40 @@ interface Message {
   created_at: string
 }
 
+// Stable channel name for two users (same for both sides)
+function channelName(a: string, b: string) {
+  return `chat:${[a, b].sort().join(':')}`
+}
+
 export function FriendChat({ currentUser, friend }: { currentUser: User; friend: User }) {
   const [messages, setMessages] = useState<Message[]>([])
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
     loadMessages()
 
-    // Real-time subscription
-    const channel = supabase
-      .channel(`chat:${[currentUser.id, friend.id].sort().join(':')}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `receiver_id=eq.${currentUser.id}`,
-      }, (payload) => {
-        const msg = payload.new as Message
-        if (msg.sender_id === friend.id) {
-          setMessages(prev => [...prev, msg])
-        }
-      })
-      .subscribe()
+    // Use Broadcast for instant delivery — both users subscribe to the same channel
+    const ch = supabase.channel(channelName(currentUser.id, friend.id), {
+      config: { broadcast: { self: false } },
+    })
+    channelRef.current = ch
 
-    return () => { supabase.removeChannel(channel) }
+    ch.on('broadcast', { event: 'new_message' }, ({ payload }: { payload: Message }) => {
+      setMessages(prev => {
+        // Ignore if we already have this message (our own optimistic insert)
+        if (prev.some(m => m.id === payload.id)) return prev
+        return [...prev, payload]
+      })
+    }).subscribe()
+
+    return () => {
+      supabase.removeChannel(ch)
+      channelRef.current = null
+    }
   }, [friend.id])
 
   useEffect(() => {
@@ -67,8 +74,10 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
     setSending(true)
     setText('')
 
+    // Optimistic insert
+    const tempId = `temp-${Date.now()}`
     const optimistic: Message = {
-      id: `temp-${Date.now()}`,
+      id: tempId,
       sender_id: currentUser.id,
       receiver_id: friend.id,
       content,
@@ -76,6 +85,7 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
     }
     setMessages(prev => [...prev, optimistic])
 
+    // Save to DB
     const { data } = await supabase.from('messages').insert({
       sender_id: currentUser.id,
       receiver_id: friend.id,
@@ -83,8 +93,17 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
     }).select().single()
 
     if (data) {
-      setMessages(prev => prev.map(m => m.id === optimistic.id ? data : m))
+      // Replace optimistic with real DB row
+      setMessages(prev => prev.map(m => m.id === tempId ? data : m))
+
+      // Broadcast to friend's client so they see it instantly
+      await channelRef.current?.send({
+        type: 'broadcast',
+        event: 'new_message',
+        payload: data,
+      })
     }
+
     setSending(false)
   }
 
