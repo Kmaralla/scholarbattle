@@ -107,7 +107,8 @@ export default function BattlePage() {
       else if (!tied) eloDelta = -Math.floor(base / 2)
 
       const coinKey = `bot_${botDifficulty}` as keyof typeof COIN_REWARDS
-      coinsEarned = iWon ? (COIN_REWARDS[coinKey] ?? 10) : Math.floor((COIN_REWARDS[coinKey] ?? 10) / 2)
+      const baseReward = COIN_REWARDS[coinKey] ?? 10
+      coinsEarned = iWon ? baseReward : tied ? 0 : -Math.floor(baseReward / 2)
 
       const newElo = Math.max(100, currentElo + eloDelta)
       const soloUpdate: Record<string, unknown> = {
@@ -116,11 +117,11 @@ export default function BattlePage() {
         total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
         total_battles: (myProfile?.total_battles ?? 0) + 1,
       }
-      if ((coinsRow as any)?.coins !== undefined) soloUpdate.coins = currentCoins + coinsEarned
+      if ((coinsRow as any)?.coins !== undefined) soloUpdate.coins = Math.max(0, currentCoins + coinsEarned)
       const { error: updateErr } = await supabase.from('users').update(soloUpdate).eq('id', currentUser.id)
       if (updateErr) console.error('[Battle] ELO update failed:', updateErr.message)
     } else {
-      coinsEarned = iWon ? COIN_REWARDS.pvp_win : tied ? COIN_REWARDS.pvp_tie : COIN_REWARDS.pvp_loss
+      coinsEarned = iWon ? COIN_REWARDS.pvp_win : tied ? COIN_REWARDS.pvp_tie : -COIN_REWARDS.pvp_loss
 
       const loserId = winnerId === battle.challenger_id ? battle.opponent_id : battle.challenger_id
       const { data: loserProfile } = await supabase.from('users').select('elo_rating, total_wins, total_battles').eq('id', loserId).single()
@@ -138,14 +139,14 @@ export default function BattlePage() {
           total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
           total_battles: (myProfile?.total_battles ?? 0) + 1,
         }
-        if ((coinsRow as any)?.coins !== undefined) pvpUpdate.coins = currentCoins + coinsEarned
+        if ((coinsRow as any)?.coins !== undefined) pvpUpdate.coins = Math.max(0, currentCoins + coinsEarned)
         const { error: pvpErr } = await supabase.from('users').update(pvpUpdate).eq('id', currentUser.id)
         if (pvpErr) console.error('[Battle] PvP ELO update failed:', pvpErr.message)
         await supabase.from('users').update({
           elo_rating: theirNewElo,
           rank_tier: getRankTier(theirNewElo),
           total_battles: (loserProfile.total_battles ?? 0) + 1,
-          ...((loserCoinsRow as any)?.coins !== undefined ? { coins: ((loserCoinsRow as any).coins ?? 0) + COIN_REWARDS.pvp_loss } : {}),
+          ...((loserCoinsRow as any)?.coins !== undefined ? { coins: Math.max(0, ((loserCoinsRow as any).coins ?? 0) - COIN_REWARDS.pvp_loss) } : {}),
         }).eq('id', loserId)
       } else if (tied) {
         await supabase.from('users').update({
@@ -211,13 +212,13 @@ export default function BattlePage() {
                 {isSolo && <span className="font-normal text-xs ml-1 opacity-70">(vs bot)</span>}
               </div>
             )}
-            {done.coinsEarned > 0 && (
-              <div className="py-2 px-4 rounded-xl text-sm font-bold bg-yellow-400/20 text-yellow-300 border border-yellow-400/30">
-                🪙 +{done.coinsEarned} coins
+            {done.coinsEarned !== 0 && (
+              <div className={`py-2 px-4 rounded-xl text-sm font-bold border ${done.coinsEarned > 0 ? 'bg-yellow-400/20 text-yellow-300 border-yellow-400/30' : 'bg-red-400/20 text-red-300 border-red-400/30'}`}>
+                🪙 {done.coinsEarned > 0 ? `+${done.coinsEarned}` : done.coinsEarned} coins
               </div>
             )}
           </div>
-          {done.eloDelta === 0 && done.coinsEarned === 0 && <p className="text-xs text-white/30">No ELO change (tie)</p>}
+          {done.eloDelta === 0 && done.coinsEarned === 0 && <p className="text-xs text-white/30">No ELO or coin change (tie)</p>}
 
           {/* New badges earned */}
           {done.newBadges.length > 0 && (
