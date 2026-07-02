@@ -125,7 +125,7 @@ export default function FriendsPage() {
   if (!currentUser) return <div className="p-4 text-center text-white/60">Loading...</div>
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] md:h-screen max-w-4xl mx-auto">
+    <div className="flex h-[calc(100dvh-5rem)] md:h-screen max-w-4xl mx-auto overflow-hidden">
 
       {/* ── Left sidebar ── */}
       <div className={cn(
@@ -273,7 +273,7 @@ export default function FriendsPage() {
                 ← Back
               </button>
             </div>
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 flex flex-col">
               <FriendChat currentUser={currentUser} friend={chattingWith} />
             </div>
           </>

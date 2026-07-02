@@ -179,13 +179,14 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSend} className="flex items-center gap-2 px-4 py-3 border-t border-white/10 flex-shrink-0">
+      <form onSubmit={handleSend} className="flex items-center gap-2 px-4 py-3 border-t border-white/10 flex-shrink-0 bg-[var(--bg-nav)]">
         <input
           value={text}
           onChange={e => setText(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend(e as any)}
           placeholder={`Message ${friend.username}...`}
-          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 outline-none focus:border-indigo-400 transition"
-          autoFocus
+          className="flex-1 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-indigo-400 transition"
+          style={{ background: 'rgba(255,255,255,0.06)', color: 'inherit', pointerEvents: 'auto' }}
         />
         <button
           type="submit"
