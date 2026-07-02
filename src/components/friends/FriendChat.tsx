@@ -55,16 +55,18 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
   }, [messages])
 
   async function loadMessages() {
-    const { data } = await supabase
-      .from('messages')
-      .select('*')
-      .or(
-        `and(sender_id.eq.${currentUser.id},receiver_id.eq.${friend.id}),` +
-        `and(sender_id.eq.${friend.id},receiver_id.eq.${currentUser.id})`
-      )
-      .order('created_at', { ascending: true })
-      .limit(100)
-    if (data) setMessages(data)
+    // Fetch both directions separately and merge — avoids nested .or() syntax issues
+    const [sentRes, receivedRes] = await Promise.all([
+      supabase.from('messages').select('*')
+        .eq('sender_id', currentUser.id).eq('receiver_id', friend.id)
+        .order('created_at', { ascending: true }).limit(100),
+      supabase.from('messages').select('*')
+        .eq('sender_id', friend.id).eq('receiver_id', currentUser.id)
+        .order('created_at', { ascending: true }).limit(100),
+    ])
+    const all = [...(sentRes.data ?? []), ...(receivedRes.data ?? [])]
+    all.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    setMessages(all)
   }
 
   async function handleSend(e: React.FormEvent) {
@@ -86,17 +88,26 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
     setMessages(prev => [...prev, optimistic])
 
     // Save to DB
-    const { data } = await supabase.from('messages').insert({
+    const { data, error } = await supabase.from('messages').insert({
       sender_id: currentUser.id,
       receiver_id: friend.id,
       content,
     }).select().single()
 
+    if (error) {
+      // Remove optimistic if save failed
+      console.error('Message save failed:', error)
+      setMessages(prev => prev.filter(m => m.id !== tempId))
+      setText(content) // restore text
+      setSending(false)
+      return
+    }
+
     if (data) {
       // Replace optimistic with real DB row
       setMessages(prev => prev.map(m => m.id === tempId ? data : m))
 
-      // Broadcast to friend's client so they see it instantly
+      // Broadcast to friend so they see it instantly
       await channelRef.current?.send({
         type: 'broadcast',
         event: 'new_message',
