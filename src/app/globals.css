@@ -102,3 +102,8 @@ html.light .border-slate-600 { border-color: rgba(109,88,217,0.20) !important; }
 /* Input backgrounds in dark */
 html.light input, html.light textarea { background-color: rgba(255,255,255,0.7) !important; color: #1e1b4b !important; }
 html.light input::placeholder, html.light textarea::placeholder { color: rgba(30,27,75,0.35) !important; }
+
+/* Battle result badges — readable on light backgrounds */
+html.light .text-green-300 { color: #15803d !important; }
+html.light .text-red-300   { color: #b91c1c !important; }
+html.light .text-yellow-300 { color: #a16207 !important; }

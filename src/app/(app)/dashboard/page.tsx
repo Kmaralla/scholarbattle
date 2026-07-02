@@ -118,7 +118,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-black text-white/80">{myScore}–{theirScore}</span>
-                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${isTie ? 'bg-yellow-400/20 text-yellow-300' : isWinner ? 'bg-green-400/20 text-green-300' : 'bg-red-400/20 text-red-300'}`}>
+                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${isTie ? 'bg-yellow-400/30 text-yellow-600 dark:text-yellow-300' : isWinner ? 'bg-green-400/30 text-green-700 dark:text-green-300' : 'bg-red-400/30 text-red-700 dark:text-red-300'}`}>
                       {isTie ? 'TIE' : isWinner ? 'WIN' : 'LOSS'}
                     </span>
                   </div>
