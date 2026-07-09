@@ -62,7 +62,7 @@ export default async function DashboardPage() {
             <Swords className="w-6 h-6 text-indigo-300" />
           </div>
           <div className="flex-1">
-            <p className="font-black text-white text-base">Battle Online ⚔️</p>
+            <p className="font-black text-white text-base">Battle ⚔️</p>
             <p className="text-white/40 text-xs">Ranked · Match with a real player now</p>
           </div>
           <span className="text-white/30 text-xl">→</span>
