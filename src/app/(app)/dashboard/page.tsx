@@ -63,7 +63,7 @@ export default async function DashboardPage() {
           </div>
           <div className="flex-1">
             <p className="font-black text-white text-base">Battle ⚔️</p>
-            <p className="text-white/40 text-xs">Ranked · Match with a real player now</p>
+            <p className="text-white/40 text-xs">Ranked · Battle anyone, anytime</p>
           </div>
           <span className="text-white/30 text-xl">→</span>
         </Link>
