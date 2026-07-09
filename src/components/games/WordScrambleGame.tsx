@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Subject } from '@/types'
 
 const WORD_BANKS: Record<string, string[]> = {
@@ -28,9 +28,14 @@ export function WordScrambleGame({ subject, grade, onExit }: { subject: Subject;
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null)
   const [done, setDone] = useState(false)
 
-  function nextWord(idx: number) {
-    if (idx >= words.length) { setDone(true); return }
-    setScrambled(scramble(words[idx]))
+  function goToNext() {
+    const next = index + 1
+    if (next >= words.length) {
+      setDone(true)
+      return
+    }
+    setIndex(next)
+    setScrambled(scramble(words[next]))
     setInput('')
     setFeedback(null)
   }
@@ -41,53 +46,54 @@ export function WordScrambleGame({ subject, grade, onExit }: { subject: Subject;
     if (input.trim().toLowerCase() === words[index]) {
       setScore(s => s + 1)
       setFeedback('correct')
-      setTimeout(() => { setIndex(i => { const next = i + 1; nextWord(next); return next }) }, 800)
+      setTimeout(goToNext, 800)
     } else {
       setFeedback('wrong')
-      // Stay on this word — user must click Next
     }
-  }
-
-  function handleNext() {
-    setIndex(i => { const next = i + 1; nextWord(next); return next })
   }
 
   function skip() {
     if (feedback) return
     setFeedback('wrong')
-    // Stay — user must click Next
   }
 
   if (done) return (
     <div className="max-w-lg mx-auto p-4 flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
       <div className="text-6xl">{score >= words.length * 0.7 ? '🏆' : '🎯'}</div>
-      <h2 className="text-2xl font-black text-gray-900">Game Over!</h2>
-      <p className="text-lg font-bold text-indigo-600">{score} / {words.length} correct</p>
+      <h2 className="text-2xl font-black text-white">Game Over!</h2>
+      <p className="text-lg font-bold text-indigo-400">{score} / {words.length} correct</p>
       <div className="flex gap-3 mt-2">
-        <button onClick={() => { setIndex(0); setScore(0); setDone(false); nextWord(0) }} className="px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold">Play Again</button>
+        <button onClick={() => { setIndex(0); setScore(0); setDone(false); setScrambled(scramble(words[0])); setInput(''); setFeedback(null) }} className="px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold">Play Again</button>
         <button onClick={onExit} className="px-6 py-3 bg-white/10 text-white rounded-2xl font-bold">Exit</button>
       </div>
     </div>
   )
 
+  const isWrong = feedback === 'wrong'
+
   return (
     <div className="max-w-lg mx-auto p-4 space-y-6">
       <div className="flex items-center justify-between">
-        <button onClick={onExit} className="text-sm text-gray-500 hover:text-gray-700">← Back</button>
-        <span className="font-bold text-indigo-600">Score: {score}</span>
-        <span className="text-sm text-gray-400">{index + 1}/{words.length}</span>
+        <button onClick={onExit} className="text-sm text-white/50 hover:text-white">← Back</button>
+        <span className="font-bold text-indigo-400">Score: {score}</span>
+        <span className="text-sm text-white/40">{index + 1}/{words.length}</span>
       </div>
 
-      <div className={`rounded-3xl p-8 text-center transition-colors ${feedback === 'correct' ? 'bg-green-50' : feedback === 'wrong' ? 'bg-red-50' : 'bg-indigo-50'}`}>
-        <p className="text-xs text-gray-500 mb-2 uppercase tracking-wide">Unscramble this word</p>
-        <p className="text-4xl font-black tracking-[0.3em] text-indigo-700">{scrambled.toUpperCase()}</p>
-        {feedback === 'wrong' && (
-          <p className="mt-3 text-sm text-red-500">The word was: <span className="font-black text-red-600">{words[index]}</span></p>
+      <div className={`rounded-3xl p-8 text-center transition-colors ${feedback === 'correct' ? 'bg-green-500/20 border border-green-400/30' : isWrong ? 'bg-red-500/20 border border-red-400/30' : 'bg-white/5 border border-white/10'}`}>
+        <p className="text-xs text-white/50 mb-2 uppercase tracking-wide">Unscramble this word</p>
+        <p className="text-4xl font-black tracking-[0.3em] text-white">{scrambled.toUpperCase()}</p>
+        {isWrong && (
+          <p className="mt-4 text-base font-bold text-red-300">
+            The answer was: <span className="text-white font-black">{words[index]}</span>
+          </p>
         )}
       </div>
 
-      {feedback === 'wrong' ? (
-        <button onClick={handleNext} className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-sm transition">
+      {isWrong ? (
+        <button
+          onClick={goToNext}
+          className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-sm transition"
+        >
           Next →
         </button>
       ) : (
@@ -103,7 +109,12 @@ export function WordScrambleGame({ subject, grade, onExit }: { subject: Subject;
           <button type="submit" className="px-5 py-3 bg-indigo-600 text-white rounded-2xl font-bold">Go</button>
         </form>
       )}
-      {!feedback && <button onClick={skip} className="w-full py-2 text-sm text-gray-400 hover:text-gray-600">Skip word</button>}
+
+      {!feedback && (
+        <button onClick={skip} className="w-full py-2 text-sm text-white/30 hover:text-white/60 transition">
+          Skip word
+        </button>
+      )}
     </div>
   )
 }
