@@ -91,7 +91,10 @@ export function TrainingSession({
 
   useEffect(() => {
     if (phase !== 'question' || answered || mode.seconds === 99) return
-    setTimeLeft(mode.seconds)
+    const questionSeconds = isPuzzle
+      ? qIndex === mode.questions - 1 ? 5 : Math.max(10, mode.seconds - qIndex * 10)
+      : mode.seconds
+    setTimeLeft(questionSeconds)
     timerRef.current = setInterval(() => {
       setTimeLeft(t => {
         if (t <= 1) { clearInterval(timerRef.current!); handleTimeout(); return 0 }
@@ -228,7 +231,8 @@ export function TrainingSession({
     setTypedHintLevel(0)
   }
 
-  const timerPct = mode.seconds === 99 ? 100 : (timeLeft / mode.seconds) * 100
+  const questionSeconds = isPuzzle ? qIndex === mode.questions - 1 ? 5 : Math.max(10, mode.seconds - qIndex * 10) : mode.seconds
+  const timerPct = mode.seconds === 99 ? 100 : (timeLeft / questionSeconds) * 100
   const myAnswerCorrect = selectedAnswer
     ? selectedAnswer.toLowerCase() === q?.correct_answer?.toLowerCase()
     : typedAnswer.toLowerCase() === q?.correct_answer?.toLowerCase()
