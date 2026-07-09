@@ -214,7 +214,7 @@ export default function BattlePage() {
             )}
             {done.coinsEarned !== 0 && (
               <div className={`py-2 px-4 rounded-xl text-sm font-bold border ${done.coinsEarned > 0 ? 'bg-yellow-400/20 text-yellow-300 border-yellow-400/30' : 'bg-red-400/20 text-red-300 border-red-400/30'}`}>
-                <img src="/coin.avif" alt="coin" width={16} height={16} className="inline-block object-contain mr-1" style={{ verticalAlign: 'middle' }} />{done.coinsEarned > 0 ? `+${done.coinsEarned}` : done.coinsEarned} coins
+                🪙 {done.coinsEarned > 0 ? `+${done.coinsEarned}` : done.coinsEarned} coins
               </div>
             )}
           </div>

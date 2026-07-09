@@ -61,7 +61,7 @@ export function Navbar() {
         {coins !== null && (
           <div className="flex items-center justify-center gap-3 pt-1.5 px-4">
             <div className="flex items-center gap-1.5 bg-yellow-400/10 border border-yellow-400/30 rounded-full px-4 py-0.5">
-              <img src="/coin.avif" alt="coin" width={18} height={18} className="inline-block object-contain" />
+              <span className="text-sm">🪙</span>
               <span className="text-sm font-black text-yellow-300">{coins}</span>
             </div>
             <button
@@ -111,7 +111,7 @@ export function Navbar() {
           </div>
           {coins !== null && (
             <div className="mt-4 flex items-center gap-2 bg-yellow-400/10 border border-yellow-400/20 rounded-2xl px-4 py-2">
-              <img src="/coin.avif" alt="coin" width={28} height={28} className="inline-block object-contain" />
+              <span className="text-xl">🪙</span>
               <div>
                 <p className="text-xs text-yellow-400/60 font-medium">Your Coins</p>
                 <p className="text-lg font-black text-yellow-300">{coins}</p>

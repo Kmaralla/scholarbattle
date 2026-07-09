@@ -244,7 +244,7 @@ export function TrainingSession({
             You've already completed today's puzzle. Come back tomorrow for a new one!
           </p>
           <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-2xl p-4">
-            <p className="text-yellow-300 font-bold text-sm flex items-center gap-1.5"><img src="/coin.avif" alt="coin" width={16} height={16} className="inline-block object-contain" /> You earned {PUZZLE_COINS} coins today</p>
+            <p className="text-yellow-300 font-bold text-sm">🪙 You earned {PUZZLE_COINS} coins today</p>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
             <p className="text-xs text-white/40 mb-1">New puzzle in</p>
@@ -286,7 +286,7 @@ export function TrainingSession({
 
           {isPuzzle && puzzleCoinsAwarded && (
             <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-2xl p-4 flex items-center justify-center gap-3">
-              <img src="/coin.avif" alt="coin" width={48} height={48} className="object-contain" />
+              <span className="text-3xl">🪙</span>
               <div className="text-left">
                 <p className="text-yellow-300 font-black text-lg">+{PUZZLE_COINS} coins earned!</p>
                 <p className="text-yellow-400/60 text-xs">Daily puzzle reward</p>

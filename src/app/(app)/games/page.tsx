@@ -58,7 +58,7 @@ export default function GamesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-black text-white">🎮 Games</h1>
         <div className="flex items-center gap-1 bg-yellow-400/10 border border-yellow-400/30 rounded-full px-3 py-1.5">
-          <img src="/coin.avif" alt="coin" width={20} height={20} className="inline-block object-contain" />
+          <span>🪙</span>
           <span className="font-bold text-yellow-300">{profile.coins}</span>
         </div>
       </div>
@@ -143,7 +143,7 @@ export default function GamesPage() {
                     'text-xs rounded-full px-2 py-0.5 font-semibold',
                     canAfford ? 'bg-yellow-300 text-yellow-900' : 'bg-black/20 text-white'
                   )}>
-                    <img src="/coin.avif" alt="coin" width={12} height={12} className="inline-block object-contain mr-0.5" style={{ verticalAlign: 'middle' }} />{game.coinCost} to unlock
+                    🪙 {game.coinCost} to unlock
                   </span>
                 )}
               </div>
@@ -158,7 +158,7 @@ export default function GamesPage() {
         })}
       </div>
 
-      <p className="text-xs text-center text-gray-400">Win battles to earn <img src="/coin.avif" alt="coin" width={12} height={12} className="inline-block object-contain" style={{ verticalAlign: 'middle' }} /> coins and unlock more games!</p>
+      <p className="text-xs text-center text-gray-400">Win battles to earn 🪙 coins and unlock more games!</p>
     </div>
   )
 }
