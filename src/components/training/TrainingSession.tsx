@@ -42,6 +42,7 @@ export function TrainingSession({
   const isPuzzle = mode.id === 'puzzles'
   const isFlashcard = mode.id === 'flashcards'
   const isStreak = mode.id === 'streak'
+  const isSpeed = mode.id === 'speed'
   const supabase = createClient()
 
   // Daily puzzle gate
@@ -67,6 +68,10 @@ export function TrainingSession({
   const [bestStreak, setBestStreak] = useState(0)
   const [lives, setLives] = useState(3)
   const [timeLeft, setTimeLeft] = useState(mode.seconds)
+  const [speedHighScore, setSpeedHighScore] = useState(() =>
+    isSpeed ? parseInt(localStorage.getItem('speed_high_score') ?? '0', 10) : 0
+  )
+  const [newHighScore, setNewHighScore] = useState(false)
   const [coachMessage, setCoachMessage] = useState(coach.introLine)
   const [showCoachMessage, setShowCoachMessage] = useState(true)
   const [phase, setPhase] = useState<'intro' | 'question' | 'done'>('intro')
@@ -86,6 +91,16 @@ export function TrainingSession({
     if (phase === 'intro') {
       const t = setTimeout(() => setPhase('question'), 2500)
       return () => clearTimeout(t)
+    }
+  }, [phase])
+
+  useEffect(() => {
+    if (isSpeed && phase === 'done') {
+      if (score > speedHighScore) {
+        localStorage.setItem('speed_high_score', String(score))
+        setSpeedHighScore(score)
+        setNewHighScore(true)
+      }
     }
   }, [phase])
 
@@ -282,6 +297,11 @@ export function TrainingSession({
             <p className="text-white/70 text-sm font-semibold">{mode.emoji} {mode.name}</p>
             <p className="text-6xl font-black text-white mt-1">{score}<span className="text-2xl text-white/60">/{finalTotal}</span></p>
             {isStreak && <p className="text-white/80 font-bold text-sm mt-1">🔥 Best streak: {bestStreak}</p>}
+            {isSpeed && (
+              <p className="text-white/80 font-bold text-sm mt-1">
+                {newHighScore ? '🏆 New High Score!' : `🏆 High Score: ${speedHighScore}/${totalQ}`}
+              </p>
+            )}
             <div className="mt-3 h-3 bg-black/20 rounded-full overflow-hidden">
               <div className="h-full bg-white/70 rounded-full" style={{ width: `${pct}%` }} />
             </div>
@@ -309,7 +329,7 @@ export function TrainingSession({
             {!isPuzzle && (
               <button
                 onClick={() => {
-                  setQIndex(0); setScore(0); setStreak(0); setBestStreak(0); setLives(3)
+                  setQIndex(0); setScore(0); setStreak(0); setBestStreak(0); setLives(3); setNewHighScore(false)
                   setSelectedAnswer(null); setTypedAnswer(''); setAnswered(false)
                   setShowResult(false); setFlashRevealed(false); setEliminatedOptions([]); setHintsLeft(MAX_HINTS)
                   setCoachMessage(coach.introLine); setShowCoachMessage(true)
