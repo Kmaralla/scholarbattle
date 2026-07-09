@@ -64,7 +64,7 @@ export function TierBanner({ tier, username, eloRating, coins, progress }: Props
           <p className={`text-4xl font-black ${s.text}`}>{eloRating}</p>
           <p className={`${s.muted} text-xs`}>ELO Rating</p>
           {coins !== undefined && (
-            <p className={`${s.text} font-bold text-sm mt-1 opacity-80`}>🪙 {coins}</p>
+            <p className={`${s.text} font-bold text-sm mt-1 opacity-80 flex items-center gap-1`}><img src="/coin.avif" alt="coin" width={16} height={16} className="inline-block object-contain" /> {coins}</p>
           )}
         </div>
       </div>

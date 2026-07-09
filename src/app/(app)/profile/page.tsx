@@ -64,10 +64,14 @@ export default async function ProfilePage() {
           { label: 'Battles', value: profile.total_battles, emoji: '⚔️' },
           { label: 'Wins',    value: profile.total_wins,    emoji: '🏆' },
           { label: 'Win Rate',value: `${winRate}%`,         emoji: '⚡' },
-          { label: 'Coins',   value: (profile as any).coins ?? 0, emoji: '🪙' },
+          { label: 'Coins',   value: (profile as any).coins ?? 0, emoji: 'coin' },
         ].map(({ label, value, emoji }) => (
           <div key={label} className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
-            <div className="text-lg mb-0.5">{emoji}</div>
+            <div className="text-lg mb-0.5 flex justify-center">
+              {emoji === 'coin'
+                ? <img src="/coin.avif" alt="coin" width={24} height={24} className="object-contain" />
+                : emoji}
+            </div>
             <p className="text-base font-black text-white leading-none">{value}</p>
             <p className="text-white/40 text-[10px] font-medium mt-0.5">{label}</p>
           </div>
