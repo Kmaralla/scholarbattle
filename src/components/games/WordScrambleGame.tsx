@@ -3,10 +3,41 @@ import { useState } from 'react'
 import { Subject } from '@/types'
 
 const WORD_BANKS: Record<string, string[]> = {
-  english: ['elephant', 'journey', 'whisper', 'gravity', 'dolphin', 'thunder', 'mystery', 'champion', 'adventure', 'knowledge'],
-  science: ['nucleus', 'photon', 'erosion', 'gravity', 'habitat', 'oxygen', 'molecule', 'friction', 'climate', 'ecosystem'],
-  history: ['pyramid', 'republic', 'emperor', 'colony', 'slavery', 'treaty', 'congress', 'liberty', 'revolution', 'democracy'],
-  math: ['fraction', 'decimal', 'integer', 'equation', 'polygon', 'perimeter', 'quotient', 'factor', 'theorem', 'symmetry'],
+  english: [
+    'elephant', 'journey', 'whisper', 'dolphin', 'thunder', 'mystery', 'champion', 'adventure', 'knowledge', 'silence',
+    'blossom', 'courage', 'freedom', 'lantern', 'crystal', 'harmony', 'phantom', 'shelter', 'triumph', 'volcano',
+    'blanket', 'cabinet', 'dazzle', 'elegant', 'feather', 'glitter', 'horizon', 'imagine', 'jealous', 'kitchen',
+    'laughter', 'meadow', 'nervous', 'opinion', 'painful', 'quarter', 'rainbow', 'shallow', 'thunder', 'umbrella',
+    'village', 'warrior', 'xylophone', 'yearning', 'zebra', 'anchor', 'bridges', 'comfort', 'dragon', 'emerald',
+  ],
+  science: [
+    'nucleus', 'photon', 'erosion', 'habitat', 'oxygen', 'molecule', 'friction', 'climate', 'ecosystem', 'gravity',
+    'electron', 'protein', 'neutron', 'volcano', 'tornado', 'mineral', 'magnet', 'crystal', 'prism', 'tsunami',
+    'bacteria', 'carbon', 'density', 'energy', 'fossil', 'genome', 'helium', 'igneous', 'Jupiter', 'kinetic',
+    'larvae', 'metamorphosis', 'nitrogen', 'osmosis', 'photosynthesis', 'quasar', 'radiation', 'sediment', 'thermal', 'ultraviolet',
+    'velocity', 'wavelength', 'xylem', 'yeast', 'zodiac', 'algae', 'biome', 'comet', 'diffusion', 'eclipse',
+  ],
+  history: [
+    'pyramid', 'republic', 'emperor', 'colony', 'slavery', 'treaty', 'congress', 'liberty', 'revolution', 'democracy',
+    'empire', 'pharaoh', 'gladiator', 'feudal', 'crusade', 'dynasty', 'monarchy', 'senate', 'warrior', 'conquest',
+    'artifact', 'barbarian', 'cathedral', 'diplomat', 'explorer', 'fortress', 'guillotine', 'heritage', 'invasion', 'justice',
+    'kingdom', 'legion', 'medieval', 'nobility', 'ottoman', 'patriarch', 'quorum', 'rebellion', 'sovereign', 'tribute',
+    'uprising', 'victory', 'warfare', 'xenophobia', 'yeoman', 'zealot', 'alliance', 'ballot', 'cavalry', 'decree',
+  ],
+  math: [
+    'fraction', 'decimal', 'integer', 'equation', 'polygon', 'perimeter', 'quotient', 'factor', 'theorem', 'symmetry',
+    'algebra', 'calculus', 'diameter', 'exponent', 'formula', 'geometry', 'hexagon', 'infinity', 'median', 'negative',
+    'octagon', 'parallel', 'quadrant', 'radius', 'segment', 'tangent', 'variable', 'vector', 'vertex', 'volume',
+    'absolute', 'binomial', 'coefficient', 'denominator', 'estimate', 'fibonacci', 'gradient', 'hypotenuse', 'intercept', 'logarithm',
+    'multiple', 'numerator', 'obtuse', 'product', 'rational', 'sequence', 'triangle', 'undefined', 'whole', 'zero',
+  ],
+}
+
+const GAME_SIZE = 10
+
+function pickRandom(arr: string[], n: number): string[] {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5)
+  return shuffled.slice(0, n)
 }
 
 function scramble(word: string): string {
@@ -20,7 +51,7 @@ function scramble(word: string): string {
 }
 
 export function WordScrambleGame({ subject, grade, onExit }: { subject: Subject; grade: number; onExit: () => void }) {
-  const words = WORD_BANKS[subject] ?? WORD_BANKS.english
+  const [words, setWords] = useState(() => pickRandom(WORD_BANKS[subject] ?? WORD_BANKS.english, GAME_SIZE))
   const [index, setIndex] = useState(0)
   const [scrambled, setScrambled] = useState(() => scramble(words[0]))
   const [input, setInput] = useState('')
@@ -63,7 +94,7 @@ export function WordScrambleGame({ subject, grade, onExit }: { subject: Subject;
       <h2 className="text-2xl font-black text-white">Game Over!</h2>
       <p className="text-lg font-bold text-indigo-400">{score} / {words.length} correct</p>
       <div className="flex gap-3 mt-2">
-        <button onClick={() => { setIndex(0); setScore(0); setDone(false); setScrambled(scramble(words[0])); setInput(''); setFeedback(null) }} className="px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold">Play Again</button>
+        <button onClick={() => { const fresh = pickRandom(WORD_BANKS[subject] ?? WORD_BANKS.english, GAME_SIZE); setWords(fresh); setIndex(0); setScore(0); setDone(false); setScrambled(scramble(fresh[0])); setInput(''); setFeedback(null) }} className="px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold">Play Again</button>
         <button onClick={onExit} className="px-6 py-3 bg-white/10 text-white rounded-2xl font-bold">Exit</button>
       </div>
     </div>
