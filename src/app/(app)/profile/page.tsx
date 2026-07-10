@@ -4,7 +4,7 @@ import { getRankTier } from '@/types'
 import { LogOut } from 'lucide-react'
 import { AvatarPicker, AVATARS } from '@/components/profile/AvatarPicker'
 import { BADGES, RARITY_STYLES } from '@/lib/badges'
-import { BgColorPicker } from '@/components/profile/BgColorPicker'
+import { ColorsSidePanel } from '@/components/profile/ColorsSidePanel'
 
 const TIER_COLORS: Record<string, string> = {
   bronze:   'from-orange-900/70 to-amber-800/50',
@@ -117,7 +117,7 @@ export default async function ProfilePage() {
         <p className="text-[10px] text-white/25 text-center mt-2">Hover a badge to see its description</p>
       </div>
 
-      <BgColorPicker />
+      <ColorsSidePanel />
     </div>
   )
 }
