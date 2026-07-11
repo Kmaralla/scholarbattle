@@ -22,6 +22,7 @@ export default function BattlePage() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isSolo, setIsSolo] = useState(true)
   const [waitingForOpponent, setWaitingForOpponent] = useState(false)
+  const [challengeDeclined, setChallengeDeclined] = useState(false)
   const supabase = createClient()
   const router = useRouter()
 
@@ -56,6 +57,10 @@ export default function BattlePage() {
             if (data?.status === 'in_progress') {
               clearInterval(poll)
               setWaitingForOpponent(false)
+            } else if (data?.status === 'declined') {
+              clearInterval(poll)
+              setWaitingForOpponent(false)
+              setChallengeDeclined(true)
             }
           }, 2000)
         }
@@ -257,6 +262,29 @@ export default function BattlePage() {
           <p className="font-bold text-white">{loadError}</p>
           <button onClick={() => router.push('/battle')} className="px-5 py-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-xl text-sm font-bold">
             Back to Battle
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (challengeDeclined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
+        <div className="rounded-3xl p-8 max-w-sm w-full text-center space-y-4 bg-red-500/10 border border-red-400/30">
+          <div className="text-5xl">😤</div>
+          <h2 className="text-2xl font-black text-red-400">CHALLENGE DECLINED!</h2>
+          <p className="text-sm text-white/50">
+            <span className="font-bold text-white">{opponent?.username}</span> turned down your challenge.
+          </p>
+          <button
+            onClick={() => router.push('/matchmaking')}
+            className="w-full py-3 rounded-2xl bg-indigo-500 hover:bg-indigo-400 font-black text-white transition-all"
+          >
+            Find Another Opponent
+          </button>
+          <button onClick={() => router.push('/dashboard')} className="text-sm text-white/30 underline">
+            Go Home
           </button>
         </div>
       </div>
