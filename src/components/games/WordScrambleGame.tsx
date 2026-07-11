@@ -36,8 +36,7 @@ const WORD_BANKS: Record<string, string[]> = {
 const GAME_SIZE = 10
 
 function pickRandom(arr: string[], n: number): string[] {
-  const shuffled = [...arr].sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, n)
+  return [...arr].sort(() => Math.random() - 0.5).slice(0, n)
 }
 
 function scramble(word: string): string {
@@ -56,15 +55,14 @@ export function WordScrambleGame({ subject, grade, onExit }: { subject: Subject;
   const [scrambled, setScrambled] = useState(() => scramble(words[0]))
   const [input, setInput] = useState('')
   const [score, setScore] = useState(0)
+  const [streak, setStreak] = useState(0)
+  const [bestStreak, setBestStreak] = useState(0)
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null)
   const [done, setDone] = useState(false)
 
   function goToNext() {
     const next = index + 1
-    if (next >= words.length) {
-      setDone(true)
-      return
-    }
+    if (next >= words.length) { setDone(true); return }
     setIndex(next)
     setScrambled(scramble(words[next]))
     setInput('')
@@ -74,56 +72,97 @@ export function WordScrambleGame({ subject, grade, onExit }: { subject: Subject;
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (feedback) return
-    if (input.trim().toLowerCase() === words[index]) {
+    if (input.trim().toLowerCase() === words[index].toLowerCase()) {
       setScore(s => s + 1)
+      setStreak(s => { const n = s + 1; setBestStreak(b => Math.max(b, n)); return n })
       setFeedback('correct')
-      setTimeout(goToNext, 800)
+      setTimeout(goToNext, 700)
     } else {
+      setStreak(0)
       setFeedback('wrong')
     }
   }
 
   function skip() {
     if (feedback) return
+    setStreak(0)
     setFeedback('wrong')
   }
 
-  if (done) return (
-    <div className="max-w-lg mx-auto p-4 flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
-      <div className="text-6xl">{score >= words.length * 0.7 ? '🏆' : '🎯'}</div>
-      <h2 className="text-2xl font-black text-white">Game Over!</h2>
-      <p className="text-lg font-bold text-indigo-400">{score} / {words.length} correct</p>
-      <div className="flex gap-3 mt-2">
-        <button onClick={() => { const fresh = pickRandom(WORD_BANKS[subject] ?? WORD_BANKS.english, GAME_SIZE); setWords(fresh); setIndex(0); setScore(0); setDone(false); setScrambled(scramble(fresh[0])); setInput(''); setFeedback(null) }} className="px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold">Play Again</button>
-        <button onClick={onExit} className="px-6 py-3 bg-white/10 text-white rounded-2xl font-bold">Exit</button>
+  function playAgain() {
+    const fresh = pickRandom(WORD_BANKS[subject] ?? WORD_BANKS.english, GAME_SIZE)
+    setWords(fresh)
+    setIndex(0)
+    setScrambled(scramble(fresh[0]))
+    setInput('')
+    setScore(0)
+    setStreak(0)
+    setBestStreak(0)
+    setFeedback(null)
+    setDone(false)
+  }
+
+  if (done) {
+    const pct = Math.round((score / words.length) * 100)
+    return (
+      <div className="max-w-lg mx-auto p-4 flex flex-col items-center justify-center min-h-[70vh] gap-5 text-center">
+        <div className="text-6xl">{pct >= 80 ? '🏆' : pct >= 50 ? '🎯' : '💪'}</div>
+        <h2 className="text-2xl font-black text-white">Game Over!</h2>
+        <p className="text-6xl font-black text-indigo-400">{score}<span className="text-2xl text-white/40">/{words.length}</span></p>
+        <div className="flex gap-6 text-center">
+          <div><p className="text-xl font-black text-orange-300">{bestStreak}x</p><p className="text-xs text-white/40">best streak</p></div>
+          <div><p className="text-xl font-black text-indigo-300">{pct}%</p><p className="text-xs text-white/40">accuracy</p></div>
+        </div>
+        <div className="flex gap-3">
+          <button onClick={playAgain} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black transition">Play Again</button>
+          <button onClick={onExit} className="px-6 py-3 bg-white/10 hover:bg-white/15 text-white rounded-2xl font-black transition">Exit</button>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   const isWrong = feedback === 'wrong'
+  const isCorrect = feedback === 'correct'
+  const progress = (index / words.length) * 100
 
   return (
-    <div className="max-w-lg mx-auto p-4 space-y-6">
+    <div className="max-w-lg mx-auto p-4 space-y-5 pb-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <button onClick={onExit} className="text-sm text-white/50 hover:text-white">← Back</button>
-        <span className="font-bold text-indigo-400">Score: {score}</span>
-        <span className="text-sm text-white/40">{index + 1}/{words.length}</span>
+        <button onClick={onExit} className="text-sm text-white/50 hover:text-white transition">← Back</button>
+        <div className="flex items-center gap-3">
+          {streak >= 3 && <span className="text-orange-400 font-black text-sm">🔥{streak}</span>}
+          <span className="font-black text-indigo-400">{score} ✓</span>
+          <span className="text-xs text-white/40">{index + 1}/{words.length}</span>
+        </div>
       </div>
 
-      <div className={`rounded-3xl p-8 text-center transition-colors ${feedback === 'correct' ? 'bg-green-500/20 border border-green-400/30' : isWrong ? 'bg-red-500/20 border border-red-400/30' : 'bg-white/5 border border-white/10'}`}>
-        <p className="text-xs text-white/50 mb-2 uppercase tracking-wide">Unscramble this word</p>
+      {/* Progress bar */}
+      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+        <div className="h-full bg-indigo-500 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
+      </div>
+
+      {/* Scrambled word card */}
+      <div className={`rounded-3xl p-8 text-center border transition-all duration-200 ${
+        isCorrect ? 'bg-green-500/20 border-green-400/40' :
+        isWrong   ? 'bg-red-500/20 border-red-400/40' :
+                    'bg-white/5 border-white/10'
+      }`}>
+        <p className="text-xs text-white/30 uppercase tracking-widest mb-3">Unscramble this word</p>
         <p className="text-4xl font-black tracking-[0.3em] text-white">{scrambled.toUpperCase()}</p>
+        {isCorrect && <p className="mt-3 text-green-400 font-black text-sm">✓ Correct!</p>}
         {isWrong && (
-          <p className="mt-4 text-base font-bold text-red-300">
+          <p className="mt-3 text-sm font-bold text-red-300">
             The answer was: <span className="text-white font-black">{words[index]}</span>
           </p>
         )}
       </div>
 
+      {/* Input or Next */}
       {isWrong ? (
         <button
           onClick={goToNext}
-          className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-sm transition"
+          className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-sm transition"
         >
           Next →
         </button>
@@ -135,14 +174,16 @@ export function WordScrambleGame({ subject, grade, onExit }: { subject: Subject;
             placeholder="Type your answer..."
             autoFocus
             disabled={!!feedback}
-            className="flex-1 px-4 py-3 rounded-2xl border-2 border-white/20 bg-white/5 text-white focus:border-indigo-400 outline-none text-lg font-semibold"
+            className="flex-1 px-4 py-4 rounded-2xl border-2 border-white/15 bg-white/5 text-white focus:border-indigo-400 outline-none text-lg font-semibold placeholder-white/20 transition"
           />
-          <button type="submit" className="px-5 py-3 bg-indigo-600 text-white rounded-2xl font-bold">Go</button>
+          <button type="submit" disabled={!!feedback} className="px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black transition disabled:opacity-50">
+            Go
+          </button>
         </form>
       )}
 
       {!feedback && (
-        <button onClick={skip} className="w-full py-2 text-sm text-white/30 hover:text-white/60 transition">
+        <button onClick={skip} className="w-full py-2 text-sm text-white/25 hover:text-white/50 transition">
           Skip word
         </button>
       )}
