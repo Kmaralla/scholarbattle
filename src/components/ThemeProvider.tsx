@@ -3,8 +3,11 @@ import { createContext, useContext, useEffect, useState } from 'react'
 
 type Theme = 'dark' | 'light'
 
-const DARK_PRESETS  = ['#0f0a1e', '#0a0f1e', '#0d1117', '#0a1a0f', '#1a0a0a', '#0a1520', '#1a1000']
-const LIGHT_PRESETS = ['#f0eeff', '#ffffff', '#fdf8f0', '#f0fff4', '#f0f8ff', '#fff5f0', '#fef9e7']
+const DEFAULT_DARK  = '#0e0b2e'
+const DEFAULT_LIGHT = '#eeeaff'
+
+const DARK_PRESETS  = [DEFAULT_DARK, '#0a0f1e', '#0d1117', '#0a1a0f', '#1a0a0a', '#0a1520', '#1a1000']
+const LIGHT_PRESETS = [DEFAULT_LIGHT, '#ffffff', '#fdf8f0', '#f0fff4', '#f0f8ff', '#fff5f0', '#fef9e7']
 
 // Shifts a hex color slightly lighter (positive) or darker (negative)
 function shiftHex(hex: string, amount: number): string {
@@ -28,20 +31,20 @@ interface ThemeCtx {
 
 const ThemeContext = createContext<ThemeCtx>({
   theme: 'dark', toggle: () => {},
-  darkBg: DARK_PRESETS[0], lightBg: LIGHT_PRESETS[0],
+  darkBg: DEFAULT_DARK, lightBg: DEFAULT_LIGHT,
   setDarkBg: () => {}, setLightBg: () => {},
   darkPresets: DARK_PRESETS, lightPresets: LIGHT_PRESETS,
 })
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('dark')
-  const [darkBg,  setDarkBgState]  = useState(DARK_PRESETS[0])
-  const [lightBg, setLightBgState] = useState(LIGHT_PRESETS[0])
+  const [darkBg,  setDarkBgState]  = useState(DEFAULT_DARK)
+  const [lightBg, setLightBgState] = useState(DEFAULT_LIGHT)
 
   useEffect(() => {
     const savedTheme  = (localStorage.getItem('theme') as Theme) ?? 'dark'
-    const savedDark   = localStorage.getItem('darkBg')  ?? DARK_PRESETS[0]
-    const savedLight  = localStorage.getItem('lightBg') ?? LIGHT_PRESETS[0]
+    const savedDark   = localStorage.getItem('darkBg')  ?? DEFAULT_DARK
+    const savedLight  = localStorage.getItem('lightBg') ?? DEFAULT_LIGHT
     setTheme(savedTheme)
     setDarkBgState(savedDark)
     setLightBgState(savedLight)
