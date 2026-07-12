@@ -48,25 +48,6 @@ export function ColorsSidePanel() {
                 />
               ))}
 
-              {/* Custom picker */}
-              <label
-                className="w-full aspect-square rounded-xl border-2 border-white/20 flex items-center justify-center cursor-pointer hover:scale-110 transition-all overflow-hidden relative bg-white/5"
-                title="Custom color"
-              >
-                <span className="text-white/60 text-lg leading-none">+</span>
-                <input
-                  type="color"
-                  value={current}
-                  onChange={e => setter(e.target.value)}
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                />
-              </label>
-            </div>
-
-            {/* Current color */}
-            <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2">
-              <div className="w-4 h-4 rounded-md border border-white/20 flex-shrink-0" style={{ background: current }} />
-              <span className="text-xs text-white/40 font-mono">{current}</span>
             </div>
           </div>
         </div>
