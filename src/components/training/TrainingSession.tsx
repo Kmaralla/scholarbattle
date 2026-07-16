@@ -176,9 +176,13 @@ export function TrainingSession({
 
   function handleChoice(opt: string) {
     if (answered) return
-    clearInterval(timerRef.current!)
     setSelectedAnswer(opt)
-    registerAnswer(opt.toLowerCase() === q.correct_answer.toLowerCase())
+  }
+
+  function handleChoiceSubmit() {
+    if (!selectedAnswer || answered) return
+    clearInterval(timerRef.current!)
+    registerAnswer(selectedAnswer.toLowerCase() === q.correct_answer.toLowerCase())
   }
 
   function handleTypedSubmit(e: React.FormEvent) {
@@ -493,6 +497,16 @@ export function TrainingSession({
                 )
               })}
                 </div>
+          )}
+
+          {/* Submit button for multiple choice */}
+          {!isFlashcard && q.type === 'multiple_choice' && selectedAnswer && !answered && (
+            <button
+              onClick={handleChoiceSubmit}
+              className={cn('w-full mt-3 py-3.5 rounded-2xl font-black text-white transition-all text-sm bg-gradient-to-r', coach.gradient)}
+            >
+              Submit Answer ✓
+            </button>
           )}
 
           {/* Typed */}

@@ -38,6 +38,16 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
     }
   }, [phase])
 
+  function select(opt: string) {
+    if (selected !== null) return
+    setSelected(opt)
+  }
+
+  function submitSelected() {
+    if (!selected) return
+    advance(selected)
+  }
+
   function advance(answer: string | null) {
     const q = questions[index]
     const correct = answer !== null && answer === q.correct_answer
@@ -137,8 +147,8 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
           {opts.map(opt => (
             <button
               key={opt}
-              onClick={() => advance(opt)}
-              disabled={selected !== null}
+              onClick={() => select(opt)}
+              disabled={selected !== null && selected !== opt}
               className={`py-4 px-3 rounded-2xl text-sm font-bold text-left transition-all ${
                 selected === opt
                   ? opt === q.correct_answer ? 'bg-green-500 text-white border-2 border-green-400' : 'bg-red-500 text-white border-2 border-red-400'
@@ -157,6 +167,16 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
             Got it ✓
           </button>
         </div>
+      )}
+
+      {/* Submit button for multiple choice */}
+      {opts && selected && feedback === null && (
+        <button
+          onClick={submitSelected}
+          className="w-full py-3.5 rounded-2xl font-black text-white bg-rose-500 hover:bg-rose-400 transition-all text-sm"
+        >
+          Submit Answer ✓
+        </button>
       )}
     </div>
   )

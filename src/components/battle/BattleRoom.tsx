@@ -193,8 +193,13 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
   }, [answeredRef, q, qIndex, botAnsweredFirst, botWasCorrect, isSolo, botDifficulty, questions.length])
 
   const handleChoice = (option: string) => {
+    if (answered) return
     setSelectedAnswer(option)
-    handleSubmit(option)
+  }
+
+  const handleChoiceSubmit = () => {
+    if (!selectedAnswer || answered) return
+    handleSubmit(selectedAnswer)
   }
 
   const handleTypedSubmit = (e: React.FormEvent) => {
@@ -318,6 +323,16 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
               </button>
             )}
           </form>
+        )}
+
+        {/* Submit button for multiple choice */}
+        {q.type === 'multiple_choice' && selectedAnswer && !answered && (
+          <button
+            onClick={handleChoiceSubmit}
+            className="w-full mt-3 py-3.5 rounded-2xl font-black text-white bg-indigo-600 hover:bg-indigo-500 transition-all text-sm"
+          >
+            Submit Answer ✓
+          </button>
         )}
 
         {/* Result feedback */}
