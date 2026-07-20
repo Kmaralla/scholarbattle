@@ -221,3 +221,25 @@ export function getQuestionsForBattle(subject: Subject, gradeLevel: number, coun
   }
   return arr.slice(0, count)
 }
+
+// Returns the global indices into SEED_QUESTIONS for a picked set
+export function pickQuestionIndices(subject: Subject, gradeLevel: number, count = 10): number[] {
+  let pool = SEED_QUESTIONS.map((q, i) => ({ q, i })).filter(({ q }) => q.subject === subject && q.grade_level === gradeLevel)
+  if (pool.length < count) {
+    const availableGrades = [...new Set(SEED_QUESTIONS.filter(q => q.subject === subject).map(q => q.grade_level))]
+    const nearest = availableGrades.reduce((prev, curr) =>
+      Math.abs(curr - gradeLevel) < Math.abs(prev - gradeLevel) ? curr : prev
+    )
+    pool = SEED_QUESTIONS.map((q, i) => ({ q, i })).filter(({ q }) => q.subject === subject && q.grade_level === nearest)
+  }
+  const arr = [...pool]
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr.slice(0, count).map(({ i }) => i)
+}
+
+export function getQuestionsByIndices(indices: number[]): Omit<Question, 'id'>[] {
+  return indices.map(i => SEED_QUESTIONS[i]).filter(Boolean)
+}

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { BattleRoom, type BotDifficulty } from '@/components/battle/BattleRoom'
 import { User, Question, Battle, Subject } from '@/types'
-import { getQuestionsForBattle } from '@/lib/questions'
+import { getQuestionsForBattle, pickQuestionIndices, getQuestionsByIndices } from '@/lib/questions'
 import { calculateElo, getRankTier } from '@/types'
 import { COIN_REWARDS } from '@/lib/games'
 import { checkNewBadges, BADGE_MAP } from '@/lib/badges'
@@ -57,6 +57,8 @@ export default function BattlePage() {
             if (data?.status === 'in_progress') {
               clearInterval(poll)
               setWaitingForOpponent(false)
+              // Reload to pick up question_ids saved by challenger
+              window.location.reload()
             } else if (data?.status === 'declined') {
               clearInterval(poll)
               setWaitingForOpponent(false)
@@ -69,10 +71,24 @@ export default function BattlePage() {
         setIsSolo(true)
       }
 
-      const selected = getQuestionsForBattle(battleData.subject as Subject, battleData.grade_level)
-        .map((q, i) => ({ ...q, id: `q-${i}` }))
+      let questionList: Omit<Question, 'id'>[]
+      const isChallenger = battleData.challenger_id === user.id
+      const existingIndices: number[] = battleData.question_ids ?? []
 
-      setQuestions(selected)
+      if (!isSolo && existingIndices.length === 0 && isChallenger) {
+        // Challenger picks questions and saves indices so opponent gets the same set
+        const indices = pickQuestionIndices(battleData.subject as Subject, battleData.grade_level)
+        await supabase.from('battles').update({ question_ids: indices }).eq('id', id)
+        questionList = getQuestionsByIndices(indices)
+      } else if (!isSolo && existingIndices.length > 0) {
+        // Opponent (or challenger on reload) uses the saved indices
+        questionList = getQuestionsByIndices(existingIndices)
+      } else {
+        // Solo practice — random as before
+        questionList = getQuestionsForBattle(battleData.subject as Subject, battleData.grade_level)
+      }
+
+      setQuestions(questionList.map((q, i) => ({ ...q, id: `q-${i}` })))
     }
     load()
   }, [id])
