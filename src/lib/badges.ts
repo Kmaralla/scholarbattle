@@ -74,11 +74,11 @@ export function checkNewBadges(ctx: BattleContext): string[] {
   check('veteran',         ctx.newTotalBattles >= 10)
   check('ten_wins',        ctx.newTotalWins >= 10)
   check('bot_slayer',      ctx.iWon && ctx.isSolo && ctx.botDifficulty === 'hard')
-  check('silver_rank',     ctx.newElo >= 1100)
-  check('gold_rank',       ctx.newElo >= 1300)
+  check('silver_rank',     ctx.newElo >= 1200)
+  check('gold_rank',       ctx.newElo >= 1400)
   check('twenty_five_wins',ctx.newTotalWins >= 25)
   check('platinum_rank',   ctx.newElo >= 1600)
-  check('diamond_rank',    ctx.newElo >= 2000)
+  check('diamond_rank',    ctx.newElo >= 1800)
   check('fifty_wins',      ctx.newTotalWins >= 50)
 
   return earned
