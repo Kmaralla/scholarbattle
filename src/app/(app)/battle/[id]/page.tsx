@@ -240,12 +240,14 @@ export default function BattlePage() {
     function shareScore() {
       const result = won ? 'WON' : tied ? 'TIED' : 'LOST'
       const d = done!
-      const text = `I just ${result} a ScholarBattle! 🎮\n${d.myScore}–${d.theirScore} vs ${opponent?.username ?? 'opponent'}\nSubject: ${battle?.subject} · ${d.eloDelta > 0 ? `+${d.eloDelta}` : d.eloDelta} ELO\n\nCan you beat me? 👉 scholarbattle.vercel.app`
+      const myUsername = currentUser?.username ?? 'me'
+      const challengeUrl = `${window.location.origin}/challenge/${myUsername}`
+      const text = `I just ${result} a ScholarBattle! 🎮\n${d.myScore}–${d.theirScore} in ${battle?.subject ?? 'a battle'} · ${d.eloDelta > 0 ? `+${d.eloDelta}` : d.eloDelta} ELO\n\nThink you can beat me? 👇\n${challengeUrl}`
       if (navigator.share) {
-        navigator.share({ title: 'ScholarBattle Result', text })
+        navigator.share({ title: `Can you beat @${myUsername} on ScholarBattle?`, text, url: challengeUrl })
       } else {
         navigator.clipboard.writeText(text)
-        alert('Score card copied to clipboard!')
+        alert('Link copied to clipboard!')
       }
     }
 
