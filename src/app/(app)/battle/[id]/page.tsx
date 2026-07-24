@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { BattleRoom, type BotDifficulty } from '@/components/battle/BattleRoom'
+import { BattleRoom, type BotDifficulty, type QuestionResult } from '@/components/battle/BattleRoom'
 import { User, Question, Battle, Subject } from '@/types'
 import { getQuestionsForBattle, pickQuestionIndices, getQuestionsByIndices } from '@/lib/questions'
 import { calculateElo, getRankTier } from '@/types'
@@ -19,7 +19,8 @@ export default function BattlePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [opponent, setOpponent] = useState<User | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
-  const [done, setDone] = useState<{ myScore: number; theirScore: number; eloDelta: number; coinsEarned: number; newBadges: string[] } | null>(null)
+  const [done, setDone] = useState<{ myScore: number; theirScore: number; eloDelta: number; coinsEarned: number; newBadges: string[]; results: QuestionResult[] } | null>(null)
+  const [showReview, setShowReview] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isSolo, setIsSolo] = useState(true)
   const [waitingForOpponent, setWaitingForOpponent] = useState(false)
@@ -94,7 +95,7 @@ export default function BattlePage() {
     load()
   }, [id])
 
-  async function handleComplete(myScore: number, theirScore: number) {
+  async function handleComplete(myScore: number, theirScore: number, results: QuestionResult[]) {
     if (!battle || !currentUser) return
 
     const iAmChallenger = battle.challenger_id === currentUser.id
@@ -207,7 +208,7 @@ export default function BattlePage() {
     if (iWonFinal) sounds.win()
     else if (!tiedFinal) sounds.lose()
 
-    setDone({ myScore, theirScore, eloDelta, coinsEarned, newBadges })
+    setDone({ myScore, theirScore, eloDelta, coinsEarned, newBadges, results })
   }
 
   if (done) {
@@ -301,13 +302,50 @@ export default function BattlePage() {
             </div>
           )}
 
-          {/* Share score card */}
-          <button
-            onClick={shareScore}
-            className="w-full py-3 rounded-2xl bg-white/8 border border-white/15 text-white/70 font-bold text-sm hover:bg-white/12 hover:text-white transition flex items-center justify-center gap-2"
-          >
-            📤 Share Result
-          </button>
+          {/* Share (win/tie) or Review (loss) */}
+          {won || tied ? (
+            <button
+              onClick={shareScore}
+              className="w-full py-3 rounded-2xl bg-white/8 border border-white/15 text-white/70 font-bold text-sm hover:bg-white/12 hover:text-white transition flex items-center justify-center gap-2"
+            >
+              📤 Share Result
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowReview(r => !r)}
+              className="w-full py-3 rounded-2xl bg-red-500/15 border border-red-400/30 text-red-300 font-bold text-sm hover:bg-red-500/25 transition flex items-center justify-center gap-2"
+            >
+              🔍 {showReview ? 'Hide Review' : 'Review What Went Wrong'}
+            </button>
+          )}
+
+          {/* Review panel */}
+          {showReview && !won && (
+            <div className="space-y-2 text-left">
+              <p className="text-xs text-white/40 font-semibold uppercase tracking-wide px-1">Question Review</p>
+              {done.results.map((r, i) => (
+                <div
+                  key={i}
+                  className={`rounded-2xl p-3 border text-sm space-y-1.5 ${r.isCorrect ? 'bg-green-500/10 border-green-400/20' : 'bg-red-500/10 border-red-400/20'}`}
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="mt-0.5 flex-shrink-0">{r.isCorrect ? '✅' : '❌'}</span>
+                    <p className="text-white/90 font-medium leading-snug">{r.question.question_text}</p>
+                  </div>
+                  {!r.isCorrect && (
+                    <div className="pl-6 space-y-0.5">
+                      {r.userAnswer ? (
+                        <p className="text-red-400 text-xs">Your answer: <span className="font-bold">{r.userAnswer}</span></p>
+                      ) : (
+                        <p className="text-white/30 text-xs italic">No answer — ran out of time</p>
+                      )}
+                      <p className="text-green-400 text-xs">Correct: <span className="font-bold">{r.question.correct_answer}</span></p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="flex gap-3">
             <button

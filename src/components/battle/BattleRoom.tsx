@@ -27,10 +27,17 @@ interface BattleRoomProps {
   botDifficulty?: BotDifficulty
   subject: Subject
   gradeLevel: number
-  onComplete: (myScore: number, opponentScore: number) => void
+  onComplete: (myScore: number, opponentScore: number, results: QuestionResult[]) => void
+}
+
+export interface QuestionResult {
+  question: Question
+  userAnswer: string | null
+  isCorrect: boolean
 }
 
 export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo, botDifficulty = 'medium', subject, gradeLevel, onComplete }: BattleRoomProps) {
+  const resultsRef = useRef<QuestionResult[]>([])
   const [qIndex, setQIndex] = useState(0)
   const [myScore, setMyScore] = useState(0)
   const [opponentScore, setOpponentScore] = useState(0)
@@ -93,7 +100,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
       .on('broadcast', { event: 'battle_done' }, ({ payload }) => {
         // Opponent finished all their questions — end our game too
         if (payload.user_id !== currentUser.id) {
-          onComplete(myScoreRef.current, opponentScoreRef.current)
+          onComplete(myScoreRef.current, opponentScoreRef.current, resultsRef.current)
         }
       })
       .subscribe()
@@ -146,6 +153,8 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
 
     const isCorrect = answer?.trim().toLowerCase() === q.correct_answer.trim().toLowerCase()
     const timeTaken = Date.now() - startTime.current
+
+    resultsRef.current.push({ question: q, userAnswer: answer, isCorrect })
 
     if (isCorrect) sounds.correct()
     else if (answer !== null) sounds.wrong()
@@ -216,7 +225,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
     const nextIndex = qIndex + 1
     const isLastQuestion = nextIndex >= TOTAL_QUESTIONS || nextIndex >= questions.length
     if (isLastQuestion) {
-      onComplete(myScoreRef.current, opponentScoreRef.current)
+      onComplete(myScoreRef.current, opponentScoreRef.current, resultsRef.current)
     } else {
       setQIndex(nextIndex)
     }
