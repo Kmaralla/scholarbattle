@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Question, User, Subject } from '@/types'
 import { cn } from '@/lib/utils'
 import { gradeLabel } from '@/lib/utils'
+import { sounds } from '@/lib/sounds'
 
 const SECONDS_PER_QUESTION = 15
 const TOTAL_QUESTIONS = 10
@@ -106,6 +107,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
   useEffect(() => {
     if (answered) return
     if (timeLeft <= 0) { handleSubmit(null); return }
+    if (timeLeft <= 5) sounds.countdown()
     const t = setTimeout(() => setTimeLeft(s => s - 1), 1000)
     return () => clearTimeout(t)
   }, [timeLeft, answered])
@@ -144,6 +146,9 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
 
     const isCorrect = answer?.trim().toLowerCase() === q.correct_answer.trim().toLowerCase()
     const timeTaken = Date.now() - startTime.current
+
+    if (isCorrect) sounds.correct()
+    else if (answer !== null) sounds.wrong()
 
     // Point rule: you only score if correct AND bot hasn't already scored this question
     const botAlreadyScored = botAnsweredFirst && botWasCorrect

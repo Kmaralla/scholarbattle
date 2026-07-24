@@ -9,6 +9,7 @@ import { COIN_REWARDS } from '@/lib/games'
 import { checkNewBadges, BADGE_MAP } from '@/lib/badges'
 import { BadgeCard } from '@/components/BadgeCard'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
+import { sounds } from '@/lib/sounds'
 
 export default function BattlePage() {
   const { id } = useParams<{ id: string }>()
@@ -201,12 +202,53 @@ export default function BattlePage() {
       await supabase.from('users').update({ badges: [...currentBadges, ...newBadges] }).eq('id', currentUser.id)
     }
 
+    const iWonFinal = myScore > theirScore
+    const tiedFinal = myScore === theirScore
+    if (iWonFinal) sounds.win()
+    else if (!tiedFinal) sounds.lose()
+
     setDone({ myScore, theirScore, eloDelta, coinsEarned, newBadges })
   }
 
   if (done) {
     const won = done.myScore > done.theirScore
     const tied = done.myScore === done.theirScore
+
+    async function handleRematch() {
+      if (!battle || !currentUser || !opponent) return
+      const { data: newBattle } = await supabase.from('battles').insert({
+        challenger_id: currentUser.id,
+        opponent_id: isSolo ? currentUser.id : opponent.id,
+        subject: battle.subject,
+        grade_level: battle.grade_level,
+        status: isSolo ? 'in_progress' : 'pending',
+        challenger_score: 0, opponent_score: 0, question_ids: [],
+      }).select().single()
+      if (!newBattle) return
+      if (!isSolo) {
+        const ch = supabase.channel(`challenge:${opponent.id}`)
+        await ch.subscribe()
+        await ch.send({ type: 'broadcast', event: 'incoming_challenge', payload: {
+          battle_id: newBattle.id, challenger_username: currentUser.username,
+          subject: battle.subject, grade_level: battle.grade_level,
+        }})
+        supabase.removeChannel(ch)
+      }
+      router.push(`/battle/${newBattle.id}${isSolo ? `?difficulty=${botDifficulty}` : ''}`)
+    }
+
+    function shareScore() {
+      const result = won ? 'WON' : tied ? 'TIED' : 'LOST'
+      const d = done!
+      const text = `I just ${result} a ScholarBattle! 🎮\n${d.myScore}–${d.theirScore} vs ${opponent?.username ?? 'opponent'}\nSubject: ${battle?.subject} · ${d.eloDelta > 0 ? `+${d.eloDelta}` : d.eloDelta} ELO\n\nCan you beat me? 👉 scholarbattle.vercel.app`
+      if (navigator.share) {
+        navigator.share({ title: 'ScholarBattle Result', text })
+      } else {
+        navigator.clipboard.writeText(text)
+        alert('Score card copied to clipboard!')
+      }
+    }
+
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
         <div className="rounded-3xl p-8 max-w-sm w-full text-center space-y-5 bg-white/5 border border-white/10 shadow-2xl backdrop-blur">
@@ -222,7 +264,7 @@ export default function BattlePage() {
             <div className="text-2xl font-black text-white/20 self-center">vs</div>
             <div>
               <p className="text-5xl font-black text-orange-400">{done.theirScore}</p>
-              <p className="text-xs text-white/40 mt-1">Opponent</p>
+              <p className="text-xs text-white/40 mt-1">{opponent?.username ?? 'Opponent'}</p>
             </div>
           </div>
 
@@ -249,17 +291,28 @@ export default function BattlePage() {
                 <p className="text-sm font-black text-white">Badge{done.newBadges.length > 1 ? 's' : ''} Unlocked!</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {done.newBadges.map(id => {
-                  const badge = BADGE_MAP[id]
-                  return badge ? <BadgeCard key={id} badge={badge} size="sm" /> : null
+                {done.newBadges.map(bid => {
+                  const badge = BADGE_MAP[bid]
+                  return badge ? <BadgeCard key={bid} badge={badge} size="sm" /> : null
                 })}
               </div>
             </div>
           )}
 
+          {/* Share score card */}
+          <button
+            onClick={shareScore}
+            className="w-full py-3 rounded-2xl bg-white/8 border border-white/15 text-white/70 font-bold text-sm hover:bg-white/12 hover:text-white transition flex items-center justify-center gap-2"
+          >
+            📤 Share Result
+          </button>
+
           <div className="flex gap-3">
-            <button onClick={() => router.push('/battle')} className="flex-1 border border-white/20 rounded-2xl py-3 text-sm font-bold text-white/70 hover:bg-white/10 transition">
-              Play Again
+            <button
+              onClick={handleRematch}
+              className="flex-1 border border-indigo-400/30 bg-indigo-500/15 rounded-2xl py-3 text-sm font-black text-indigo-300 hover:bg-indigo-500/25 transition"
+            >
+              🔁 Rematch
             </button>
             <button onClick={() => router.push('/dashboard')} className="flex-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-2xl py-3 text-sm font-bold hover:opacity-90 transition shadow-lg shadow-violet-500/30">
               Dashboard
