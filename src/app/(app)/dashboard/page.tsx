@@ -5,6 +5,7 @@ import { getRankTier, RANK_THRESHOLDS, type RankTier } from '@/types'
 import { Swords, Trophy, Users, Gamepad2, Target } from 'lucide-react'
 import Link from 'next/link'
 import { TierBanner } from '@/components/dashboard/TierBanner'
+import { StreakBadge } from '@/components/StreakBadge'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -39,6 +40,9 @@ export default async function DashboardPage() {
         coins={(profile as any).coins}
         progress={progress}
       />
+
+      {/* Streak */}
+      <StreakBadge />
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">

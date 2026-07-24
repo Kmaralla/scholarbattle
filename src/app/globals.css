@@ -42,7 +42,14 @@ body {
   100% { transform: scale(1); }
 }
 
+@keyframes bounce-in {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.9); }
+  60%  { transform: translateX(-50%) translateY(4px) scale(1.03); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
 .float { animation: float 3s ease-in-out infinite; }
+.animate-bounce-in { animation: bounce-in 0.4s ease-out forwards; }
 .shimmer-text {
   background: linear-gradient(90deg, #f59e0b, #ec4899, #8b5cf6, #06b6d4, #f59e0b);
   background-size: 200% auto;
