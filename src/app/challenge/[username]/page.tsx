@@ -91,14 +91,14 @@ export default async function ChallengePage({ params }: { params: Promise<{ user
           {/* Buttons */}
           <div className="space-y-2">
             <Link
-              href="/login"
+              href={`/login?challenge=${profile.username}`}
               className="block w-full py-3.5 rounded-2xl font-black text-sm transition-all hover:opacity-90 active:scale-95"
               style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', color: '#fff', boxShadow: '0 8px 24px rgba(124,58,237,0.35)' }}
             >
               Join &amp; Challenge 🎮
             </Link>
             <Link
-              href="/login"
+              href={`/login?challenge=${profile.username}`}
               className="block w-full py-3 rounded-2xl font-bold text-sm transition-all hover:opacity-80"
               style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}
             >

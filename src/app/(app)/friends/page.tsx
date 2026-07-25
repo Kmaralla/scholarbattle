@@ -48,6 +48,16 @@ export default function FriendsPage() {
     if (currentUser) loadFriends()
   }, [currentUser, friendsKey])
 
+  // Auto-challenge flow from the share card link
+  useEffect(() => {
+    if (!currentUser) return
+    const autoChallenge = localStorage.getItem('auto_challenge')
+    if (!autoChallenge) return
+    localStorage.removeItem('auto_challenge')
+    supabase.from('users').select('*').eq('username', autoChallenge).single()
+      .then(({ data }) => { if (data) setChallenging(data) })
+  }, [currentUser])
+
   async function loadFriends() {
     const { data: rows } = await supabase
       .from('friendships')

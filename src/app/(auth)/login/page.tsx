@@ -1,14 +1,20 @@
 'use client'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Swords } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginInner() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const challengeFrom = searchParams.get('challenge')
 
   async function handleGoogle() {
     setGoogleLoading(true)
     setError(null)
+    if (challengeFrom) {
+      localStorage.setItem('pending_challenge', challengeFrom)
+    }
     const { createClient } = await import('@/lib/supabase/client')
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithOAuth({
@@ -19,7 +25,6 @@ export default function LoginPage() {
       },
     })
     if (error) { setError(error.message); setGoogleLoading(false) }
-    // On success, browser redirects to Google — no further action needed
   }
 
   return (
@@ -32,7 +37,11 @@ export default function LoginPage() {
             <Swords className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-black text-gray-900">ScholarBattle</h1>
-          <p className="text-sm text-gray-500">Battle your friends. Learn more. Climb the ranks.</p>
+          {challengeFrom ? (
+            <p className="text-sm text-indigo-600 font-semibold">Sign in to challenge @{challengeFrom}</p>
+          ) : (
+            <p className="text-sm text-gray-500">Battle your friends. Learn more. Climb the ranks.</p>
+          )}
         </div>
 
         {/* Google button */}
@@ -59,5 +68,13 @@ export default function LoginPage() {
         <p className="text-xs text-gray-400">Free to play · Works on any device</p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginInner />
+    </Suspense>
   )
 }
