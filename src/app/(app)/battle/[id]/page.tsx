@@ -26,9 +26,26 @@ export default function BattlePage() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isSolo, setIsSolo] = useState(true)
   const [waitingForOpponent, setWaitingForOpponent] = useState(false)
+  const [waitSecondsLeft, setWaitSecondsLeft] = useState(120)
   const [challengeDeclined, setChallengeDeclined] = useState(false)
   const supabase = createClient()
   const router = useRouter()
+
+  // Countdown timer while waiting for opponent to accept
+  useEffect(() => {
+    if (!waitingForOpponent) return
+    if (waitSecondsLeft <= 0) {
+      // Time's up — mark battle as declined and go back
+      if (battle) {
+        supabase.from('battles').update({ status: 'declined' }).eq('id', battle.id).then(() => {})
+      }
+      setWaitingForOpponent(false)
+      router.push('/friends')
+      return
+    }
+    const t = setTimeout(() => setWaitSecondsLeft(s => s - 1), 1000)
+    return () => clearTimeout(t)
+  }, [waitingForOpponent, waitSecondsLeft])
 
   useEffect(() => {
     async function load() {
@@ -436,6 +453,10 @@ export default function BattlePage() {
   }
 
   if (waitingForOpponent) {
+    const pct = (waitSecondsLeft / 120) * 100
+    const mins = Math.floor(waitSecondsLeft / 60)
+    const secs = waitSecondsLeft % 60
+    const urgent = waitSecondsLeft <= 30
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
         <div className="rounded-3xl p-8 max-w-sm w-full text-center space-y-4 bg-white/5 border border-white/10">
@@ -445,12 +466,34 @@ export default function BattlePage() {
             Challenge sent to <span className="font-bold text-violet-300">{opponent?.username}</span>.
             <br />They'll see a notification to accept.
           </p>
+
+          {/* Countdown bar */}
+          <div className="space-y-1.5">
+            <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ${urgent ? 'bg-red-400' : 'bg-violet-400'}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <p className={`text-xs font-bold tabular-nums ${urgent ? 'text-red-400' : 'text-white/40'}`}>
+              {urgent ? '⚠️ ' : ''}{mins}:{secs.toString().padStart(2, '0')} remaining
+            </p>
+          </div>
+
           <div className="flex gap-1 justify-center">
             {[0,1,2].map(i => (
               <div key={i} className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
             ))}
           </div>
-          <button onClick={() => router.push('/friends')} className="text-sm text-white/30 underline">Cancel</button>
+          <button
+            onClick={async () => {
+              if (battle) await supabase.from('battles').update({ status: 'declined' }).eq('id', battle.id)
+              router.push('/friends')
+            }}
+            className="text-sm text-white/30 underline"
+          >
+            Cancel
+          </button>
         </div>
       </div>
     )
