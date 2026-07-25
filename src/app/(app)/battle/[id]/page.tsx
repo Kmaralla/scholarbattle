@@ -21,6 +21,8 @@ export default function BattlePage() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [done, setDone] = useState<{ myScore: number; theirScore: number; eloDelta: number; coinsEarned: number; newBadges: string[]; results: QuestionResult[] } | null>(null)
   const [showReview, setShowReview] = useState(false)
+  const [alreadyFriends, setAlreadyFriends] = useState(false)
+  const [friendAdded, setFriendAdded] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isSolo, setIsSolo] = useState(true)
   const [waitingForOpponent, setWaitingForOpponent] = useState(false)
@@ -208,6 +210,17 @@ export default function BattlePage() {
     if (iWonFinal) sounds.win()
     else if (!tiedFinal) sounds.lose()
 
+    // Check if already friends (only matters for PvP)
+    if (!isSolo && opponent) {
+      const { data: friendship } = await supabase
+        .from('friendships')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .eq('friend_id', opponent.id)
+        .maybeSingle()
+      setAlreadyFriends(!!friendship)
+    }
+
     setDone({ myScore, theirScore, eloDelta, coinsEarned, newBadges, results })
   }
 
@@ -345,6 +358,28 @@ export default function BattlePage() {
                 </div>
               ))}
             </div>
+          )}
+
+          {/* Add friend — only for PvP, only if not already friends */}
+          {!isSolo && opponent && !alreadyFriends && (
+            <button
+              disabled={friendAdded}
+              onClick={async () => {
+                if (!currentUser || !opponent) return
+                await supabase.from('friendships').upsert([
+                  { user_id: currentUser.id, friend_id: opponent.id },
+                  { user_id: opponent.id, friend_id: currentUser.id },
+                ], { ignoreDuplicates: true })
+                setFriendAdded(true)
+              }}
+              className={`w-full py-3 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 ${
+                friendAdded
+                  ? 'bg-green-500/20 border border-green-400/30 text-green-300 cursor-default'
+                  : 'bg-white/5 border border-white/15 text-white/70 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              {friendAdded ? '✅ Friend added!' : `➕ Add @${opponent.username} as friend`}
+            </button>
           )}
 
           <div className="flex gap-3">
