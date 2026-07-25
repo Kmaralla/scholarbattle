@@ -65,6 +65,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
   const opponentAnsweredRef  = useRef(false)
   const opponentCorrectRef   = useRef(false)
   const advanceScheduledRef  = useRef(false)
+  const timeoutFallbackRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // ── Misc ────────────────────────────────────────────────────────────────────
   const [timeLeft,       setTimeLeft]       = useState(SECONDS_PER_QUESTION)
@@ -94,7 +95,8 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
     setBotAnsweredFirst(false)
     setBotWasCorrect(null)
     startTime.current = Date.now()
-    if (advanceTimerRef.current) { clearTimeout(advanceTimerRef.current); advanceTimerRef.current = null }
+    if (advanceTimerRef.current)   { clearTimeout(advanceTimerRef.current);   advanceTimerRef.current   = null }
+    if (timeoutFallbackRef.current){ clearTimeout(timeoutFallbackRef.current); timeoutFallbackRef.current = null }
   }, [qIndex])
 
   // ── Shuffle options ──────────────────────────────────────────────────────────
@@ -171,6 +173,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
         opponentCorrectRef.current  = payload.is_correct
         setOpponentAnswered(true)
         setOpponentCorrect(payload.is_correct)
+        if (timeoutFallbackRef.current) { clearTimeout(timeoutFallbackRef.current); timeoutFallbackRef.current = null }
         checkAdvance(answeredRef.current, myCorrectRef.current, true, payload.is_correct)
       })
       .subscribe()
@@ -245,6 +248,14 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
     // Check advance (PvP) or proceed (solo)
     if (!isSolo) {
       checkAdvance(true, isCorrect, opponentAnsweredRef.current, opponentCorrectRef.current)
+      // Fallback: if opponent never broadcasts (timeout drift / network), advance after 4s
+      if (!isCorrect && !opponentAnsweredRef.current) {
+        timeoutFallbackRef.current = setTimeout(() => {
+          if (!advanceScheduledRef.current) {
+            scheduleAdvance()
+          }
+        }, 4000)
+      }
     }
   }, [q, qIndex, botAnsweredFirst, botWasCorrect, isSolo, botDifficulty, checkAdvance])
 
