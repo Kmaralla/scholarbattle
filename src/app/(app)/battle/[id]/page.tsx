@@ -22,7 +22,7 @@ export default function BattlePage() {
   const [done, setDone] = useState<{ myScore: number; theirScore: number; eloDelta: number; coinsEarned: number; newBadges: string[]; results: QuestionResult[] } | null>(null)
   const [showReview, setShowReview] = useState(false)
   const [alreadyFriends, setAlreadyFriends] = useState(false)
-  const [friendAdded, setFriendAdded] = useState(false)
+  const [friendRequestId, setFriendRequestId] = useState<string | null>(null) // null=not sent, string=pending row id
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isSolo, setIsSolo] = useState(true)
   const [waitingForOpponent, setWaitingForOpponent] = useState(false)
@@ -378,50 +378,51 @@ export default function BattlePage() {
             </div>
           )}
 
-          {/* Add friend — only for PvP, only if not already friends */}
+          {/* Add / cancel friend request — only for PvP, only if not already friends */}
           {!isSolo && opponent && !alreadyFriends && (
             <button
-              disabled={friendAdded}
               onClick={async () => {
                 if (!currentUser || !opponent) return
-                // Check no pending/accepted request already exists
-                const { data: existing } = await supabase
-                  .from('friendships')
-                  .select('id')
-                  .eq('user_id', currentUser.id)
-                  .eq('friend_id', opponent.id)
-                  .maybeSingle()
-                if (existing) { setFriendAdded(true); return }
-                // Insert pending friend request
-                const { data: row } = await supabase
-                  .from('friendships')
-                  .insert({ user_id: currentUser.id, friend_id: opponent.id, status: 'pending' })
-                  .select('id')
-                  .single()
-                // Notify the opponent in real-time
-                if (row) {
-                  const notifCh = supabase.channel(`friend_requests:${opponent.id}`)
-                  await notifCh.subscribe()
-                  await notifCh.send({
-                    type: 'broadcast',
-                    event: 'friend_request',
-                    payload: {
-                      friendship_id: row.id,
-                      user_id: currentUser.id,
-                      username: currentUser.username,
-                    },
-                  })
-                  supabase.removeChannel(notifCh)
+
+                if (friendRequestId) {
+                  // Cancel the pending request
+                  await supabase.from('friendships').delete().eq('id', friendRequestId)
+                  setFriendRequestId(null)
+                } else {
+                  // Check no row already exists
+                  const { data: existing } = await supabase
+                    .from('friendships').select('id')
+                    .eq('user_id', currentUser.id).eq('friend_id', opponent.id)
+                    .maybeSingle()
+                  if (existing) { setFriendRequestId(existing.id); return }
+
+                  // Insert pending request
+                  const { data: row } = await supabase
+                    .from('friendships')
+                    .insert({ user_id: currentUser.id, friend_id: opponent.id, status: 'pending' })
+                    .select('id').single()
+
+                  if (row) {
+                    setFriendRequestId(row.id)
+                    // Notify opponent in real-time
+                    const notifCh = supabase.channel(`friend_requests:${opponent.id}`)
+                    await notifCh.subscribe()
+                    await notifCh.send({
+                      type: 'broadcast',
+                      event: 'friend_request',
+                      payload: { friendship_id: row.id, user_id: currentUser.id, username: currentUser.username },
+                    })
+                    supabase.removeChannel(notifCh)
+                  }
                 }
-                setFriendAdded(true)
               }}
               className={`w-full py-3 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 ${
-                friendAdded
-                  ? 'bg-green-500/20 border border-green-400/30 text-green-300 cursor-default'
+                friendRequestId
+                  ? 'bg-yellow-500/15 border border-yellow-400/30 text-yellow-300 hover:bg-red-500/15 hover:border-red-400/30 hover:text-red-300'
                   : 'bg-white/5 border border-white/15 text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
-              {friendAdded ? '✅ Friend request sent!' : `➕ Add @${opponent.username} as friend`}
+              {friendRequestId ? '✅ Request sent — tap to cancel' : `➕ Add @${opponent.username} as friend`}
             </button>
           )}
 

@@ -38,9 +38,11 @@ const ALL_NAV = SECTIONS.flatMap(s => s.items)
 export function Navbar() {
   const path = usePathname()
   const [coins, setCoins] = useState<number | null>(null)
+  const [pendingInvites, setPendingInvites] = useState(0)
   const { theme, toggle } = useTheme()
   const supabase = createClient()
 
+  // Load coins
   useEffect(() => {
     async function loadCoins() {
       const { data: { user } } = await supabase.auth.getUser()
@@ -53,6 +55,40 @@ export function Navbar() {
     const handler = () => loadCoins()
     window.addEventListener('focus', handler)
     return () => window.removeEventListener('focus', handler)
+  }, [path])
+
+  // Load pending friend invite count + listen for new ones globally
+  useEffect(() => {
+    let userId: string | null = null
+    let ch: ReturnType<typeof supabase.channel> | null = null
+
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      userId = user.id
+
+      // Initial count
+      const { count } = await supabase
+        .from('friendships')
+        .select('id', { count: 'exact', head: true })
+        .eq('friend_id', user.id)
+        .eq('status', 'pending')
+      setPendingInvites(count ?? 0)
+
+      // Real-time: listen for new friend requests
+      ch = supabase.channel(`friend_requests:${user.id}`)
+      ch.on('broadcast', { event: 'friend_request' }, () => {
+        setPendingInvites(n => n + 1)
+      }).subscribe()
+    }
+
+    init()
+    return () => { if (ch) supabase.removeChannel(ch) }
+  }, [])
+
+  // Clear badge when visiting /friends
+  useEffect(() => {
+    if (path.startsWith('/friends')) setPendingInvites(0)
   }, [path])
 
   return (
@@ -78,10 +114,16 @@ export function Navbar() {
         <div className="flex justify-around px-1 pb-2 pt-1">
           {ALL_NAV.map(({ href, label, emoji }) => {
             const active = path.startsWith(href)
+            const isFriends = href === '/friends'
             return (
-              <Link key={href} href={href} className="flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-xl transition-all">
+              <Link key={href} href={href} className="relative flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-xl transition-all">
                 <span className={cn('text-xl transition-transform', active && 'scale-125')}>{emoji}</span>
                 <span className={cn('text-[10px] font-bold', active ? 'text-white' : 'text-white/40')}>{label}</span>
+                {isFriends && pendingInvites > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[9px] font-black flex items-center justify-center px-1">
+                    {pendingInvites}
+                  </span>
+                )}
               </Link>
             )
           })}
@@ -133,6 +175,7 @@ export function Navbar() {
               <div className="space-y-1">
                 {section.items.map(({ href, label, emoji, desc }) => {
                   const active = path.startsWith(href)
+                  const isFriends = href === '/friends'
                   return (
                     <div key={href} className="relative group">
                       <Link
@@ -146,6 +189,11 @@ export function Navbar() {
                       >
                         <span className="text-xl">{emoji}</span>
                         <span>{label}</span>
+                        {isFriends && pendingInvites > 0 && (
+                          <span className="ml-1 min-w-[20px] h-5 rounded-full bg-red-500 text-white text-xs font-black flex items-center justify-center px-1.5">
+                            {pendingInvites}
+                          </span>
+                        )}
                         {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/60" />}
                       </Link>
                       {/* Tooltip */}
