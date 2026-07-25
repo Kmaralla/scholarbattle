@@ -48,6 +48,19 @@ export default function FriendsPage() {
     if (currentUser) loadFriends()
   }, [currentUser, friendsKey])
 
+  // Real-time: listen for incoming friend requests while on this page
+  useEffect(() => {
+    if (!currentUser) return
+    const ch = supabase.channel(`friend_requests:${currentUser.id}`)
+    ch.on('broadcast', { event: 'friend_request' }, ({ payload }) => {
+      setInvites(prev => {
+        if (prev.some(i => i.user_id === payload.user_id)) return prev
+        return [...prev, { id: payload.friendship_id, user_id: payload.user_id, username: payload.username }]
+      })
+    }).subscribe()
+    return () => { supabase.removeChannel(ch) }
+  }, [currentUser?.id])
+
   // Auto-challenge flow from the share card link
   useEffect(() => {
     if (!currentUser) return

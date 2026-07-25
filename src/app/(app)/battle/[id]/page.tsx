@@ -383,10 +383,35 @@ export default function BattlePage() {
               disabled={friendAdded}
               onClick={async () => {
                 if (!currentUser || !opponent) return
-                await supabase.from('friendships').upsert([
-                  { user_id: currentUser.id, friend_id: opponent.id },
-                  { user_id: opponent.id, friend_id: currentUser.id },
-                ], { ignoreDuplicates: true })
+                // Check no pending/accepted request already exists
+                const { data: existing } = await supabase
+                  .from('friendships')
+                  .select('id')
+                  .eq('user_id', currentUser.id)
+                  .eq('friend_id', opponent.id)
+                  .maybeSingle()
+                if (existing) { setFriendAdded(true); return }
+                // Insert pending friend request
+                const { data: row } = await supabase
+                  .from('friendships')
+                  .insert({ user_id: currentUser.id, friend_id: opponent.id, status: 'pending' })
+                  .select('id')
+                  .single()
+                // Notify the opponent in real-time
+                if (row) {
+                  const notifCh = supabase.channel(`friend_requests:${opponent.id}`)
+                  await notifCh.subscribe()
+                  await notifCh.send({
+                    type: 'broadcast',
+                    event: 'friend_request',
+                    payload: {
+                      friendship_id: row.id,
+                      user_id: currentUser.id,
+                      username: currentUser.username,
+                    },
+                  })
+                  supabase.removeChannel(notifCh)
+                }
                 setFriendAdded(true)
               }}
               className={`w-full py-3 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 ${
@@ -395,7 +420,7 @@ export default function BattlePage() {
                   : 'bg-white/5 border border-white/15 text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
-              {friendAdded ? '✅ Friend added!' : `➕ Add @${opponent.username} as friend`}
+              {friendAdded ? '✅ Friend request sent!' : `➕ Add @${opponent.username} as friend`}
             </button>
           )}
 
