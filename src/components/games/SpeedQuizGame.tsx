@@ -15,8 +15,12 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
   const [timeLeft, setTimeLeft] = useState(TIME_PER_Q)
   const [selected, setSelected] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<boolean | null>(null)
-  const [highScore] = useState(() => parseInt(localStorage.getItem('speed_high_score') ?? '0', 10))
+  const [highScore, setHighScore] = useState(0)
   const [newHigh, setNewHigh] = useState(false)
+
+  useEffect(() => {
+    setHighScore(parseInt(localStorage.getItem('speed_high_score') ?? '0', 10))
+  }, [])
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -50,7 +54,7 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
 
   function advance(answer: string | null) {
     const q = questions[index]
-    const correct = answer !== null && answer === q.correct_answer
+    const correct = answer !== null && answer.trim().toLowerCase() === q.correct_answer.trim().toLowerCase()
     if (correct) {
       setScore(s => s + 1)
       setStreak(s => { const n = s + 1; setBestStreak(b => Math.max(b, n)); return n })
@@ -161,12 +165,26 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
           ))}
         </div>
       ) : (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
-          <p className="text-2xl font-black text-indigo-300">{q.correct_answer}</p>
-          <button onClick={() => advance(q.correct_answer)} className="mt-3 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black text-sm transition">
-            Got it ✓
-          </button>
-        </div>
+        <form onSubmit={e => { e.preventDefault(); submitSelected() }} className="space-y-2">
+          <input
+            value={selected ?? ''}
+            onChange={e => setSelected(e.target.value)}
+            disabled={feedback !== null}
+            placeholder="Type your answer…"
+            className="w-full px-4 py-3 rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 text-sm font-semibold outline-none focus:border-white/30"
+            autoFocus
+          />
+          {feedback === null && (
+            <button type="submit" className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black text-sm transition">
+              Submit ↵
+            </button>
+          )}
+          {feedback !== null && (
+            <p className={`text-center text-sm font-bold ${feedback ? 'text-green-400' : 'text-red-400'}`}>
+              {feedback ? '✓ Correct!' : `✗ Answer: ${q.correct_answer}`}
+            </p>
+          )}
+        </form>
       )}
 
       {/* Submit button for multiple choice */}

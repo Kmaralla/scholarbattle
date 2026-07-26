@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { BattleRoom, type BotDifficulty, type QuestionResult } from '@/components/battle/BattleRoom'
 import { User, Question, Battle, Subject } from '@/types'
@@ -30,6 +30,7 @@ export default function BattlePage() {
   const [challengeDeclined, setChallengeDeclined] = useState(false)
   const supabase = createClient()
   const router = useRouter()
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Countdown timer while waiting for opponent to accept
   useEffect(() => {
@@ -69,19 +70,18 @@ export default function BattlePage() {
         // If battle is still pending, poll until opponent accepts
         if (battleData.status === 'pending') {
           setWaitingForOpponent(true)
-          const poll = setInterval(async () => {
+          pollRef.current = setInterval(async () => {
             const { data } = await supabase
               .from('battles')
               .select('status')
               .eq('id', id)
               .single()
             if (data?.status === 'in_progress') {
-              clearInterval(poll)
+              if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null }
               setWaitingForOpponent(false)
-              // Reload to pick up question_ids saved by challenger
               window.location.reload()
             } else if (data?.status === 'declined') {
-              clearInterval(poll)
+              if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null }
               setWaitingForOpponent(false)
               setChallengeDeclined(true)
             }
@@ -94,7 +94,7 @@ export default function BattlePage() {
 
       let questionList: Omit<Question, 'id'>[]
       const isChallenger = battleData.challenger_id === user.id
-      const isPvP = battleData.opponent_id !== user.id   // true battle vs another person
+      const isPvP = battleData.challenger_id !== battleData.opponent_id   // real PvP, not solo
       const existingIndices: number[] = battleData.question_ids ?? []
 
       if (isPvP && existingIndices.length === 0 && isChallenger) {
@@ -105,6 +105,16 @@ export default function BattlePage() {
       } else if (isPvP && existingIndices.length > 0) {
         // Opponent (or challenger on reload) loads the saved indices — same order, same questions
         questionList = getQuestionsByIndices(existingIndices)
+      } else if (isPvP && existingIndices.length === 0 && !isChallenger) {
+        // Opponent loaded before challenger wrote question_ids — poll until available (up to 8s)
+        let retryIndices: number[] = []
+        for (let attempt = 0; attempt < 5 && retryIndices.length === 0; attempt++) {
+          await new Promise(r => setTimeout(r, 1500))
+          const { data: retryBattle } = await supabase.from('battles').select('question_ids').eq('id', id).single()
+          retryIndices = retryBattle?.question_ids ?? []
+        }
+        if (retryIndices.length === 0) { setLoadError('Could not sync questions. Please try again.'); return }
+        questionList = getQuestionsByIndices(retryIndices)
       } else {
         // Solo practice — random questions
         questionList = getQuestionsForBattle(battleData.subject as Subject, battleData.grade_level)
@@ -113,6 +123,7 @@ export default function BattlePage() {
       setQuestions(questionList.map((q, i) => ({ ...q, id: `q-${i}` })))
     }
     load()
+    return () => { if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null } }
   }, [id])
 
   async function handleComplete(myScore: number, theirScore: number, results: QuestionResult[]) {
@@ -125,13 +136,19 @@ export default function BattlePage() {
     const opponentId = iAmChallenger ? battle.opponent_id : battle.challenger_id
     const winnerId = tied ? null : iWon ? currentUser.id : (isSolo ? null : opponentId)
 
-    await supabase.from('battles').update({
+    // Each player only writes their own score column to avoid race condition on theirScore
+    // Challenger also writes winner_id (both compute same result, challenger's write is authoritative)
+    const battleUpdate: Record<string, unknown> = {
       status: 'completed',
-      challenger_score: iAmChallenger ? myScore : theirScore,
-      opponent_score: iAmChallenger ? theirScore : myScore,
-      winner_id: winnerId,
       completed_at: new Date().toISOString(),
-    }).eq('id', battle.id)
+    }
+    if (iAmChallenger) {
+      battleUpdate.challenger_score = myScore
+      battleUpdate.winner_id = winnerId
+    } else {
+      battleUpdate.opponent_score = myScore
+    }
+    await supabase.from('battles').update(battleUpdate).eq('id', battle.id)
 
     const { data: myProfile, error: profileErr } = await supabase.from('users').select('elo_rating, total_wins, total_battles').eq('id', currentUser.id).single()
     if (profileErr) console.error('[Battle] profile fetch failed:', profileErr.message)
@@ -166,15 +183,16 @@ export default function BattlePage() {
     } else {
       coinsEarned = iWon ? COIN_REWARDS.pvp_win : tied ? COIN_REWARDS.pvp_tie : -COIN_REWARDS.pvp_loss
 
-      const loserId = winnerId === battle.challenger_id ? battle.opponent_id : battle.challenger_id
-      const { data: loserProfile } = await supabase.from('users').select('elo_rating, total_wins, total_battles').eq('id', loserId).single()
-      const { data: loserCoinsRow } = await supabase.from('users').select('coins').eq('id', loserId).single()
+      // Each player only updates THEIR OWN stats — opponent updates themselves in their own handleComplete
+      const opponentUserId = iAmChallenger ? battle.opponent_id : battle.challenger_id
+      const { data: opponentProfile } = await supabase.from('users').select('elo_rating').eq('id', opponentUserId).single()
 
-      if (loserProfile && !tied) {
-        const [newWinnerElo, newLoserElo] = calculateElo(currentElo, loserProfile.elo_rating)
-        eloDelta = iWon ? newWinnerElo - currentElo : newLoserElo - currentElo
+      if (opponentProfile && !tied) {
+        const winnerElo = iWon ? currentElo : opponentProfile.elo_rating
+        const loserElo  = iWon ? opponentProfile.elo_rating : currentElo
+        const [newWinnerElo, newLoserElo] = calculateElo(winnerElo, loserElo)
         const myNewElo = iWon ? newWinnerElo : newLoserElo
-        const theirNewElo = iWon ? newLoserElo : newWinnerElo
+        eloDelta = myNewElo - currentElo
 
         const pvpUpdate: Record<string, unknown> = {
           elo_rating: myNewElo,
@@ -185,16 +203,10 @@ export default function BattlePage() {
         if ((coinsRow as any)?.coins !== undefined) pvpUpdate.coins = Math.max(0, currentCoins + coinsEarned)
         const { error: pvpErr } = await supabase.from('users').update(pvpUpdate).eq('id', currentUser.id)
         if (pvpErr) console.error('[Battle] PvP ELO update failed:', pvpErr.message)
-        await supabase.from('users').update({
-          elo_rating: theirNewElo,
-          rank_tier: getRankTier(theirNewElo),
-          total_battles: (loserProfile.total_battles ?? 0) + 1,
-          ...((loserCoinsRow as any)?.coins !== undefined ? { coins: Math.max(0, ((loserCoinsRow as any).coins ?? 0) - COIN_REWARDS.pvp_loss) } : {}),
-        }).eq('id', loserId)
       } else if (tied) {
         await supabase.from('users').update({
           total_battles: (myProfile?.total_battles ?? 0) + 1,
-          coins: currentCoins + coinsEarned,
+          coins: Math.max(0, currentCoins + coinsEarned),
         }).eq('id', currentUser.id)
       }
     }
@@ -315,7 +327,7 @@ export default function BattlePage() {
               </div>
             )}
           </div>
-          {done.eloDelta === 0 && done.coinsEarned === 0 && <p className="text-xs text-white/30">No ELO or coin change (tie)</p>}
+          {done.eloDelta === 0 && done.coinsEarned === 0 && tied && <p className="text-xs text-white/30">No ELO change on tie</p>}
 
           {/* New badges earned */}
           {done.newBadges.length > 0 && (

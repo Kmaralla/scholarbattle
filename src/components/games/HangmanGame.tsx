@@ -15,7 +15,7 @@ function pickWord(words: string[]) {
   return words[Math.floor(Math.random() * words.length)]
 }
 
-export function HangmanGame({ subject, grade, onExit }: { subject: Subject; grade: number; onExit: () => void }) {
+export function HangmanGame({ subject, onExit }: { subject: Subject; grade: number; onExit: () => void }) {
   const words = WORD_BANKS[subject] ?? WORD_BANKS.english
   const [word, setWord] = useState(() => pickWord(words))
   const [guessed, setGuessed] = useState<Set<string>>(new Set())

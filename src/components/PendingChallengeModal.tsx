@@ -63,11 +63,11 @@ export function PendingChallengeModal({ myUsername }: { myUsername: string }) {
   }
 
   function accept() {
-    // Store so /friends page can auto-open the challenge flow
     localStorage.setItem('auto_challenge', challenger!.username)
     localStorage.removeItem('pending_challenge')
     setDismissed(true)
-    router.push('/friends')
+    // Force a full navigation so the friends page always remounts and picks up auto_challenge
+    window.location.href = '/friends'
   }
 
   return (

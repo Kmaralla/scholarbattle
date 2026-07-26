@@ -66,10 +66,12 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
   const opponentCorrectRef   = useRef(false)
   const advanceScheduledRef  = useRef(false)
   const timeoutFallbackRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const handleSubmitRef      = useRef<(answer: string | null) => void>(() => {})
 
   // ── Misc ────────────────────────────────────────────────────────────────────
   const [timeLeft,       setTimeLeft]       = useState(SECONDS_PER_QUESTION)
   const [botAnsweredFirst, setBotAnsweredFirst] = useState(false)
+  const botAnsweredFirstRef = useRef(false)
   const [botWasCorrect,    setBotWasCorrect]    = useState<boolean | null>(null)
   const startTime        = useRef(Date.now())
   const botTimerRef      = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -93,6 +95,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
     setTypedAnswer('')
     setShowResult(false)
     setBotAnsweredFirst(false)
+    botAnsweredFirstRef.current = false
     setBotWasCorrect(null)
     startTime.current = Date.now()
     if (advanceTimerRef.current)   { clearTimeout(advanceTimerRef.current);   advanceTimerRef.current   = null }
@@ -143,6 +146,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
     botTimerRef.current = setTimeout(() => {
       if (answeredRef.current) return
       setBotAnsweredFirst(true)
+      botAnsweredFirstRef.current = true
       setBotWasCorrect(isCorrect)
       if (isCorrect) {
         setOpponentScore(s => s + 1)
@@ -184,7 +188,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
   // ── Timer ────────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (answered) return
-    if (timeLeft <= 0) { handleSubmit(null); return }
+    if (timeLeft <= 0) { handleSubmitRef.current(null); return }
     if (timeLeft <= 5) sounds.countdown()
     const t = setTimeout(() => setTimeLeft(s => s - 1), 1000)
     return () => clearTimeout(t)
@@ -210,11 +214,11 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
 
     // Solo scoring
     if (isSolo) {
-      const botAlreadyScored = botAnsweredFirst && botWasCorrect
+      const botAlreadyScored = botAnsweredFirstRef.current && botWasCorrect
       if (isCorrect && !botAlreadyScored) {
         setMyScore(s => { const v = s + 1; myScoreRef.current = v; return v })
       }
-      if (!botAnsweredFirst) {
+      if (!botAnsweredFirstRef.current) {
         const { accuracy } = BOT_PROFILES[botDifficulty]
         const botCorrect = Math.random() < accuracy
         setBotWasCorrect(botCorrect)
@@ -257,7 +261,8 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
         }, 4000)
       }
     }
-  }, [q, qIndex, botAnsweredFirst, botWasCorrect, isSolo, botDifficulty, checkAdvance])
+  }, [q, qIndex, botWasCorrect, isSolo, botDifficulty, checkAdvance])
+  handleSubmitRef.current = handleSubmit
 
   // ── Solo: manual Next ────────────────────────────────────────────────────────
   const handleNext = () => {

@@ -33,9 +33,10 @@ export default function MatchmakingPage() {
   const [friends, setFriends]   = useState<User[]>([])
   const [currentUser, setCurrentUser] = useState<User | null>(null)
 
-  const channelRef    = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
-  const timerRef      = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const countdownRef  = useRef<ReturnType<typeof setInterval> | null>(null)
+  const channelRef      = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
+  const timerRef        = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const countdownRef    = useRef<ReturnType<typeof setInterval> | null>(null)
+  const alreadyMatchedRef = useRef(false)
   const router        = useRouter()
   const supabase      = createClient()
 
@@ -70,6 +71,7 @@ export default function MatchmakingPage() {
 
   // ── Random matchmaking ────────────────────────────────────────
   async function startSearch(s: Subject, g: number) {
+    alreadyMatchedRef.current = false
     setSubject(s); setGrade(g); setStep('searching'); setTimeLeft(20)
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -93,7 +95,8 @@ export default function MatchmakingPage() {
         setStep('found')
         setStatusMsg(`Found ${opponent.username}! Starting battle...`)
 
-        if (user.id < opponent.user_id) {
+        if (user.id < opponent.user_id && !alreadyMatchedRef.current) {
+          alreadyMatchedRef.current = true
           const { data: battle } = await supabase.from('battles').insert({
             challenger_id: user.id,
             opponent_id: opponent.user_id,
@@ -108,6 +111,8 @@ export default function MatchmakingPage() {
         }
       })
       .on('broadcast', { event: 'battle_ready' }, ({ payload }) => {
+        if (alreadyMatchedRef.current) return
+        alreadyMatchedRef.current = true
         cleanup(); router.push(`/battle/${payload.battle_id}`)
       })
       .subscribe(async (status) => {

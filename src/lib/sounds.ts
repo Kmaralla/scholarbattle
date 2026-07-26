@@ -11,7 +11,8 @@ function getCtx(): AudioContext | null {
 function play(fn: (ctx: AudioContext) => void) {
   const c = getCtx()
   if (!c) return
-  try { fn(c) } catch {}
+  const run = () => { try { fn(c) } catch {} }
+  if (c.state === 'suspended') { c.resume().then(run) } else { run() }
 }
 
 export const sounds = {

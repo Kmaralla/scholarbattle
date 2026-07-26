@@ -98,7 +98,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ user
               Join &amp; Challenge 🎮
             </Link>
             <Link
-              href={`/login?challenge=${profile.username}`}
+              href={`/login`}
               className="block w-full py-3 rounded-2xl font-bold text-sm transition-all hover:opacity-80"
               style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}
             >

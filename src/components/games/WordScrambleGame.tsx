@@ -46,6 +46,7 @@ function scramble(word: string): string {
     [arr[i], arr[j]] = [arr[j], arr[i]]
   }
   const result = arr.join('')
+  if (word.length <= 1) return word
   return result === word ? scramble(word) : result
 }
 

@@ -86,9 +86,18 @@ export function Navbar() {
     return () => { if (ch) supabase.removeChannel(ch) }
   }, [])
 
-  // Clear badge when visiting /friends
+  // Clear badge when visiting /friends, re-fetch when returning
   useEffect(() => {
-    if (path.startsWith('/friends')) setPendingInvites(0)
+    if (!path.startsWith('/friends')) return
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { setPendingInvites(0); return }
+      supabase
+        .from('friendships')
+        .select('id', { count: 'exact', head: true })
+        .eq('friend_id', user.id)
+        .eq('status', 'pending')
+        .then(({ count }) => setPendingInvites(count ?? 0))
+    })
   }, [path])
 
   return (
