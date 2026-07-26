@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getRankTier } from '@/types'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { UserAvatar } from '@/components/profile/UserAvatar'
 
 const TIER_META: Record<string, { color: string; emoji: string }> = {
   bronze:   { color: '#b45309', emoji: '🥉' },
@@ -17,7 +18,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ user
 
   const { data: profile } = await supabase
     .from('users')
-    .select('username, elo_rating, total_wins, total_battles')
+    .select('username, elo_rating, total_wins, total_battles, avatar_url')
     .eq('username', username)
     .single()
 
@@ -50,11 +51,8 @@ export default async function ChallengePage({ params }: { params: Promise<{ user
         <div className="rounded-3xl p-6 space-y-5" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)' }}>
           {/* Avatar / rank ring */}
           <div className="flex flex-col items-center gap-2">
-            <div
-              className="w-20 h-20 rounded-full flex items-center justify-center text-4xl"
-              style={{ border: `4px solid ${meta.color}` }}
-            >
-              🧠
+            <div style={{ border: `4px solid ${meta.color}` }} className="rounded-full">
+              <UserAvatar username={profile.username} avatarUrl={(profile as any).avatar_url ?? null} size="lg" />
             </div>
             <div>
               <p className="font-black text-xl" style={{ color: '#fff' }}>@{profile.username}</p>

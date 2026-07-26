@@ -162,7 +162,7 @@ export default function MatchmakingPage() {
     await notifChannel.subscribe()
     await notifChannel.send({
       type: 'broadcast', event: 'incoming_challenge',
-      payload: { battle_id: battle.id, challenger_username: currentUser.username, subject: s, grade_level: g },
+      payload: { battle_id: battle.id, challenger_username: currentUser.username, challenger_avatar_url: (currentUser as any).avatar_url ?? null, subject: s, grade_level: g },
     })
     supabase.removeChannel(notifChannel)
     router.push(`/battle/${battle.id}`)

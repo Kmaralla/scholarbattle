@@ -2,12 +2,14 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { UserAvatar } from '@/components/profile/UserAvatar'
 
 interface ChallengerInfo {
   username: string
   elo_rating: number
   total_wins: number
   total_battles: number
+  avatar_url: string | null
 }
 
 const TIER_META: Record<string, { color: string; emoji: string }> = {
@@ -42,7 +44,7 @@ export function PendingChallengeModal({ myUsername }: { myUsername: string }) {
     const supabase = createClient()
     supabase
       .from('users')
-      .select('username, elo_rating, total_wins, total_battles')
+      .select('username, elo_rating, total_wins, total_battles, avatar_url')
       .ilike('username', pending)   // case-insensitive match
       .single()
       .then(({ data }) => {
@@ -88,11 +90,8 @@ export function PendingChallengeModal({ myUsername }: { myUsername: string }) {
         {/* Challenger card */}
         <div className="rounded-2xl p-4 space-y-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <div className="flex flex-col items-center gap-1.5">
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-3xl"
-              style={{ border: `3px solid ${meta.color}` }}
-            >
-              🧠
+            <div style={{ border: `3px solid ${meta.color}` }} className="rounded-full">
+              <UserAvatar username={challenger.username} avatarUrl={challenger.avatar_url} size="lg" />
             </div>
             <p className="font-black text-white text-lg">@{challenger.username}</p>
             <p className="text-xs font-bold" style={{ color: meta.color }}>{meta.emoji} {tier.charAt(0).toUpperCase() + tier.slice(1)} Scholar</p>

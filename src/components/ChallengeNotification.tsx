@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation'
 import { Swords, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Subject, SUBJECT_COLORS } from '@/types'
+import { UserAvatar } from '@/components/profile/UserAvatar'
 
 interface ChallengePayload {
   battle_id: string
   challenger_username: string
+  challenger_avatar_url: string | null
   subject: Subject
   grade_level: number
 }
@@ -70,9 +72,12 @@ export function ChallengeNotification({ userId }: { userId: string }) {
 
       {/* Body */}
       <div className="p-4 space-y-3">
-        <p className="text-sm text-white/70">
-          <span className="font-bold text-white">{challenge.challenger_username}</span> challenged you to a battle!
-        </p>
+        <div className="flex items-center gap-3">
+          <UserAvatar username={challenge.challenger_username} avatarUrl={challenge.challenger_avatar_url} size="md" />
+          <p className="text-sm text-white/70">
+            <span className="font-bold text-white">{challenge.challenger_username}</span> challenged you to a battle!
+          </p>
+        </div>
         <div className="flex items-center gap-2">
           <span className="px-2.5 py-1 rounded-full text-xs font-bold border border-indigo-400/30 bg-indigo-500/20 text-indigo-300 capitalize">
             {challenge.subject}

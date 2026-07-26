@@ -135,7 +135,7 @@ export default function FriendsPage() {
     if (!battle) return
     const notifChannel = supabase.channel(`challenge:${challenging.id}`)
     await notifChannel.subscribe()
-    await notifChannel.send({ type: 'broadcast', event: 'incoming_challenge', payload: { battle_id: battle.id, challenger_username: currentUser.username, subject, grade_level: grade } })
+    await notifChannel.send({ type: 'broadcast', event: 'incoming_challenge', payload: { battle_id: battle.id, challenger_username: currentUser.username, challenger_avatar_url: (currentUser as any).avatar_url ?? null, subject, grade_level: grade } })
     supabase.removeChannel(notifChannel)
     setChallenging(null)
     router.push(`/battle/${battle.id}`)
