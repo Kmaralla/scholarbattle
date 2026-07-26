@@ -33,7 +33,9 @@ export function PendingChallengeModal({ myUsername }: { myUsername: string }) {
 
   useEffect(() => {
     const pending = localStorage.getItem('pending_challenge')
-    if (!pending || pending === myUsername) {
+    if (!pending) return
+    // Same person — clear and skip
+    if (pending.toLowerCase() === myUsername.toLowerCase()) {
       localStorage.removeItem('pending_challenge')
       return
     }
@@ -41,7 +43,7 @@ export function PendingChallengeModal({ myUsername }: { myUsername: string }) {
     supabase
       .from('users')
       .select('username, elo_rating, total_wins, total_battles')
-      .eq('username', pending)
+      .ilike('username', pending)   // case-insensitive match
       .single()
       .then(({ data }) => {
         if (data) setChallenger(data)
