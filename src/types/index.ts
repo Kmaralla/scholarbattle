@@ -77,11 +77,11 @@ export const RANK_THRESHOLDS: Record<RankTier, [number, number]> = {
 }
 
 export const RANK_COLORS: Record<RankTier, string> = {
-  bronze:   'text-amber-700 bg-amber-100',
-  silver:   'text-gray-600 bg-gray-100',
-  gold:     'text-yellow-600 bg-yellow-100',
-  platinum: 'text-cyan-600 bg-cyan-100',
-  diamond:  'text-blue-500 bg-blue-100',
+  bronze:   'text-amber-800 bg-amber-200 dark:text-amber-300 dark:bg-amber-900/60 border-amber-400/50',
+  silver:   'text-slate-600 bg-slate-200 dark:text-slate-300 dark:bg-slate-700/60 border-slate-400/50',
+  gold:     'text-yellow-700 bg-yellow-200 dark:text-yellow-300 dark:bg-yellow-600/40 border-yellow-400/50',
+  platinum: 'text-cyan-700 bg-cyan-200 dark:text-cyan-300 dark:bg-cyan-800/60 border-cyan-400/50',
+  diamond:  'text-blue-700 bg-blue-200 dark:text-blue-300 dark:bg-blue-800/60 border-blue-400/50',
 }
 
 export const SUBJECT_COLORS: Record<Subject, string> = {
