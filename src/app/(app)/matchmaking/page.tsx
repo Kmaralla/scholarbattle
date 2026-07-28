@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { BotDifficulty } from '@/components/battle/BattleRoom'
+import { pickQuestionIndices } from '@/lib/questions'
 import { UserAvatar } from '@/components/profile/UserAvatar'
 import { Swords } from 'lucide-react'
 
@@ -102,7 +103,8 @@ export default function MatchmakingPage() {
             opponent_id: opponent.user_id,
             subject: s, grade_level: g,
             status: 'in_progress',
-            challenger_score: 0, opponent_score: 0, question_ids: [],
+            challenger_score: 0, opponent_score: 0,
+            question_ids: pickQuestionIndices(s, g, 10),
           }).select().single()
           if (battle) {
             await channel.send({ type: 'broadcast', event: 'battle_ready', payload: { battle_id: battle.id } })
@@ -141,7 +143,8 @@ export default function MatchmakingPage() {
       opponent_id: user.id,
       subject: s, grade_level: g,
       status: 'in_progress',
-      challenger_score: 0, opponent_score: 0, question_ids: [],
+      challenger_score: 0, opponent_score: 0,
+      question_ids: pickQuestionIndices(s, g, 10),
     }).select().single()
     if (battle) router.push(`/battle/${battle.id}?difficulty=${botDiff}`)
   }
@@ -154,7 +157,8 @@ export default function MatchmakingPage() {
       opponent_id: friend.id,
       subject: s, grade_level: g,
       status: 'pending',
-      challenger_score: 0, opponent_score: 0, question_ids: [],
+      challenger_score: 0, opponent_score: 0,
+      question_ids: pickQuestionIndices(s, g, 10),
     }).select().single()
     if (!battle) return
 

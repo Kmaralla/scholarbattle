@@ -10,6 +10,7 @@ import { RankBadge } from '@/components/RankBadge'
 import { UserPlus, X, Check, Bell, Swords, MessageCircle, UserMinus, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
+import { pickQuestionIndices } from '@/lib/questions'
 
 interface PendingInvite {
   id: string
@@ -127,10 +128,11 @@ export default function FriendsPage() {
 
   async function handleStartBattle(subject: Subject, grade: number) {
     if (!challenging || !currentUser) return
+    const questionIndices = pickQuestionIndices(subject, grade, 10)
     const { data: battle } = await supabase.from('battles').insert({
       challenger_id: currentUser.id, opponent_id: challenging.id,
       subject, grade_level: grade, status: 'pending',
-      challenger_score: 0, opponent_score: 0, question_ids: [],
+      challenger_score: 0, opponent_score: 0, question_ids: questionIndices,
     }).select().single()
     if (!battle) return
     const notifChannel = supabase.channel(`challenge:${challenging.id}`)

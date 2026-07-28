@@ -97,24 +97,26 @@ export default function BattlePage() {
       const isPvP = battleData.challenger_id !== battleData.opponent_id   // real PvP, not solo
       const existingIndices: number[] = battleData.question_ids ?? []
 
-      if (isPvP && existingIndices.length === 0 && isChallenger) {
-        // Challenger picks 10 questions and saves so opponent loads the same set
-        const indices = pickQuestionIndices(battleData.subject as Subject, battleData.grade_level, 10)
-        await supabase.from('battles').update({ question_ids: indices }).eq('id', id)
-        questionList = getQuestionsByIndices(indices)
-      } else if (isPvP && existingIndices.length > 0) {
-        // Opponent (or challenger on reload) loads the saved indices — same order, same questions
+      if (isPvP && existingIndices.length > 0) {
+        // Both players load the same pre-picked questions from the battle record
         questionList = getQuestionsByIndices(existingIndices)
-      } else if (isPvP && existingIndices.length === 0 && !isChallenger) {
-        // Opponent loaded before challenger wrote question_ids — poll until available (up to 8s)
-        let retryIndices: number[] = []
-        for (let attempt = 0; attempt < 5 && retryIndices.length === 0; attempt++) {
-          await new Promise(r => setTimeout(r, 1500))
-          const { data: retryBattle } = await supabase.from('battles').select('question_ids').eq('id', id).single()
-          retryIndices = retryBattle?.question_ids ?? []
+      } else if (isPvP && existingIndices.length === 0) {
+        // Fallback: questions weren't pre-populated (old battle) — challenger picks and saves them
+        if (isChallenger) {
+          const indices = pickQuestionIndices(battleData.subject as Subject, battleData.grade_level, 10)
+          await supabase.from('battles').update({ question_ids: indices }).eq('id', id)
+          questionList = getQuestionsByIndices(indices)
+        } else {
+          // Opponent arrived before challenger wrote — poll briefly
+          let retryIndices: number[] = []
+          for (let attempt = 0; attempt < 8 && retryIndices.length === 0; attempt++) {
+            await new Promise(r => setTimeout(r, 1500))
+            const { data: retryBattle } = await supabase.from('battles').select('question_ids').eq('id', id).single()
+            retryIndices = retryBattle?.question_ids ?? []
+          }
+          if (retryIndices.length === 0) { setLoadError('Could not sync questions. Please try again.'); return }
+          questionList = getQuestionsByIndices(retryIndices)
         }
-        if (retryIndices.length === 0) { setLoadError('Could not sync questions. Please try again.'); return }
-        questionList = getQuestionsByIndices(retryIndices)
       } else {
         // Solo practice — random questions
         questionList = getQuestionsForBattle(battleData.subject as Subject, battleData.grade_level)
@@ -266,7 +268,8 @@ export default function BattlePage() {
         subject: battle.subject,
         grade_level: battle.grade_level,
         status: isSolo ? 'in_progress' : 'pending',
-        challenger_score: 0, opponent_score: 0, question_ids: [],
+        challenger_score: 0, opponent_score: 0,
+        question_ids: pickQuestionIndices(battle.subject as Subject, battle.grade_level, 10),
       }).select().single()
       if (!newBattle) return
       if (!isSolo) {
