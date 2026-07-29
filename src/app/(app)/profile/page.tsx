@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getRankTier } from '@/types'
+import { getDisplayTier } from '@/types'
 import { LogOut } from 'lucide-react'
 import { AvatarPicker } from '@/components/profile/AvatarPicker'
 import { ColorsSidePanel } from '@/components/profile/ColorsSidePanel'
@@ -13,10 +13,11 @@ const TIER_COLORS: Record<string, string> = {
   gold:     'from-yellow-900/70 to-amber-800/50',
   platinum: 'from-cyan-900/70 to-teal-800/50',
   diamond:  'from-violet-900/70 to-indigo-800/50',
+  legend:   'from-yellow-800/60 to-purple-900/60',
 }
 
 const TIER_EMOJI: Record<string, string> = {
-  bronze: '🥉', silver: '🥈', gold: '🥇', platinum: '💎', diamond: '👑',
+  bronze: '🥉', silver: '🥈', gold: '🥇', platinum: '💎', diamond: '👑', legend: '🌟',
 }
 
 export default async function ProfilePage() {
@@ -27,7 +28,7 @@ export default async function ProfilePage() {
   const { data: profile } = await supabase.from('users').select('*').eq('id', user.id).single()
   if (!profile) redirect('/onboarding')
 
-  const tier = getRankTier(profile.elo_rating)
+  const tier = getDisplayTier(profile.elo_rating, profile.rank_tier)
   const winRate = profile.total_battles > 0
     ? Math.round((profile.total_wins / profile.total_battles) * 100)
     : 0

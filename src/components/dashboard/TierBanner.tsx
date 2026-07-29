@@ -5,7 +5,7 @@ import type { RankTier } from '@/types'
 type TierStyle = { gradient: string; shadow: string; text: string; muted: string; badge: string; bar: string }
 type TierEntry = { emoji: string; dark: TierStyle; light: TierStyle }
 
-const TIER_CONFIG: Record<RankTier, TierEntry> = {
+const TIER_CONFIG: Record<Exclude<RankTier, 'legend'>, TierEntry> = {
   bronze: {
     emoji: '🥉',
     dark:  { gradient: 'from-amber-800  to-orange-700',  shadow: 'shadow-amber-900/60',   text: 'text-amber-100',  muted: 'text-amber-200/70',  badge: 'bg-amber-900/40 text-amber-100',  bar: 'bg-white/40' },
@@ -39,10 +39,54 @@ interface Props {
   eloRating: number
   coins?: number
   progress: number
+  diamondWins?: number
 }
 
-export function TierBanner({ tier, username, eloRating, coins, progress }: Props) {
+export function TierBanner({ tier, username, eloRating, coins, progress, diamondWins }: Props) {
   const { theme } = useTheme()
+
+  if (tier === 'legend') {
+    return (
+      <div className="relative rounded-3xl p-6 overflow-hidden legend-card-glow border border-white/10"
+        style={{ background: 'linear-gradient(135deg, #1a0533 0%, #0a1a33 40%, #001a1a 100%)' }}>
+        {/* Animated rainbow shimmer overlay */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none"
+          style={{
+            background: 'linear-gradient(90deg, #fbbf24, #ec4899, #8b5cf6, #06b6d4, #10b981, #fbbf24)',
+            backgroundSize: '300% 100%',
+            animation: 'shimmer 3s linear infinite',
+          }} />
+        <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full blur-3xl opacity-30"
+          style={{ background: 'radial-gradient(circle, #fbbf24, #ec4899)' }} />
+        <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full blur-3xl opacity-20"
+          style={{ background: 'radial-gradient(circle, #06b6d4, #8b5cf6)' }} />
+
+        <div className="relative flex items-start justify-between">
+          <div>
+            <p className="text-white/50 text-sm font-medium">Welcome back,</p>
+            <h1 className="text-3xl font-black text-white tracking-tight">{username} 👋</h1>
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-2xl animate-[spin_4s_linear_infinite]">🌟</span>
+              <span className="font-black text-sm legend-text px-3 py-0.5 rounded-full bg-black/30">Legend</span>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-4xl font-black text-white">{eloRating}</p>
+            <p className="text-white/50 text-xs">ELO Rating</p>
+            {coins !== undefined && (
+              <p className="text-white font-bold text-sm mt-1 opacity-80">🪙 {coins}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="relative mt-4 bg-black/20 rounded-2xl px-4 py-2 flex items-center justify-between">
+          <span className="text-xs text-white/50">⭐ Diamond wins</span>
+          <span className="text-sm font-black legend-text">{diamondWins ?? 0} wins</span>
+        </div>
+      </div>
+    )
+  }
+
   const entry = TIER_CONFIG[tier]
   const s = theme === 'light' ? entry.light : entry.dark
 

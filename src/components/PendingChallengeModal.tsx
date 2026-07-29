@@ -7,6 +7,7 @@ import { UserAvatar } from '@/components/profile/UserAvatar'
 interface ChallengerInfo {
   username: string
   elo_rating: number
+  rank_tier: string | null
   total_wins: number
   total_battles: number
   avatar_url: string | null
@@ -18,14 +19,7 @@ const TIER_META: Record<string, { color: string; emoji: string }> = {
   gold:     { color: '#d97706', emoji: '🥇' },
   platinum: { color: '#06b6d4', emoji: '💎' },
   diamond:  { color: '#3b82f6', emoji: '💠' },
-}
-
-function getTier(elo: number) {
-  if (elo >= 1800) return 'diamond'
-  if (elo >= 1600) return 'platinum'
-  if (elo >= 1400) return 'gold'
-  if (elo >= 1200) return 'silver'
-  return 'bronze'
+  legend:   { color: '#fbbf24', emoji: '🌟' },
 }
 
 export function PendingChallengeModal({ myUsername }: { myUsername: string }) {
@@ -44,7 +38,7 @@ export function PendingChallengeModal({ myUsername }: { myUsername: string }) {
     const supabase = createClient()
     supabase
       .from('users')
-      .select('username, elo_rating, total_wins, total_battles, avatar_url')
+      .select('username, elo_rating, rank_tier, total_wins, total_battles, avatar_url')
       .ilike('username', pending)   // case-insensitive match
       .single()
       .then(({ data }) => {
@@ -55,8 +49,8 @@ export function PendingChallengeModal({ myUsername }: { myUsername: string }) {
 
   if (!challenger || dismissed) return null
 
-  const tier = getTier(challenger.elo_rating)
-  const meta = TIER_META[tier]
+  const tier = challenger.rank_tier ?? (challenger.elo_rating >= 1800 ? 'diamond' : challenger.elo_rating >= 1600 ? 'platinum' : challenger.elo_rating >= 1400 ? 'gold' : challenger.elo_rating >= 1200 ? 'silver' : 'bronze')
+  const meta = TIER_META[tier] ?? TIER_META['bronze']
   const winRate = challenger.total_battles > 0
     ? Math.round((challenger.total_wins / challenger.total_battles) * 100)
     : 0

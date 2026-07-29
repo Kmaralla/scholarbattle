@@ -1,4 +1,4 @@
-export type RankTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond'
+export type RankTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'legend'
 export type Subject = 'math' | 'science' | 'history' | 'english'
 export type BattleStatus = 'pending' | 'accepted' | 'in_progress' | 'completed' | 'declined'
 export type FriendshipStatus = 'pending' | 'accepted'
@@ -74,6 +74,7 @@ export const RANK_THRESHOLDS: Record<RankTier, [number, number]> = {
   gold:     [1400, 1599],
   platinum: [1600, 1799],
   diamond:  [1800, 9999],
+  legend:   [1800, 9999],
 }
 
 export const RANK_COLORS: Record<RankTier, string> = {
@@ -82,7 +83,12 @@ export const RANK_COLORS: Record<RankTier, string> = {
   gold:     'text-yellow-700 bg-yellow-200 dark:text-yellow-300 dark:bg-yellow-600/40 border-yellow-400/50',
   platinum: 'text-cyan-700 bg-cyan-200 dark:text-cyan-300 dark:bg-cyan-800/60 border-cyan-400/50',
   diamond:  'text-blue-700 bg-blue-200 dark:text-blue-300 dark:bg-blue-800/60 border-blue-400/50',
+  legend:   'legend-rank-badge border-transparent',
 }
+
+// Legend unlock thresholds
+export const LEGEND_DAYS_AT_DIAMOND = 7
+export const LEGEND_WINS_AT_DIAMOND = 10
 
 export const SUBJECT_COLORS: Record<Subject, string> = {
   math:    'bg-yellow-100 text-yellow-800 border-yellow-300',
@@ -97,6 +103,12 @@ export function getRankTier(elo: number): RankTier {
   if (elo >= 1400) return 'gold'
   if (elo >= 1200) return 'silver'
   return 'bronze'
+}
+
+// Use this everywhere you display rank — preserves 'legend' if already earned
+export function getDisplayTier(elo: number, storedTier?: string): RankTier {
+  if (storedTier === 'legend') return 'legend'
+  return getRankTier(elo)
 }
 
 export function calculateElo(winnerElo: number, loserElo: number): [number, number] {

@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { RankBadge } from '@/components/RankBadge'
-import { getRankTier } from '@/types'
+import { getDisplayTier } from '@/types'
 import { Card, CardContent } from '@/components/ui/card'
 import { Crown } from 'lucide-react'
 import { UserAvatar } from '@/components/profile/UserAvatar'
@@ -113,7 +113,7 @@ export default async function LeaderboardPage({
           <CardContent className="p-0">
             {players.map((player, i) => {
               const isMe = player.id === user?.id
-              const tier = getRankTier(player.elo_rating)
+              const tier = getDisplayTier(player.elo_rating, (player as any).rank_tier)
               const winRate = player.total_battles > 0
                 ? Math.round((player.total_wins / player.total_battles) * 100)
                 : 0
