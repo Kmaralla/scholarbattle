@@ -2,9 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getRankTier } from '@/types'
 import { LogOut } from 'lucide-react'
-import { AvatarPicker, AVATARS } from '@/components/profile/AvatarPicker'
-import { BADGES, RARITY_STYLES } from '@/lib/badges'
+import { AvatarPicker } from '@/components/profile/AvatarPicker'
 import { ColorsSidePanel } from '@/components/profile/ColorsSidePanel'
+import { BadgesSection } from '@/components/profile/BadgesSection'
+import type { PrestigeMap } from '@/lib/badges'
 
 const TIER_COLORS: Record<string, string> = {
   bronze:   'from-orange-900/70 to-amber-800/50',
@@ -31,12 +32,13 @@ export default async function ProfilePage() {
     ? Math.round((profile.total_wins / profile.total_battles) * 100)
     : 0
   const earnedBadges: string[] = (profile as any).badges ?? []
+  const prestigeMap: PrestigeMap = (profile as any).badge_prestige ?? {}
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-3 pb-24">
       <h1 className="text-xl font-black text-white">👤 Profile</h1>
 
-      {/* Compact profile header — avatar + info side by side */}
+      {/* Compact profile header */}
       <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
         <AvatarPicker
           userId={user.id}
@@ -59,7 +61,7 @@ export default async function ProfilePage() {
         </form>
       </div>
 
-      {/* Stats + info in one tight grid */}
+      {/* Stats grid */}
       <div className="grid grid-cols-4 gap-2">
         {[
           { label: 'Battles', value: profile.total_battles, emoji: '⚔️' },
@@ -88,34 +90,12 @@ export default async function ProfilePage() {
         ))}
       </div>
 
-      {/* Badges — all 17 in a compact grid */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
-        <h2 className="font-black text-white text-sm flex items-center gap-2 mb-3">
-          🎖️ Badges
-          <span className="text-white/30 font-normal text-xs">{earnedBadges.length}/{BADGES.length} earned</span>
-        </h2>
-        <div className="grid grid-cols-4 gap-1.5">
-          {BADGES.map(badge => {
-            const earned = earnedBadges.includes(badge.id)
-            const s = RARITY_STYLES[badge.rarity]
-            return (
-              <div
-                key={badge.id}
-                title={`${badge.name} — ${badge.description}`}
-                className={`flex flex-col items-center text-center rounded-xl border p-2 transition-all ${
-                  earned
-                    ? `${s.border} ${s.bg} ${s.glow ? `shadow-sm ${s.glow}` : ''}`
-                    : 'border-white/5 bg-white/3 opacity-25'
-                }`}
-              >
-                <span className={`text-2xl ${!earned && 'grayscale'}`}>{badge.emoji}</span>
-                <p className="font-bold text-white text-[9px] leading-tight mt-0.5 line-clamp-2">{badge.name}</p>
-              </div>
-            )
-          })}
-        </div>
-        <p className="text-[10px] text-white/25 text-center mt-2">Hover a badge to see its description</p>
-      </div>
+      {/* Interactive badges section with prestige support */}
+      <BadgesSection
+        earnedBadges={earnedBadges}
+        prestigeMap={prestigeMap}
+        userId={user.id}
+      />
 
       <ColorsSidePanel />
     </div>
