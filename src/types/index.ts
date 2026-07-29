@@ -88,7 +88,7 @@ export const RANK_COLORS: Record<RankTier, string> = {
 
 // Legend unlock thresholds
 export const LEGEND_DAYS_AT_DIAMOND = 7
-export const LEGEND_WINS_AT_DIAMOND = 10
+export const LEGEND_WINS_AT_DIAMOND = 25
 
 export const SUBJECT_COLORS: Record<Subject, string> = {
   math:    'bg-yellow-100 text-yellow-800 border-yellow-300',
