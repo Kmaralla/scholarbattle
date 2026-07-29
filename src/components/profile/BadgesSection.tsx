@@ -17,6 +17,8 @@ export function BadgesSection({
   const [selected, setSelected] = useState<Badge | null>(null)
   const [localPrestige, setLocalPrestige] = useState<PrestigeMap>(prestigeMap)
 
+  const allEarned = earnedBadges.length >= BADGES.length
+
   function handleUpgraded(badgeId: string, newLevel: PrestigeLevel) {
     setLocalPrestige(prev => ({ ...prev, [badgeId]: newLevel }))
     setSelected(null)
@@ -28,7 +30,9 @@ export function BadgesSection({
         <h2 className="font-black text-white text-sm flex items-center gap-2 mb-3">
           🎖️ Badges
           <span className="text-white/30 font-normal text-xs">{earnedBadges.length}/{BADGES.length} earned</span>
-          <span className="ml-auto text-white/20 font-normal text-[10px]">Tap to prestige</span>
+          {allEarned && (
+            <span className="ml-auto text-yellow-400/60 font-normal text-[10px]">✨ Tap to prestige</span>
+          )}
         </h2>
         <div className="grid grid-cols-4 gap-1.5">
           {BADGES.map(badge => {
@@ -39,12 +43,12 @@ export function BadgesSection({
             return (
               <button
                 key={badge.id}
-                title={`${badge.name} — ${badge.description}${earned ? '\nTap to view prestige challenge' : ''}`}
-                onClick={() => setSelected(badge)}
+                title={`${badge.name} — ${badge.description}${allEarned && earned ? '\nTap to prestige' : ''}`}
+                onClick={() => allEarned && earned && setSelected(badge)}
                 className={cn(
                   'flex flex-col items-center text-center rounded-xl border p-2 transition-all',
                   earned
-                    ? `${s.border} ${s.bg} ${p.ring} ${(s.glow || p.glow) ? `shadow-sm ${s.glow} ${p.glow}` : ''} hover:brightness-110 active:scale-95`
+                    ? `${s.border} ${s.bg} ${p.ring} ${(s.glow || p.glow) ? `shadow-sm ${s.glow} ${p.glow}` : ''} ${allEarned ? 'hover:brightness-110 active:scale-95 cursor-pointer' : 'cursor-default'}`
                     : 'border-white/5 bg-white/3 opacity-25 cursor-default'
                 )}
               >
@@ -57,10 +61,20 @@ export function BadgesSection({
             )
           })}
         </div>
-        <p className="text-[10px] text-white/25 text-center mt-2">Tap an earned badge to attempt a prestige challenge</p>
+
+        {/* Footer hint — changes based on completion */}
+        {allEarned ? (
+          <p className="text-[10px] text-yellow-400/40 text-center mt-2">
+            🏆 All badges collected! Tap any badge to attempt a prestige challenge.
+          </p>
+        ) : (
+          <p className="text-[10px] text-white/25 text-center mt-2">
+            Collect all {BADGES.length} badges to unlock prestige challenges — {BADGES.length - earnedBadges.length} remaining.
+          </p>
+        )}
       </div>
 
-      {selected && (
+      {selected && allEarned && (
         <BadgePrestigeModal
           badge={selected}
           earned={earnedBadges.includes(selected.id)}
