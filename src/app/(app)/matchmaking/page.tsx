@@ -71,7 +71,7 @@ export default function MatchmakingPage() {
   }
 
   // ── Random matchmaking ────────────────────────────────────────
-  async function startSearch(s: Subject, g: number) {
+  async function startSearch(s: Subject, g: number, topic: string) {
     alreadyMatchedRef.current = false
     setSubject(s); setGrade(g); setStep('searching'); setTimeLeft(20)
 
@@ -104,7 +104,7 @@ export default function MatchmakingPage() {
             subject: s, grade_level: g,
             status: 'in_progress',
             challenger_score: 0, opponent_score: 0,
-            question_ids: pickQuestionIndices(s, g, 10),
+            question_ids: pickQuestionIndices(s, g, 10, topic),
           }).select().single()
           if (battle) {
             await channel.send({ type: 'broadcast', event: 'battle_ready', payload: { battle_id: battle.id } })
@@ -135,7 +135,7 @@ export default function MatchmakingPage() {
   function cancelSearch() { cleanup(); setStep('pick') }
 
   // ── Bot battle ────────────────────────────────────────────────
-  async function startBotBattle(s: Subject, g: number) {
+  async function startBotBattle(s: Subject, g: number, topic: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const { data: battle } = await supabase.from('battles').insert({
@@ -144,13 +144,13 @@ export default function MatchmakingPage() {
       subject: s, grade_level: g,
       status: 'in_progress',
       challenger_score: 0, opponent_score: 0,
-      question_ids: pickQuestionIndices(s, g, 10),
+      question_ids: pickQuestionIndices(s, g, 10, topic),
     }).select().single()
     if (battle) router.push(`/battle/${battle.id}?difficulty=${botDiff}`)
   }
 
   // ── Friend challenge ──────────────────────────────────────────
-  async function challengeFriend(friend: User, s: Subject, g: number) {
+  async function challengeFriend(friend: User, s: Subject, g: number, topic: string) {
     if (!currentUser) return
     const { data: battle } = await supabase.from('battles').insert({
       challenger_id: currentUser.id,
@@ -158,7 +158,7 @@ export default function MatchmakingPage() {
       subject: s, grade_level: g,
       status: 'pending',
       challenger_score: 0, opponent_score: 0,
-      question_ids: pickQuestionIndices(s, g, 10),
+      question_ids: pickQuestionIndices(s, g, 10, topic),
     }).select().single()
     if (!battle) return
 
@@ -349,7 +349,7 @@ function FriendChallengeFlow({
   currentUser: User | null
   friends: User[]
   onBack: () => void
-  onChallenge: (friend: User, subject: Subject, grade: number) => void
+  onChallenge: (friend: User, subject: Subject, grade: number, topic: string) => void
 }) {
   const [selected, setSelected] = useState<User | null>(null)
 
@@ -399,7 +399,7 @@ function FriendChallengeFlow({
           <Card>
             <CardContent className="p-5 space-y-2">
               <p className="text-sm text-white/50">Pick a subject and grade for the battle.</p>
-              <TopicPicker onSelect={(s, g) => onChallenge(selected, s, g)} />
+              <TopicPicker onSelect={(s, g, t) => onChallenge(selected, s, g, t)} />
             </CardContent>
           </Card>
         </div>

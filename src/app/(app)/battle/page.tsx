@@ -21,7 +21,7 @@ export default function BattlePage() {
   const router = useRouter()
   const supabase = createClient()
 
-  async function handleSelect(subject: Subject, grade: number) {
+  async function handleSelect(subject: Subject, grade: number, topic: string) {
     setStep('finding')
     const { data: { user }, error: authErr } = await supabase.auth.getUser()
     if (!user) { setStep('pick'); return }

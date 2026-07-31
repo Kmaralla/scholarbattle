@@ -31,12 +31,14 @@ export function TrainingSession({
   mode,
   subject,
   grade,
+  topic,
   onBack,
 }: {
   coach: Coach
   mode: TrainingMode
   subject: Subject
   grade: number
+  topic?: string
   onBack: () => void
 }) {
   const isPuzzle = mode.id === 'puzzles'
@@ -50,7 +52,7 @@ export function TrainingSession({
   const [puzzleCoinsAwarded, setPuzzleCoinsAwarded] = useState(false)
 
   const [questions] = useState(() =>
-    getQuestionsForBattle(subject, grade, mode.questions).map((q, i) => ({ ...q, id: `q-${i}` }))
+    getQuestionsForBattle(subject, grade, mode.questions, topic).map((q, i) => ({ ...q, id: `q-${i}` }))
   )
   // Shuffle options per question — stored as parallel array
   const [optionSets] = useState<string[][]>(() =>

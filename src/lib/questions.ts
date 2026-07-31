@@ -692,7 +692,55 @@ export const SEED_QUESTIONS: Omit<Question, 'id'>[] = [
   { subject: 'history', grade_level: 12, question_text: 'What is historiography?', type: 'multiple_choice', options: ['Writing history books', 'The study of how history has been written and interpreted — how historians\' perspectives shape historical narratives', 'Ancient history', 'A type of biography'], correct_answer: 'The study of how history has been written and interpreted — how historians\' perspectives shape historical narratives', explanation: 'Historiography examines HOW history is written: What sources do historians use? What questions do they ask? How do their backgrounds/time periods shape interpretations? Example: the Civil War was once taught as "Lost Cause" (noble South defending states\' rights) vs. modern scholarship emphasizing slavery\'s central role. Historical interpretation evolves as new evidence and perspectives emerge.', difficulty: 4, source: 'curated' },
 ]
 
-export function getQuestionsForBattle(subject: Subject, gradeLevel: number, count = 10): Omit<Question, 'id'>[] {
+export const SUBJECT_TOPICS: Record<Subject, { label: string; emoji: string; keywords: string[] }[]> = {
+  math: [
+    { label: 'Numbers & Operations', emoji: '➕', keywords: ['add', 'subtract', 'multiply', 'divide', 'sum', 'difference', 'product', 'quotient', 'number', 'digit', 'operation', 'count'] },
+    { label: 'Fractions & Decimals', emoji: '½', keywords: ['fraction', 'decimal', 'numerator', 'denominator', 'percent', 'ratio', 'proportion', 'half', 'quarter', 'whole number'] },
+    { label: 'Geometry', emoji: '📐', keywords: ['shape', 'angle', 'triangle', 'circle', 'square', 'rectangle', 'polygon', 'area', 'perimeter', 'volume', 'geometry', 'vertex', 'parallel', 'diameter', 'radius'] },
+    { label: 'Algebra', emoji: '🔣', keywords: ['variable', 'equation', 'expression', 'solve', 'algebra', 'coefficient', 'term', 'factor', 'function', 'inequality', 'unknown', 'linear'] },
+    { label: 'Measurement', emoji: '📏', keywords: ['measure', 'length', 'weight', 'height', 'meter', 'inch', 'foot', 'pound', 'kilogram', 'gram', 'liter', 'gallon', 'temperature', 'unit', 'convert'] },
+    { label: 'Statistics & Data', emoji: '📊', keywords: ['average', 'mean', 'median', 'mode', 'probability', 'statistics', 'data', 'chart', 'graph', 'range', 'chance', 'likely', 'predict'] },
+  ],
+  science: [
+    { label: 'Biology & Life Science', emoji: '🧬', keywords: ['cell', 'living', 'animal', 'plant', 'organism', 'body', 'human', 'dna', 'species', 'evolution', 'ecosystem', 'mammal', 'organ', 'tissue', 'photosynthesis', 'bacteria'] },
+    { label: 'Earth Science', emoji: '🌍', keywords: ['earth', 'rock', 'mineral', 'weather', 'climate', 'ocean', 'earthquake', 'volcano', 'mountain', 'soil', 'erosion', 'sediment', 'tectonic', 'crust', 'fossil'] },
+    { label: 'Physics & Forces', emoji: '⚡', keywords: ['force', 'motion', 'energy', 'gravity', 'speed', 'velocity', 'mass', 'weight', 'friction', 'newton', 'wave', 'sound', 'light', 'electricity', 'magnet', 'circuit'] },
+    { label: 'Chemistry', emoji: '🧪', keywords: ['atom', 'element', 'molecule', 'compound', 'chemical', 'reaction', 'periodic', 'proton', 'electron', 'neutron', 'acid', 'base', 'metal', 'mixture', 'solution'] },
+    { label: 'Space & Astronomy', emoji: '🚀', keywords: ['planet', 'star', 'solar', 'moon', 'sun', 'galaxy', 'orbit', 'space', 'asteroid', 'comet', 'universe', 'astronomy', 'telescope', 'milky way', 'nasa', 'satellite'] },
+    { label: 'Environment', emoji: '🌿', keywords: ['environment', 'pollution', 'recycle', 'renewable', 'habitat', 'biodiversity', 'conservation', 'greenhouse', 'carbon', 'ozone', 'deforestation', 'natural resource'] },
+  ],
+  history: [
+    { label: 'Ancient Civilizations', emoji: '🏛️', keywords: ['ancient', 'egypt', 'greece', 'rome', 'mesopotamia', 'civilization', 'pharaoh', 'pyramid', 'emperor', 'greek', 'roman', 'babylon', 'athens', 'sparta', 'julius caesar'] },
+    { label: 'American History', emoji: '🦅', keywords: ['america', 'american', 'united states', 'president', 'revolution', 'civil war', 'independence', 'colonist', 'washington', 'lincoln', 'founding', 'constitution', 'declaration'] },
+    { label: 'World Wars', emoji: '⚔️', keywords: ['world war', 'ww1', 'ww2', 'wwi', 'wwii', 'nazi', 'hitler', 'allied', 'axis', 'holocaust', 'd-day', 'hiroshima', 'pearl harbor', 'trench', 'atomic'] },
+    { label: 'Government & Civics', emoji: '🏛️', keywords: ['government', 'democracy', 'law', 'congress', 'senate', 'vote', 'election', 'constitution', 'rights', 'citizen', 'amendment', 'branch', 'bill of rights', 'supreme court'] },
+    { label: 'World History', emoji: '🌏', keywords: ['china', 'europe', 'africa', 'india', 'empire', 'dynasty', 'medieval', 'renaissance', 'industrial revolution', 'trade', 'silk road', 'exploration', 'colonial', 'ming', 'ottoman'] },
+    { label: 'Geography', emoji: '🗺️', keywords: ['continent', 'country', 'capital', 'ocean', 'river', 'mountain', 'geography', 'map', 'border', 'region', 'latitude', 'longitude', 'hemisphere', 'equator', 'climate zone'] },
+  ],
+  english: [
+    { label: 'Reading & Comprehension', emoji: '📖', keywords: ['read', 'paragraph', 'passage', 'author', 'main idea', 'inference', 'comprehension', 'context', 'purpose', 'summarize', 'topic sentence', 'detail'] },
+    { label: 'Grammar', emoji: '✏️', keywords: ['noun', 'verb', 'adjective', 'adverb', 'pronoun', 'preposition', 'conjunction', 'sentence', 'grammar', 'subject', 'predicate', 'clause', 'phrase', 'tense', 'plural'] },
+    { label: 'Vocabulary', emoji: '📝', keywords: ['word', 'meaning', 'definition', 'synonym', 'antonym', 'vocabulary', 'prefix', 'suffix', 'root', 'define', 'homophone', 'connotation'] },
+    { label: 'Writing', emoji: '🖊️', keywords: ['write', 'essay', 'thesis', 'transition', 'conclude', 'draft', 'revise', 'argument', 'evidence', 'paragraph', 'outline', 'narrative'] },
+    { label: 'Literature', emoji: '📚', keywords: ['story', 'character', 'plot', 'setting', 'theme', 'conflict', 'fiction', 'novel', 'poem', 'metaphor', 'simile', 'literary', 'narrative', 'foreshadowing', 'alliteration'] },
+    { label: 'Spelling & Punctuation', emoji: '🔤', keywords: ['spell', 'punctuation', 'comma', 'period', 'apostrophe', 'quotation', 'capital', 'hyphen', 'semicolon', 'colon', 'exclamation', 'question mark'] },
+  ],
+}
+
+function topicKeywords(subject: Subject, topic: string): string[] | null {
+  return SUBJECT_TOPICS[subject]?.find(t => t.label === topic)?.keywords ?? null
+}
+
+function filterByTopic<T>(pool: T[], getText: (item: T) => string, subject: Subject, topic: string): T[] {
+  const keywords = topicKeywords(subject, topic)
+  if (!keywords) return pool
+  const filtered = pool.filter(item =>
+    keywords.some(kw => getText(item).toLowerCase().includes(kw.toLowerCase()))
+  )
+  return filtered.length >= 4 ? filtered : pool
+}
+
+export function getQuestionsForBattle(subject: Subject, gradeLevel: number, count = 10, topic?: string): Omit<Question, 'id'>[] {
   let pool = SEED_QUESTIONS.filter(q => q.subject === subject && q.grade_level === gradeLevel)
 
   // Fall back to nearest grade if not enough questions
@@ -704,6 +752,8 @@ export function getQuestionsForBattle(subject: Subject, gradeLevel: number, coun
     pool = SEED_QUESTIONS.filter(q => q.subject === subject && q.grade_level === nearest)
   }
 
+  if (topic) pool = filterByTopic(pool, q => q.question_text, subject, topic)
+
   // Fisher-Yates shuffle for true randomness
   const arr = [...pool]
   for (let i = arr.length - 1; i > 0; i--) {
@@ -714,7 +764,7 @@ export function getQuestionsForBattle(subject: Subject, gradeLevel: number, coun
 }
 
 // Returns the global indices into SEED_QUESTIONS for a picked set
-export function pickQuestionIndices(subject: Subject, gradeLevel: number, count = 10): number[] {
+export function pickQuestionIndices(subject: Subject, gradeLevel: number, count = 10, topic?: string): number[] {
   let pool = SEED_QUESTIONS.map((q, i) => ({ q, i })).filter(({ q }) => q.subject === subject && q.grade_level === gradeLevel)
   if (pool.length < count) {
     const availableGrades = [...new Set(SEED_QUESTIONS.filter(q => q.subject === subject).map(q => q.grade_level))]
@@ -723,6 +773,7 @@ export function pickQuestionIndices(subject: Subject, gradeLevel: number, count 
     )
     pool = SEED_QUESTIONS.map((q, i) => ({ q, i })).filter(({ q }) => q.subject === subject && q.grade_level === nearest)
   }
+  if (topic) pool = filterByTopic(pool, item => item.q.question_text, subject, topic)
   const arr = [...pool]
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

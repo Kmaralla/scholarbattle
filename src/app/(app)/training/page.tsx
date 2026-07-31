@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { TrainingSession } from '@/components/training/TrainingSession'
 import { Subject } from '@/types'
+import { SUBJECT_TOPICS } from '@/lib/questions'
 
 export type Coach = {
   id: string
@@ -209,6 +210,7 @@ export default function TrainingPage() {
   const [selectedCoach, setSelectedCoach] = useState<Coach | null>(null)
   const [subject, setSubject] = useState<Subject>('math')
   const [grade, setGrade] = useState(5)
+  const [topic, setTopic] = useState<string | null>(null)
   const [started, setStarted] = useState(false)
 
   if (started && selectedCoach && selectedMode) {
@@ -218,7 +220,8 @@ export default function TrainingPage() {
         mode={selectedMode}
         subject={subject}
         grade={grade}
-        onBack={() => { setStarted(false); setStep('mode'); setSelectedMode(null); setSelectedCoach(null) }}
+        topic={topic ?? undefined}
+        onBack={() => { setStarted(false); setStep('mode'); setSelectedMode(null); setSelectedCoach(null); setTopic(null) }}
       />
     )
   }
@@ -240,7 +243,7 @@ export default function TrainingPage() {
               {(['mode', 'coach', 'subject'].indexOf(step) > i) ? '✓' : i + 1}
             </div>
             <span className={cn('text-xs font-semibold capitalize', step === s ? 'text-white' : 'text-white/30')}>
-              {s === 'mode' ? 'Training Type' : s === 'coach' ? 'Coach' : 'Subject'}
+              {s === 'mode' ? 'Training Type' : s === 'coach' ? 'Coach' : 'Subject & Topic'}
             </span>
             {i < 2 && <div className="w-6 h-px bg-white/20" />}
           </div>
@@ -346,7 +349,7 @@ export default function TrainingPage() {
               {SUBJECTS.map(s => (
                 <button
                   key={s}
-                  onClick={() => setSubject(s)}
+                  onClick={() => { setSubject(s); setTopic(null) }}
                   className={cn(
                     'px-4 py-1.5 rounded-full text-sm font-semibold capitalize transition',
                     subject === s
@@ -381,7 +384,30 @@ export default function TrainingPage() {
             </div>
           </div>
 
+          {/* Topic */}
+          <div className="space-y-2">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Topic</p>
+            <div className="grid grid-cols-2 gap-2">
+              {SUBJECT_TOPICS[subject].map(t => (
+                <button
+                  key={t.label}
+                  onClick={() => setTopic(t.label)}
+                  className={cn(
+                    'flex items-center gap-2 p-2.5 rounded-xl border-2 text-xs font-semibold transition-all text-left',
+                    topic === t.label
+                      ? `border-white/40 bg-gradient-to-r ${selectedCoach.gradient} text-white`
+                      : 'border-white/10 hover:border-white/20 bg-white/5 text-white/70',
+                  )}
+                >
+                  <span className="text-base flex-shrink-0">{t.emoji}</span>
+                  <span className="leading-tight">{t.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <button
+            disabled={!topic}
             onClick={() => setStarted(true)}
             className={cn(
               'w-full py-4 rounded-3xl font-black text-white text-base shadow-xl transition-all hover:scale-[1.02] hover:opacity-90 bg-gradient-to-r',
