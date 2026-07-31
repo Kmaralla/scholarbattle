@@ -152,7 +152,7 @@ export default function MatchmakingPage() {
   // ── Friend challenge ──────────────────────────────────────────
   async function challengeFriend(friend: User, s: Subject, g: number, topic: string) {
     if (!currentUser) return
-    const { data: battle } = await supabase.from('battles').insert({
+    const { data: battle, error: battleErr } = await supabase.from('battles').insert({
       challenger_id: currentUser.id,
       opponent_id: friend.id,
       subject: s, grade_level: g,
@@ -160,6 +160,7 @@ export default function MatchmakingPage() {
       challenger_score: 0, opponent_score: 0,
       question_ids: pickQuestionIndices(s, g, 10, topic),
     }).select().single()
+    if (battleErr) { alert(`Couldn't create battle: ${battleErr.message}`); return }
     if (!battle) return
 
     const notifChannel = supabase.channel(`challenge:${friend.id}`)
