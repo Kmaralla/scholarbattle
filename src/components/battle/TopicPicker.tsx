@@ -4,7 +4,7 @@ import { Subject } from '@/types'
 import { gradeLabel } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { SUBJECT_TOPICS } from '@/lib/questions'
+import { getTopicsForGrade } from '@/lib/questions'
 
 const SUBJECTS: { value: Subject; label: string; emoji: string }[] = [
   { value: 'math',    label: 'Math',    emoji: '🔢' },
@@ -38,7 +38,7 @@ export function TopicPicker({ onSelect, onCancel, startLabel = 'Start Battle ⚔
   }
 
   const subjectMeta = SUBJECTS.find(s => s.value === subject)
-  const topics = subject ? SUBJECT_TOPICS[subject] : []
+  const topics = subject && grade ? getTopicsForGrade(subject, grade) : []
 
   return (
     <div className="space-y-4">

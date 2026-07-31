@@ -692,47 +692,251 @@ export const SEED_QUESTIONS: Omit<Question, 'id'>[] = [
   { subject: 'history', grade_level: 12, question_text: 'What is historiography?', type: 'multiple_choice', options: ['Writing history books', 'The study of how history has been written and interpreted — how historians\' perspectives shape historical narratives', 'Ancient history', 'A type of biography'], correct_answer: 'The study of how history has been written and interpreted — how historians\' perspectives shape historical narratives', explanation: 'Historiography examines HOW history is written: What sources do historians use? What questions do they ask? How do their backgrounds/time periods shape interpretations? Example: the Civil War was once taught as "Lost Cause" (noble South defending states\' rights) vs. modern scholarship emphasizing slavery\'s central role. Historical interpretation evolves as new evidence and perspectives emerge.', difficulty: 4, source: 'curated' },
 ]
 
-export const SUBJECT_TOPICS: Record<Subject, { label: string; emoji: string; keywords: string[] }[]> = {
+export type TopicEntry = { label: string; emoji: string; keywords: string[] }
+
+type GradeBand = { min: number; max: number; topics: TopicEntry[] }
+
+const GRADE_TOPICS: Record<Subject, GradeBand[]> = {
   math: [
-    { label: 'Numbers & Operations', emoji: '➕', keywords: ['add', 'subtract', 'multiply', 'divide', 'sum', 'difference', 'product', 'quotient', 'number', 'digit', 'operation', 'count'] },
-    { label: 'Fractions & Decimals', emoji: '½', keywords: ['fraction', 'decimal', 'numerator', 'denominator', 'percent', 'ratio', 'proportion', 'half', 'quarter', 'whole number'] },
-    { label: 'Geometry', emoji: '📐', keywords: ['shape', 'angle', 'triangle', 'circle', 'square', 'rectangle', 'polygon', 'area', 'perimeter', 'volume', 'geometry', 'vertex', 'parallel', 'diameter', 'radius'] },
-    { label: 'Algebra', emoji: '🔣', keywords: ['variable', 'equation', 'expression', 'solve', 'algebra', 'coefficient', 'term', 'factor', 'function', 'inequality', 'unknown', 'linear'] },
-    { label: 'Measurement', emoji: '📏', keywords: ['measure', 'length', 'weight', 'height', 'meter', 'inch', 'foot', 'pound', 'kilogram', 'gram', 'liter', 'gallon', 'temperature', 'unit', 'convert'] },
-    { label: 'Statistics & Data', emoji: '📊', keywords: ['average', 'mean', 'median', 'mode', 'probability', 'statistics', 'data', 'chart', 'graph', 'range', 'chance', 'likely', 'predict'] },
+    {
+      min: 1, max: 2,
+      topics: [
+        { label: 'Counting & Numbers', emoji: '🔢', keywords: ['count', 'number', 'how many', 'ones', 'tens', 'more', 'less', 'compare', 'order', 'biggest', 'smallest'] },
+        { label: 'Addition & Subtraction', emoji: '➕', keywords: ['add', 'plus', 'subtract', 'minus', 'take away', 'sum', 'total', 'difference', 'more than', 'fewer'] },
+        { label: 'Shapes & Patterns', emoji: '🔷', keywords: ['circle', 'square', 'triangle', 'rectangle', 'shape', 'sides', 'corners', 'pattern', 'repeat'] },
+        { label: 'Measurement', emoji: '📏', keywords: ['longer', 'shorter', 'heavier', 'lighter', 'taller', 'measure', 'time', 'clock', 'hour', 'calendar'] },
+      ],
+    },
+    {
+      min: 3, max: 4,
+      topics: [
+        { label: 'Multiplication & Division', emoji: '✖️', keywords: ['multiply', 'times', 'divide', 'groups of', 'product', 'quotient', 'factor', 'array', 'equal groups'] },
+        { label: 'Fractions', emoji: '½', keywords: ['fraction', 'half', 'third', 'quarter', 'numerator', 'denominator', 'equal parts', 'whole', 'part'] },
+        { label: 'Geometry', emoji: '📐', keywords: ['perimeter', 'area', 'angle', 'polygon', 'quadrilateral', 'parallel', 'line', 'point', 'right angle', 'symmetry'] },
+        { label: 'Place Value & Rounding', emoji: '🔢', keywords: ['place value', 'hundreds', 'thousands', 'round', 'estimate', 'compare', 'greater than', 'less than', 'expanded form'] },
+      ],
+    },
+    {
+      min: 5, max: 6,
+      topics: [
+        { label: 'Fractions & Decimals', emoji: '½', keywords: ['fraction', 'decimal', 'percent', 'equivalent', 'improper', 'mixed number', 'numerator', 'denominator', 'convert'] },
+        { label: 'Ratios & Proportions', emoji: '⚖️', keywords: ['ratio', 'proportion', 'rate', 'unit rate', 'equivalent', 'scale', 'compare', 'per'] },
+        { label: 'Geometry & Area', emoji: '📐', keywords: ['area', 'volume', 'surface area', 'coordinate', 'net', 'polygon', 'triangle', 'rectangle', 'cube', 'prism'] },
+        { label: 'Statistics & Data', emoji: '📊', keywords: ['mean', 'median', 'mode', 'range', 'graph', 'data', 'average', 'bar chart', 'line plot', 'frequency'] },
+      ],
+    },
+    {
+      min: 7, max: 8,
+      topics: [
+        { label: 'Algebra', emoji: '🔣', keywords: ['equation', 'variable', 'expression', 'solve', 'linear', 'slope', 'intercept', 'function', 'inequality', 'coefficient'] },
+        { label: 'Ratios & Percentages', emoji: '📊', keywords: ['percent', 'ratio', 'proportion', 'interest', 'tax', 'discount', 'markup', 'tip', 'percent change'] },
+        { label: 'Geometry', emoji: '📐', keywords: ['pythagorean', 'congruent', 'similar', 'transformation', 'angle', 'theorem', 'parallel', 'transversal', 'circle', 'pi'] },
+        { label: 'Statistics & Probability', emoji: '🎲', keywords: ['probability', 'statistics', 'sample', 'experimental', 'theoretical', 'outcome', 'event', 'compound', 'data'] },
+      ],
+    },
+    {
+      min: 9, max: 10,
+      topics: [
+        { label: 'Algebra & Polynomials', emoji: '🔣', keywords: ['quadratic', 'polynomial', 'factor', 'exponent', 'radical', 'parabola', 'vertex', 'zero', 'FOIL', 'binomial'] },
+        { label: 'Geometry & Proofs', emoji: '📐', keywords: ['proof', 'theorem', 'congruent', 'similar', 'trigonometry', 'sine', 'cosine', 'tangent', 'circle', 'arc'] },
+        { label: 'Functions & Graphs', emoji: '📈', keywords: ['function', 'domain', 'range', 'linear', 'graph', 'slope', 'y-intercept', 'exponential', 'parent function'] },
+        { label: 'Statistics & Probability', emoji: '🎲', keywords: ['probability', 'normal distribution', 'statistics', 'sample', 'bias', 'mean', 'standard deviation', 'scatter plot'] },
+      ],
+    },
+    {
+      min: 11, max: 12,
+      topics: [
+        { label: 'Calculus', emoji: '∫', keywords: ['derivative', 'integral', 'limit', 'rate of change', 'differentiate', 'antiderivative', 'continuity', 'chain rule'] },
+        { label: 'Advanced Algebra', emoji: '🔣', keywords: ['logarithm', 'exponential', 'complex number', 'matrix', 'sequence', 'series', 'arithmetic', 'geometric', 'sigma'] },
+        { label: 'Trigonometry', emoji: '📐', keywords: ['sine', 'cosine', 'tangent', 'radian', 'identity', 'unit circle', 'law of sines', 'law of cosines', 'amplitude'] },
+        { label: 'Statistics', emoji: '📊', keywords: ['hypothesis', 'regression', 'distribution', 'confidence interval', 'z-score', 'binomial', 'normal', 'correlation'] },
+      ],
+    },
   ],
+
   science: [
-    { label: 'Biology & Life Science', emoji: '🧬', keywords: ['cell', 'living', 'animal', 'plant', 'organism', 'body', 'human', 'dna', 'species', 'evolution', 'ecosystem', 'mammal', 'organ', 'tissue', 'photosynthesis', 'bacteria'] },
-    { label: 'Earth Science', emoji: '🌍', keywords: ['earth', 'rock', 'mineral', 'weather', 'climate', 'ocean', 'earthquake', 'volcano', 'mountain', 'soil', 'erosion', 'sediment', 'tectonic', 'crust', 'fossil'] },
-    { label: 'Physics & Forces', emoji: '⚡', keywords: ['force', 'motion', 'energy', 'gravity', 'speed', 'velocity', 'mass', 'weight', 'friction', 'newton', 'wave', 'sound', 'light', 'electricity', 'magnet', 'circuit'] },
-    { label: 'Chemistry', emoji: '🧪', keywords: ['atom', 'element', 'molecule', 'compound', 'chemical', 'reaction', 'periodic', 'proton', 'electron', 'neutron', 'acid', 'base', 'metal', 'mixture', 'solution'] },
-    { label: 'Space & Astronomy', emoji: '🚀', keywords: ['planet', 'star', 'solar', 'moon', 'sun', 'galaxy', 'orbit', 'space', 'asteroid', 'comet', 'universe', 'astronomy', 'telescope', 'milky way', 'nasa', 'satellite'] },
-    { label: 'Environment', emoji: '🌿', keywords: ['environment', 'pollution', 'recycle', 'renewable', 'habitat', 'biodiversity', 'conservation', 'greenhouse', 'carbon', 'ozone', 'deforestation', 'natural resource'] },
+    {
+      min: 1, max: 2,
+      topics: [
+        { label: 'Plants & Animals', emoji: '🌱', keywords: ['plant', 'animal', 'grow', 'leaf', 'root', 'living', 'habitat', 'insect', 'bird', 'fish', 'mammal', 'food'] },
+        { label: 'Weather & Seasons', emoji: '⛅', keywords: ['weather', 'rain', 'snow', 'sun', 'wind', 'season', 'temperature', 'cloud', 'storm', 'spring', 'summer', 'fall', 'winter'] },
+        { label: 'Earth & Space', emoji: '🌍', keywords: ['earth', 'sun', 'moon', 'star', 'sky', 'rock', 'dirt', 'soil', 'day', 'night', 'planet'] },
+        { label: 'Human Body', emoji: '🫀', keywords: ['body', 'head', 'arm', 'leg', 'heart', 'eye', 'ear', 'eat', 'breathe', 'healthy', 'exercise', 'sense'] },
+      ],
+    },
+    {
+      min: 3, max: 4,
+      topics: [
+        { label: 'Life Cycles', emoji: '🦋', keywords: ['life cycle', 'caterpillar', 'butterfly', 'tadpole', 'frog', 'egg', 'larva', 'pupa', 'metamorphosis', 'hatch', 'grow'] },
+        { label: 'Matter & Materials', emoji: '🧊', keywords: ['solid', 'liquid', 'gas', 'matter', 'material', 'melt', 'freeze', 'evaporate', 'state', 'property', 'mixture'] },
+        { label: 'Forces & Motion', emoji: '⚡', keywords: ['push', 'pull', 'force', 'motion', 'magnet', 'attract', 'repel', 'gravity', 'friction', 'speed', 'direction'] },
+        { label: 'Ecosystems', emoji: '🌿', keywords: ['ecosystem', 'food chain', 'producer', 'consumer', 'habitat', 'adaptation', 'predator', 'prey', 'environment', 'food web'] },
+      ],
+    },
+    {
+      min: 5, max: 6,
+      topics: [
+        { label: 'Ecosystems & Food Webs', emoji: '🌿', keywords: ['food web', 'food chain', 'predator', 'prey', 'decomposer', 'biome', 'ecosystem', 'photosynthesis', 'energy flow'] },
+        { label: 'Earth Science', emoji: '🌋', keywords: ['rock cycle', 'water cycle', 'erosion', 'sediment', 'volcano', 'earthquake', 'tectonic', 'mineral', 'fossil', 'weathering'] },
+        { label: 'Physical Science', emoji: '⚡', keywords: ['energy', 'electricity', 'circuit', 'wave', 'light', 'sound', 'heat', 'conductor', 'insulator', 'renewable', 'chemical change'] },
+        { label: 'Space & Solar System', emoji: '🚀', keywords: ['planet', 'solar system', 'orbit', 'moon phase', 'star', 'galaxy', 'gravity', 'asteroid', 'comet', 'telescope', 'rotation', 'revolution'] },
+      ],
+    },
+    {
+      min: 7, max: 8,
+      topics: [
+        { label: 'Biology & Cells', emoji: '🧬', keywords: ['cell', 'organelle', 'mitosis', 'meiosis', 'dna', 'chromosome', 'gene', 'heredity', 'nucleus', 'membrane', 'photosynthesis', 'respiration'] },
+        { label: 'Chemistry', emoji: '🧪', keywords: ['atom', 'element', 'compound', 'periodic table', 'chemical reaction', 'molecule', 'bond', 'proton', 'neutron', 'electron', 'mixture'] },
+        { label: 'Physics', emoji: '⚡', keywords: ['newton', 'force', 'acceleration', 'energy', 'wave', 'electromagnetic', 'momentum', 'velocity', 'mass', 'gravity', 'electric charge'] },
+        { label: 'Earth & Climate', emoji: '🌍', keywords: ['climate', 'atmosphere', 'greenhouse', 'ocean', 'weather', 'geology', 'tectonic plate', 'carbon cycle', 'global warming'] },
+      ],
+    },
+    {
+      min: 9, max: 10,
+      topics: [
+        { label: 'Biology', emoji: '🧬', keywords: ['cell biology', 'genetics', 'evolution', 'ecology', 'photosynthesis', 'cellular respiration', 'natural selection', 'dna', 'protein', 'enzyme'] },
+        { label: 'Chemistry', emoji: '🧪', keywords: ['stoichiometry', 'bonding', 'reaction', 'thermodynamics', 'solution', 'acid', 'base', 'mole', 'periodic', 'electronegativity'] },
+        { label: 'Physics', emoji: '⚡', keywords: ['kinematics', 'dynamics', 'energy conservation', 'wave', 'electricity', 'magnetism', 'projectile', 'momentum', 'torque'] },
+        { label: 'Environmental Science', emoji: '🌿', keywords: ['climate change', 'pollution', 'renewable energy', 'biodiversity', 'conservation', 'carbon footprint', 'ozone', 'sustainability'] },
+      ],
+    },
+    {
+      min: 11, max: 12,
+      topics: [
+        { label: 'Advanced Biology', emoji: '🧬', keywords: ['molecular biology', 'gene expression', 'biotechnology', 'anatomy', 'physiology', 'immune system', 'nervous system', 'evolution'] },
+        { label: 'Advanced Chemistry', emoji: '🧪', keywords: ['organic chemistry', 'electrochemistry', 'quantum', 'thermodynamics', 'equilibrium', 'reaction mechanism', 'titration'] },
+        { label: 'Advanced Physics', emoji: '⚡', keywords: ['quantum', 'relativity', 'nuclear', 'electromagnetic spectrum', 'thermodynamics', 'special relativity', 'particle'] },
+        { label: 'Astronomy', emoji: '🚀', keywords: ['cosmology', 'stellar evolution', 'dark matter', 'black hole', 'big bang', 'galaxy', 'space exploration', 'nebula', 'supernova'] },
+      ],
+    },
   ],
+
   history: [
-    { label: 'Ancient Civilizations', emoji: '🏛️', keywords: ['ancient', 'egypt', 'greece', 'rome', 'mesopotamia', 'civilization', 'pharaoh', 'pyramid', 'emperor', 'greek', 'roman', 'babylon', 'athens', 'sparta', 'julius caesar'] },
-    { label: 'American History', emoji: '🦅', keywords: ['america', 'american', 'united states', 'president', 'revolution', 'civil war', 'independence', 'colonist', 'washington', 'lincoln', 'founding', 'constitution', 'declaration'] },
-    { label: 'World Wars', emoji: '⚔️', keywords: ['world war', 'ww1', 'ww2', 'wwi', 'wwii', 'nazi', 'hitler', 'allied', 'axis', 'holocaust', 'd-day', 'hiroshima', 'pearl harbor', 'trench', 'atomic'] },
-    { label: 'Government & Civics', emoji: '🏛️', keywords: ['government', 'democracy', 'law', 'congress', 'senate', 'vote', 'election', 'constitution', 'rights', 'citizen', 'amendment', 'branch', 'bill of rights', 'supreme court'] },
-    { label: 'World History', emoji: '🌏', keywords: ['china', 'europe', 'africa', 'india', 'empire', 'dynasty', 'medieval', 'renaissance', 'industrial revolution', 'trade', 'silk road', 'exploration', 'colonial', 'ming', 'ottoman'] },
-    { label: 'Geography', emoji: '🗺️', keywords: ['continent', 'country', 'capital', 'ocean', 'river', 'mountain', 'geography', 'map', 'border', 'region', 'latitude', 'longitude', 'hemisphere', 'equator', 'climate zone'] },
+    {
+      min: 1, max: 2,
+      topics: [
+        { label: 'My Community', emoji: '🏘️', keywords: ['community', 'neighborhood', 'helper', 'firefighter', 'police', 'school', 'library', 'job', 'worker', 'mayor'] },
+        { label: 'American Symbols', emoji: '🦅', keywords: ['flag', 'eagle', 'liberty bell', 'white house', 'president', 'national anthem', 'pledge', 'statue of liberty', 'bald eagle'] },
+        { label: 'Holidays & Heroes', emoji: '🎉', keywords: ['holiday', 'thanksgiving', 'independence', 'memorial', 'veterans', 'martin luther king', 'presidents', 'columbus', 'celebrate'] },
+        { label: 'Maps & Places', emoji: '🗺️', keywords: ['map', 'globe', 'country', 'state', 'city', 'continent', 'ocean', 'directions', 'north', 'south', 'east', 'west', 'compass'] },
+      ],
+    },
+    {
+      min: 3, max: 4,
+      topics: [
+        { label: 'Native Americans', emoji: '🏹', keywords: ['native american', 'tribe', 'cherokee', 'sioux', 'iroquois', 'pueblo', 'teepee', 'totem', 'reservation', 'treaty'] },
+        { label: 'Colonial America', emoji: '⛵', keywords: ['colony', 'colonist', 'pilgrim', 'mayflower', 'british', 'thirteen', 'settlement', 'puritan', 'jamestown', 'plantation'] },
+        { label: 'American Revolution', emoji: '🗽', keywords: ['revolution', 'independence', 'declaration', 'patriot', 'loyalist', 'george washington', 'taxation', 'boston', 'redcoat', 'continental'] },
+        { label: 'US Government', emoji: '🏛️', keywords: ['president', 'congress', 'government', 'law', 'vote', 'election', 'white house', 'senate', 'representative', 'capital'] },
+      ],
+    },
+    {
+      min: 5, max: 6,
+      topics: [
+        { label: 'Ancient Civilizations', emoji: '🏛️', keywords: ['ancient egypt', 'ancient greece', 'ancient rome', 'mesopotamia', 'civilization', 'pharaoh', 'pyramid', 'democracy', 'julius caesar', 'babylon'] },
+        { label: 'Civil War & Reconstruction', emoji: '⚔️', keywords: ['civil war', 'confederate', 'union', 'abraham lincoln', 'slavery', 'emancipation', 'gettysburg', 'reconstruction', 'abolition'] },
+        { label: 'World Exploration', emoji: '⛵', keywords: ['exploration', 'columbus', 'magellan', 'explorer', 'new world', 'trade route', 'age of exploration', 'vasco da gama', 'cartier'] },
+        { label: 'US Geography', emoji: '🗺️', keywords: ['state', 'capital', 'region', 'midwest', 'northeast', 'southeast', 'southwest', 'west', 'river', 'mountain', 'great plains'] },
+      ],
+    },
+    {
+      min: 7, max: 8,
+      topics: [
+        { label: 'World Wars', emoji: '🌍', keywords: ['world war', 'ww1', 'ww2', 'trench', 'allied', 'axis', 'treaty of versailles', 'holocaust', 'd-day', 'atomic bomb', 'hiroshima', 'pearl harbor'] },
+        { label: 'Constitution & Revolution', emoji: '📜', keywords: ['constitution', 'bill of rights', 'founding fathers', 'federalist', 'amendment', 'declaration', 'separation of powers', 'checks and balances'] },
+        { label: 'Industrial Revolution', emoji: '🏭', keywords: ['industrial', 'factory', 'invention', 'steam engine', 'railroad', 'urbanization', 'immigration', 'child labor', 'capitalism'] },
+        { label: 'Civil Rights', emoji: '✊', keywords: ['civil rights', 'segregation', 'rosa parks', 'martin luther king', 'naacp', 'jim crow', 'voting rights', 'equality', 'montgomery'] },
+      ],
+    },
+    {
+      min: 9, max: 10,
+      topics: [
+        { label: 'American History', emoji: '🦅', keywords: ['constitution', 'civil war', 'reconstruction', 'progressive era', 'new deal', 'cold war', 'civil rights', 'vietnam', 'great depression'] },
+        { label: 'World History', emoji: '🌍', keywords: ['empire', 'renaissance', 'reformation', 'revolution', 'colonialism', 'nationalism', 'industrialization', 'imperialism', 'ottoman'] },
+        { label: 'World Wars & Cold War', emoji: '⚔️', keywords: ['world war i', 'world war ii', 'treaty', 'holocaust', 'nato', 'nuclear', 'korean war', 'vietnam', 'cold war', 'containment'] },
+        { label: 'Government & Economics', emoji: '🏛️', keywords: ['democracy', 'capitalism', 'communism', 'gdp', 'supply', 'demand', 'trade', 'foreign policy', 'congress', 'supreme court'] },
+      ],
+    },
+    {
+      min: 11, max: 12,
+      topics: [
+        { label: 'Advanced US History', emoji: '🦅', keywords: ['gilded age', 'progressive', 'imperialism', 'new deal', 'civil rights movement', 'feminism', 'vietnam', 'watergate', 'reagan'] },
+        { label: 'World History', emoji: '🌍', keywords: ['enlightenment', 'french revolution', 'ottoman', 'meiji', 'decolonization', 'cold war', 'globalization', 'genocide', 'apartheid'] },
+        { label: 'Political Science', emoji: '🏛️', keywords: ['federalism', 'supreme court', 'legislative', 'executive', 'judicial', 'civil liberties', 'due process', 'judicial review'] },
+        { label: 'Economics & Society', emoji: '💹', keywords: ['macroeconomics', 'microeconomics', 'trade', 'globalization', 'inflation', 'fiscal policy', 'monetary policy', 'gdp', 'recession'] },
+      ],
+    },
   ],
+
   english: [
-    { label: 'Reading & Comprehension', emoji: '📖', keywords: ['read', 'paragraph', 'passage', 'author', 'main idea', 'inference', 'comprehension', 'context', 'purpose', 'summarize', 'topic sentence', 'detail'] },
-    { label: 'Grammar', emoji: '✏️', keywords: ['noun', 'verb', 'adjective', 'adverb', 'pronoun', 'preposition', 'conjunction', 'sentence', 'grammar', 'subject', 'predicate', 'clause', 'phrase', 'tense', 'plural'] },
-    { label: 'Vocabulary', emoji: '📝', keywords: ['word', 'meaning', 'definition', 'synonym', 'antonym', 'vocabulary', 'prefix', 'suffix', 'root', 'define', 'homophone', 'connotation'] },
-    { label: 'Writing', emoji: '🖊️', keywords: ['write', 'essay', 'thesis', 'transition', 'conclude', 'draft', 'revise', 'argument', 'evidence', 'paragraph', 'outline', 'narrative'] },
-    { label: 'Literature', emoji: '📚', keywords: ['story', 'character', 'plot', 'setting', 'theme', 'conflict', 'fiction', 'novel', 'poem', 'metaphor', 'simile', 'literary', 'narrative', 'foreshadowing', 'alliteration'] },
-    { label: 'Spelling & Punctuation', emoji: '🔤', keywords: ['spell', 'punctuation', 'comma', 'period', 'apostrophe', 'quotation', 'capital', 'hyphen', 'semicolon', 'colon', 'exclamation', 'question mark'] },
+    {
+      min: 1, max: 2,
+      topics: [
+        { label: 'Letters & Phonics', emoji: '🔤', keywords: ['letter', 'sound', 'vowel', 'consonant', 'phonics', 'rhyme', 'blend', 'beginning sound', 'short vowel', 'long vowel', 'syllable'] },
+        { label: 'Sight Words & Spelling', emoji: '✏️', keywords: ['sight word', 'spell', 'word', 'high frequency', 'common word', 'capital letter', 'period', 'sentence'] },
+        { label: 'Reading Stories', emoji: '📖', keywords: ['story', 'character', 'what happens', 'beginning', 'middle', 'end', 'who', 'what', 'where', 'author', 'illustrator', 'retell'] },
+        { label: 'Sentences & Grammar', emoji: '📝', keywords: ['sentence', 'noun', 'verb', 'question', 'statement', 'singular', 'plural', 'describing word', 'adjective', 'action'] },
+      ],
+    },
+    {
+      min: 3, max: 4,
+      topics: [
+        { label: 'Reading Comprehension', emoji: '📖', keywords: ['main idea', 'detail', 'paragraph', 'passage', 'author', 'purpose', 'sequence', 'compare', 'contrast', 'summarize', 'inference'] },
+        { label: 'Vocabulary', emoji: '📝', keywords: ['vocabulary', 'context clue', 'meaning', 'prefix', 'suffix', 'root word', 'define', 'synonym', 'antonym', 'homophone'] },
+        { label: 'Grammar', emoji: '✏️', keywords: ['noun', 'verb', 'adjective', 'adverb', 'pronoun', 'conjunction', 'preposition', 'subject', 'predicate', 'tense', 'plural', 'possessive'] },
+        { label: 'Writing Paragraphs', emoji: '🖊️', keywords: ['paragraph', 'topic sentence', 'supporting detail', 'concluding', 'transition', 'organize', 'draft', 'revise', 'edit'] },
+      ],
+    },
+    {
+      min: 5, max: 6,
+      topics: [
+        { label: 'Literature & Fiction', emoji: '📚', keywords: ['character', 'plot', 'setting', 'theme', 'conflict', 'point of view', 'figurative language', 'simile', 'metaphor', 'foreshadowing', 'inference'] },
+        { label: 'Nonfiction Texts', emoji: '📰', keywords: ['main idea', 'text structure', 'author purpose', 'evidence', 'fact', 'opinion', 'compare', 'contrast', 'cause', 'effect', 'heading'] },
+        { label: 'Grammar & Mechanics', emoji: '✏️', keywords: ['comma', 'apostrophe', 'quotation', 'complex sentence', 'clause', 'phrase', 'modifier', 'run-on', 'fragment', 'colon'] },
+        { label: 'Essay Writing', emoji: '🖊️', keywords: ['essay', 'thesis', 'introduction', 'body paragraph', 'conclusion', 'argument', 'evidence', 'cite', 'outline', 'transition'] },
+      ],
+    },
+    {
+      min: 7, max: 8,
+      topics: [
+        { label: 'Literary Analysis', emoji: '📚', keywords: ['theme', 'symbolism', 'figurative language', 'allusion', 'irony', 'characterization', 'mood', 'tone', 'foreshadowing', 'allegory'] },
+        { label: 'Argumentative Writing', emoji: '🖊️', keywords: ['argument', 'claim', 'evidence', 'counterclaim', 'persuasive', 'rhetorical', 'logical', 'appeal', 'thesis', 'warrant'] },
+        { label: 'Vocabulary & Etymology', emoji: '📝', keywords: ['etymology', 'latin', 'greek', 'prefix', 'suffix', 'root', 'connotation', 'denotation', 'nuance', 'academic vocabulary'] },
+        { label: 'Grammar & Style', emoji: '✏️', keywords: ['syntax', 'sentence structure', 'active voice', 'passive voice', 'modifier', 'parallel', 'comma splice', 'subordinate', 'relative clause'] },
+      ],
+    },
+    {
+      min: 9, max: 10,
+      topics: [
+        { label: 'Literary Analysis', emoji: '📚', keywords: ['analysis', 'theme', 'symbolism', 'allegory', 'archetype', 'motif', 'point of view', 'unreliable narrator', 'textual evidence', 'literary device'] },
+        { label: 'Rhetoric & Persuasion', emoji: '🎤', keywords: ['ethos', 'pathos', 'logos', 'rhetorical device', 'appeal', 'argument', 'tone', 'diction', 'syntax', 'anaphora'] },
+        { label: 'Vocabulary & Diction', emoji: '📝', keywords: ['diction', 'connotation', 'denotation', 'nuance', 'academic vocabulary', 'context', 'word choice', 'register', 'tone'] },
+        { label: 'Research & Writing', emoji: '🖊️', keywords: ['thesis', 'research', 'source', 'citation', 'mla', 'plagiarism', 'argument', 'analysis', 'synthesis', 'credibility'] },
+      ],
+    },
+    {
+      min: 11, max: 12,
+      topics: [
+        { label: 'Advanced Literature', emoji: '📚', keywords: ['shakespeare', 'modernism', 'postmodernism', 'romanticism', 'naturalism', 'existentialism', 'canonical', 'literary movement', 'satire'] },
+        { label: 'Critical Analysis', emoji: '🔍', keywords: ['literary criticism', 'feminist', 'historical context', 'close reading', 'interpretation', 'marxist', 'postcolonial', 'new criticism'] },
+        { label: 'Advanced Writing', emoji: '🖊️', keywords: ['synthesis', 'rhetorical analysis', 'argumentation', 'academic writing', 'voice', 'style', 'scholarly', 'discourse', 'annotation'] },
+        { label: 'Language & Linguistics', emoji: '🗣️', keywords: ['semantics', 'syntax', 'grammar', 'etymology', 'dialect', 'register', 'language evolution', 'morphology', 'pragmatics'] },
+      ],
+    },
   ],
 }
 
-function topicKeywords(subject: Subject, topic: string): string[] | null {
-  return SUBJECT_TOPICS[subject]?.find(t => t.label === topic)?.keywords ?? null
+export function getTopicsForGrade(subject: Subject, grade: number): TopicEntry[] {
+  const bands = GRADE_TOPICS[subject]
+  return (bands.find(b => grade >= b.min && grade <= b.max) ?? bands[0]).topics
 }
 
-function filterByTopic<T>(pool: T[], getText: (item: T) => string, subject: Subject, topic: string): T[] {
-  const keywords = topicKeywords(subject, topic)
+function topicKeywords(subject: Subject, grade: number, topic: string): string[] | null {
+  return getTopicsForGrade(subject, grade).find(t => t.label === topic)?.keywords ?? null
+}
+
+function filterByTopic<T>(pool: T[], getText: (item: T) => string, subject: Subject, grade: number, topic: string): T[] {
+  const keywords = topicKeywords(subject, grade, topic)
   if (!keywords) return pool
   const filtered = pool.filter(item =>
     keywords.some(kw => getText(item).toLowerCase().includes(kw.toLowerCase()))
@@ -752,7 +956,7 @@ export function getQuestionsForBattle(subject: Subject, gradeLevel: number, coun
     pool = SEED_QUESTIONS.filter(q => q.subject === subject && q.grade_level === nearest)
   }
 
-  if (topic) pool = filterByTopic(pool, q => q.question_text, subject, topic)
+  if (topic) pool = filterByTopic(pool, q => q.question_text, subject, gradeLevel, topic)
 
   // Fisher-Yates shuffle for true randomness
   const arr = [...pool]
@@ -773,7 +977,7 @@ export function pickQuestionIndices(subject: Subject, gradeLevel: number, count 
     )
     pool = SEED_QUESTIONS.map((q, i) => ({ q, i })).filter(({ q }) => q.subject === subject && q.grade_level === nearest)
   }
-  if (topic) pool = filterByTopic(pool, item => item.q.question_text, subject, topic)
+  if (topic) pool = filterByTopic(pool, item => item.q.question_text, subject, gradeLevel, topic)
   const arr = [...pool]
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

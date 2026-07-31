@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { TrainingSession } from '@/components/training/TrainingSession'
 import { Subject } from '@/types'
-import { SUBJECT_TOPICS } from '@/lib/questions'
+import { getTopicsForGrade } from '@/lib/questions'
 
 export type Coach = {
   id: string
@@ -388,7 +388,7 @@ export default function TrainingPage() {
           <div className="space-y-2">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Topic</p>
             <div className="grid grid-cols-2 gap-2">
-              {SUBJECT_TOPICS[subject].map(t => (
+              {getTopicsForGrade(subject, grade).map(t => (
                 <button
                   key={t.label}
                   onClick={() => setTopic(t.label)}
