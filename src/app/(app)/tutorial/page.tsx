@@ -31,7 +31,7 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         title: 'Addition & Subtraction',
         description: 'The building blocks of all math. Learn to add and subtract confidently.',
         tips: ['Count on your fingers to start', 'Use a number line for help', 'Practice with real objects like coins'],
-        videoId: 'xkTydMBZ_2w',
+        videoId: 'fsTD_jqseBA',
         channel: 'Khan Academy',
       },
       {
@@ -55,7 +55,7 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         description: 'Variables, expressions and equations — your first step into algebra.',
         tips: ['A variable is just an unknown number', 'Do the same thing to both sides of an equation', 'PEMDAS: Parentheses, Exponents, Multiply, Divide, Add, Subtract'],
         videoId: 'NybHckSEQBI',
-        channel: 'Khan Academy',
+        channel: 'Math Antics',
       },
       {
         title: 'Ratios & Proportions',
@@ -68,7 +68,7 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         title: 'Geometry Basics',
         description: 'Shapes, angles, area and perimeter.',
         tips: ['Area = length × width for rectangles', 'Perimeter = add all sides', 'A triangle\'s angles always add to 180°'],
-        videoId: 'IVYGMHJn3Ac',
+        videoId: 'H-de6Tkxej8',
         channel: 'Khan Academy',
       },
     ],
@@ -77,22 +77,22 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         title: 'Algebra',
         description: 'Solving for x, graphing lines, and quadratic equations.',
         tips: ['Isolate the variable to solve', 'Slope = rise over run (y₂-y₁)/(x₂-x₁)', 'Quadratic formula: x = (-b ± √(b²-4ac)) / 2a'],
-        videoId: 'MpZGes6V1QM',
-        channel: '3Blue1Brown',
+        videoId: 'vDqOoI-4Z6M',
+        channel: 'Khan Academy',
       },
       {
         title: 'Trigonometry',
         description: 'SOH-CAH-TOA and the unit circle.',
         tips: ['SOH: sin = opposite/hypotenuse', 'CAH: cos = adjacent/hypotenuse', 'TOA: tan = opposite/adjacent'],
         videoId: 'yBw67Fb31Cs',
-        channel: 'Khan Academy',
+        channel: '3Blue1Brown',
       },
       {
         title: 'Statistics & Probability',
         description: 'Data analysis, averages, and chance.',
         tips: ['Mean = sum of all values ÷ count', 'Median = middle value when sorted', 'Mode = most frequent value'],
         videoId: 'uhxtUt_-GyM',
-        channel: 'CrashCourse',
+        channel: 'Khan Academy',
       },
     ],
   },
@@ -102,21 +102,21 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         title: 'Living Things',
         description: 'What makes something alive? Explore animals, plants, and ecosystems.',
         tips: ['Living things grow, reproduce, and respond to environment', 'Plants make food from sunlight (photosynthesis)', 'Food chains show who eats who'],
-        videoId: 'QnQe0xW_JY4',
+        videoId: 'z9TIlM96lT8',
         channel: 'CrashCourse Kids',
       },
       {
         title: 'Matter & Energy',
         description: 'Everything around you is made of matter. Learn about solids, liquids, and gases.',
         tips: ['Matter has mass and takes up space', 'Solids have fixed shape, gases fill any container', 'Energy can be transferred but never destroyed'],
-        videoId: '9HOw_0MSUKE',
+        videoId: 'ELchwUIlWa8',
         channel: 'CrashCourse Kids',
       },
       {
         title: 'Earth & Space',
         description: 'Our planet, weather, and the solar system.',
         tips: ['Earth has 4 layers: crust, mantle, outer core, inner core', 'Weather is short-term, climate is long-term', 'The sun is the center of our solar system'],
-        videoId: 'R41iFZuFbmY',
+        videoId: 'R-Iak3Wvh9c',
         channel: 'CrashCourse Kids',
       },
     ],
@@ -126,7 +126,7 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         description: 'Cells are the basic unit of all life. Learn about plant and animal cells.',
         tips: ['Animal cells have no cell wall', 'Mitochondria = powerhouse of the cell', 'DNA carries genetic information in the nucleus'],
         videoId: 'URUJD5NEXC8',
-        channel: 'CrashCourse',
+        channel: 'Nucleus Medical Media',
       },
       {
         title: 'Forces & Motion',
@@ -139,8 +139,8 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         title: 'The Periodic Table',
         description: 'Elements, atoms, and how they combine to make everything.',
         tips: ['Atomic number = number of protons', 'Elements in the same column have similar properties', 'Metals are on the left, non-metals on the right'],
-        videoId: 'o7BTNiI4zNo',
-        channel: 'Theodore Gray',
+        videoId: '0RRVV4Diomg',
+        channel: 'CrashCourse',
       },
     ],
     '9-12': [
@@ -155,7 +155,7 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         title: 'Physics: Energy & Waves',
         description: 'Kinetic/potential energy, waves, and electromagnetism.',
         tips: ['KE = ½mv² (kinetic energy)', 'PE = mgh (potential energy)', 'Waves transfer energy, not matter'],
-        videoId: 'WKQeHiMkLkI',
+        videoId: 'TfYCnOvNnFU',
         channel: 'CrashCourse',
       },
       {
@@ -180,7 +180,7 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         title: 'World Explorers',
         description: "Columbus, Magellan, and the Age of Exploration.",
         tips: ['Columbus reached the Americas in 1492', 'Magellan led the first circumnavigation of Earth', 'Exploration brought new trade routes and cultural exchange'],
-        videoId: 'mXqoA7-taBU',
+        videoId: 'NjEGncridoQ',
         channel: 'CrashCourse',
       },
     ],
@@ -196,7 +196,7 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         title: 'The Civil War',
         description: 'Slavery, states\' rights, and the war that divided America.',
         tips: ['The Civil War lasted from 1861 to 1865', 'Lincoln issued the Emancipation Proclamation in 1863', 'The Union (North) defeated the Confederacy (South)'],
-        videoId: 'pkFEF-LtMPg',
+        videoId: 'rY9zHNOjGrs',
         channel: 'CrashCourse',
       },
       {
@@ -220,13 +220,13 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         description: 'US vs USSR: democracy vs communism without direct war.',
         tips: ['The Cold War lasted from ~1947 to 1991', 'The Space Race and Arms Race defined the era', 'The Berlin Wall fell in 1989, ending the Cold War'],
         videoId: 'I79TpDe3t2g',
-        channel: 'CrashCourse',
+        channel: 'OverSimplified',
       },
       {
         title: 'The Civil Rights Movement',
         description: "America's fight for racial equality in the 1950s–60s.",
         tips: ['Rosa Parks refused to give up her bus seat in 1955', 'MLK\'s "I Have a Dream" speech was in 1963', 'The Civil Rights Act of 1964 banned racial discrimination'],
-        videoId: 'rCRKUuRe-3E',
+        videoId: 'S64zRnnn4Po',
         channel: 'CrashCourse',
       },
     ],
@@ -244,8 +244,8 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         title: 'Grammar Basics',
         description: 'Nouns, verbs, adjectives — the building blocks of writing.',
         tips: ['A noun names a person, place, or thing', 'A verb shows action or state of being', 'Adjectives describe nouns'],
-        videoId: 'bgO_SfxiZoU',
-        channel: 'CrashCourse',
+        videoId: '7zRih61HCZs',
+        channel: 'LearnEd',
       },
     ],
     '6-8': [
@@ -253,21 +253,21 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         title: 'Essay Writing',
         description: 'Introduction, body paragraphs, and conclusion.',
         tips: ['Start with a hook — a question, quote, or bold statement', 'Every body paragraph needs a topic sentence', 'Your conclusion should restate the thesis differently'],
-        videoId: 'iRfYKxNsN2s',
+        videoId: 'KlgR1q3UQZE',
         channel: 'CrashCourse',
       },
       {
         title: 'Literary Devices',
         description: 'Metaphor, simile, symbolism, foreshadowing, and more.',
         tips: ['Simile uses "like" or "as": brave as a lion', 'Metaphor says one thing IS another: life is a journey', 'Foreshadowing hints at what comes later in the story'],
-        videoId: 'bRkLNgBDUc0',
-        channel: 'CrashCourse',
+        videoId: 'OY2zPFQsKSI',
+        channel: 'Learn English with TV Series',
       },
       {
         title: 'Vocabulary Building',
         description: 'Expand your word bank with roots, prefixes, and suffixes.',
         tips: ['Learn common Latin/Greek roots (bio=life, geo=earth)', 'Pre = before, post = after, anti = against', 'Reading widely is the fastest way to grow vocabulary'],
-        videoId: 'OkBdN-sQRcs',
+        videoId: '0diRbQ-mgfo',
         channel: 'TED-Ed',
       },
     ],
@@ -276,21 +276,21 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         title: 'Rhetoric & Persuasion',
         description: 'Ethos, pathos, logos — how to argue effectively.',
         tips: ['Ethos = credibility (why should we trust you?)', 'Pathos = emotion (how does it make you feel?)', 'Logos = logic (what are the facts and evidence?)'],
-        videoId: 'qOP2V_np2c0',
+        videoId: '3klMM9BkW5o',
         channel: 'TED-Ed',
       },
       {
         title: 'Shakespeare',
         description: 'Understanding the language and themes of Shakespeare.',
         tips: ['Thou = you, thy = your, doth = does', 'Read a modern translation alongside the original', 'Focus on plot and character, not every word'],
-        videoId: 'Lk0zMzOqFQ8',
+        videoId: 'FS2ndY5WJXA',
         channel: 'CrashCourse',
       },
       {
         title: 'Research & Citations',
         description: 'How to find sources and cite them correctly.',
         tips: ['Use .gov, .edu, and reputable .org sites', 'Always evaluate sources for bias', 'MLA and APA are the two most common citation styles'],
-        videoId: 'NXRY5GlZP7Y',
+        videoId: 'GoQG6Tin-1E',
         channel: 'CrashCourse',
       },
     ],
@@ -306,6 +306,8 @@ function getGradeBand(grade: number): string {
 export default function TutorialPage() {
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null)
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null)
+  const [expandedVideo, setExpandedVideo] = useState<string | null>(null)
+
   const gradeBand = selectedGrade ? getGradeBand(selectedGrade) : null
   const topics = selectedSubject && gradeBand ? TUTORIALS[selectedSubject][gradeBand] : null
 
@@ -327,7 +329,7 @@ export default function TutorialPage() {
                 {band.grades.map(g => (
                   <button
                     key={g}
-                    onClick={() => setSelectedGrade(g)}
+                    onClick={() => { setSelectedGrade(g); setExpandedVideo(null) }}
                     className={cn(
                       'w-12 h-10 rounded-xl text-sm font-black transition-all',
                       selectedGrade === g
@@ -352,7 +354,7 @@ export default function TutorialPage() {
             {SUBJECTS.map(s => (
               <button
                 key={s.id}
-                onClick={() => setSelectedSubject(s.id)}
+                onClick={() => { setSelectedSubject(s.id); setExpandedVideo(null) }}
                 className={cn(
                   'flex items-center gap-3 p-4 rounded-2xl border transition-all text-left',
                   selectedSubject === s.id
@@ -397,30 +399,24 @@ export default function TutorialPage() {
 
               {/* Video */}
               <div className="border-t border-white/10">
-                <a
-                  href={`https://www.youtube.com/watch?v=${topic.videoId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition group"
-                >
-                  <div className="relative flex-shrink-0 w-24 h-14 rounded-lg overflow-hidden bg-black/40">
-                    <img
-                      src={`https://img.youtube.com/vi/${topic.videoId}/mqdefault.jpg`}
-                      alt={topic.title}
-                      className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition"
+                {expandedVideo === `${selectedGrade}-${selectedSubject}-${i}` ? (
+                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      className="absolute inset-0 w-full h-full"
+                      src={`https://www.youtube.com/embed/${topic.videoId}?autoplay=1&rel=0`}
+                      title={topic.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
                     />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
-                        <span className="text-white text-xs ml-0.5">▶</span>
-                      </div>
-                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white/80 group-hover:text-white transition truncate">Watch on YouTube</p>
-                    <p className="text-xs text-white/40">{topic.channel}</p>
-                  </div>
-                  <span className="text-white/20 group-hover:text-white/50 transition text-sm">↗</span>
-                </a>
+                ) : (
+                  <button
+                    onClick={() => setExpandedVideo(`${selectedGrade}-${selectedSubject}-${i}`)}
+                    className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-white/60 hover:text-white hover:bg-white/5 transition"
+                  >
+                    <span className="text-red-500">▶</span> Watch Video
+                  </button>
+                )}
               </div>
             </div>
           ))}
