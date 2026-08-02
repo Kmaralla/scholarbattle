@@ -283,7 +283,7 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
         title: 'Shakespeare',
         description: 'Understanding the language and themes of Shakespeare.',
         tips: ['Thou = you, thy = your, doth = does', 'Read a modern translation alongside the original', 'Focus on plot and character, not every word'],
-        videoId: 'MSYw502dJNY',
+        videoId: 'Lk0zMzOqFQ8',
         channel: 'CrashCourse',
       },
       {
@@ -306,8 +306,6 @@ function getGradeBand(grade: number): string {
 export default function TutorialPage() {
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null)
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null)
-  const [expandedVideo, setExpandedVideo] = useState<string | null>(null)
-
   const gradeBand = selectedGrade ? getGradeBand(selectedGrade) : null
   const topics = selectedSubject && gradeBand ? TUTORIALS[selectedSubject][gradeBand] : null
 
@@ -399,24 +397,30 @@ export default function TutorialPage() {
 
               {/* Video */}
               <div className="border-t border-white/10">
-                {expandedVideo === `${i}` ? (
-                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                    <iframe
-                      className="absolute inset-0 w-full h-full"
-                      src={`https://www.youtube.com/embed/${topic.videoId}?autoplay=1&rel=0`}
-                      title={topic.title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
+                <a
+                  href={`https://www.youtube.com/watch?v=${topic.videoId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition group"
+                >
+                  <div className="relative flex-shrink-0 w-24 h-14 rounded-lg overflow-hidden bg-black/40">
+                    <img
+                      src={`https://img.youtube.com/vi/${topic.videoId}/mqdefault.jpg`}
+                      alt={topic.title}
+                      className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition"
                     />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
+                        <span className="text-white text-xs ml-0.5">▶</span>
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  <button
-                    onClick={() => setExpandedVideo(`${i}`)}
-                    className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-white/60 hover:text-white hover:bg-white/5 transition"
-                  >
-                    <span className="text-red-500">▶</span> Watch Video
-                  </button>
-                )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-white/80 group-hover:text-white transition truncate">Watch on YouTube</p>
+                    <p className="text-xs text-white/40">{topic.channel}</p>
+                  </div>
+                  <span className="text-white/20 group-hover:text-white/50 transition text-sm">↗</span>
+                </a>
               </div>
             </div>
           ))}
