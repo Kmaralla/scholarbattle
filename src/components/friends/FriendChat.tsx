@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { User } from '@/types'
 import { UserAvatar } from '@/components/profile/UserAvatar'
-import { Send, Plus, X } from 'lucide-react'
+import { Send } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Message {
@@ -12,31 +12,6 @@ interface Message {
   receiver_id: string
   content: string
   created_at: string
-}
-
-const IMAGE_EXTS = /\.(jpe?g|png|gif|webp|heic|avif)(\?.*)?$/i
-
-function MessageContent({ content }: { content: string }) {
-  if (content.startsWith('https://') && IMAGE_EXTS.test(content)) {
-    return (
-      <img
-        src={content}
-        alt="shared image"
-        className="max-w-[220px] rounded-xl cursor-pointer"
-        onClick={() => window.open(content, '_blank')}
-      />
-    )
-  }
-  if (content.startsWith('https://') && content.includes('/chat-media/')) {
-    const name = decodeURIComponent(content.split('/').pop()?.split('?')[0] ?? 'file')
-    return (
-      <a href={content} target="_blank" rel="noopener noreferrer"
-        className="flex items-center gap-1.5 underline underline-offset-2 text-xs opacity-90">
-        📎 {name}
-      </a>
-    )
-  }
-  return <>{content}</>
 }
 
 // Stable channel name for two users (same for both sides)
@@ -48,11 +23,8 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
   const [messages, setMessages] = useState<Message[]>([])
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [preview, setPreview] = useState<{ url: string; name: string } | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -97,37 +69,12 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
     setMessages(all)
   }
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    e.target.value = ''
-
-    const isImage = file.type.startsWith('image/')
-    const localUrl = isImage ? URL.createObjectURL(file) : null
-    if (localUrl) setPreview({ url: localUrl, name: file.name })
-
-    setUploading(true)
-    const path = `${currentUser.id}/${Date.now()}-${file.name}`
-    const { data: upload, error } = await supabase.storage
-      .from('chat-media')
-      .upload(path, file, { upsert: false })
-
-    if (error || !upload) {
-      alert('Upload failed: ' + (error?.message ?? 'unknown error'))
-      setUploading(false)
-      setPreview(null)
-      return
-    }
-
-    const { data: { publicUrl } } = supabase.storage.from('chat-media').getPublicUrl(upload.path)
-    setPreview(null)
-    setUploading(false)
-    await sendContent(publicUrl)
-  }
-
-  async function sendContent(content: string) {
+  async function handleSend(e: React.FormEvent) {
+    e.preventDefault()
+    const content = text.trim()
     if (!content || sending) return
     setSending(true)
+    setText('')
 
     const tempId = `temp-${Date.now()}`
     const optimistic: Message = {
@@ -141,23 +88,19 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
     }).select().single()
 
     if (error) {
+      console.error('Message save failed:', error)
       setMessages(prev => prev.filter(m => m.id !== tempId))
+      setText(content)
       setSending(false)
       return
     }
+
     if (data) {
       setMessages(prev => prev.map(m => m.id === tempId ? data : m))
       await channelRef.current?.send({ type: 'broadcast', event: 'new_message', payload: data })
     }
-    setSending(false)
-  }
 
-  async function handleSend(e: React.FormEvent) {
-    e.preventDefault()
-    const content = text.trim()
-    if (!content) return
-    setText('')
-    await sendContent(content)
+    setSending(false)
   }
 
   function formatTime(iso: string) {
@@ -208,7 +151,7 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
                     ? 'bg-indigo-500 text-white rounded-br-sm'
                     : 'bg-white/10 text-white rounded-bl-sm'
                 )}>
-                  <MessageContent content={msg.content} />
+                  {msg.content}
                 </div>
                 {showAvatar && (
                   <span className="text-[10px] text-white/25 px-1">{formatTime(msg.created_at)}</span>
@@ -220,42 +163,8 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
         <div ref={bottomRef} />
       </div>
 
-      {/* Upload preview */}
-      {preview && (
-        <div className="px-4 pb-2 flex-shrink-0">
-          <div className="relative inline-block">
-            <img src={preview.url} alt="preview" className="h-20 rounded-xl border border-white/20 object-cover" />
-            <button onClick={() => setPreview(null)}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-              <X className="w-3 h-3 text-white" />
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Input */}
       <form onSubmit={handleSend} className="flex items-center gap-2 px-4 py-3 border-t border-white/10 flex-shrink-0 bg-[var(--bg-nav)]">
-        {/* Hidden file input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*,video/*,.pdf,.doc,.docx"
-          capture="environment"
-          className="hidden"
-          onChange={handleFileChange}
-        />
-        {/* + button */}
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="w-10 h-10 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10 flex items-center justify-center flex-shrink-0 transition disabled:opacity-40"
-        >
-          {uploading
-            ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-            : <Plus className="w-4 h-4 text-white/60" />
-          }
-        </button>
         <input
           value={text}
           onChange={e => setText(e.target.value)}
