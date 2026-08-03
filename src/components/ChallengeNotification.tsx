@@ -27,6 +27,7 @@ export function ChallengeNotification({ userId }: { userId: string }) {
     channel
       .on('broadcast', { event: 'incoming_challenge' }, ({ payload }) => {
         setChallenge(payload as ChallengePayload)
+        setAccepting(false)
         setVisible(true)
       })
       .subscribe()
