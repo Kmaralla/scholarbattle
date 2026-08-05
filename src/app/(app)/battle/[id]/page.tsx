@@ -8,6 +8,7 @@ import { calculateElo, getRankTier, LEGEND_DAYS_AT_DIAMOND, LEGEND_WINS_AT_DIAMO
 import { COIN_REWARDS } from '@/lib/games'
 import { checkNewBadges, BADGE_MAP } from '@/lib/badges'
 import { BadgeCard } from '@/components/BadgeCard'
+import { ReportCard } from '@/components/battle/ReportCard'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import { sounds } from '@/lib/sounds'
 
@@ -21,6 +22,7 @@ export default function BattlePage() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [done, setDone] = useState<{ myScore: number; theirScore: number; eloDelta: number; coinsEarned: number; newBadges: string[]; results: QuestionResult[] } | null>(null)
   const [showReview, setShowReview] = useState(false)
+  const [showReportCard, setShowReportCard] = useState(false)
   const [alreadyFriends, setAlreadyFriends] = useState(false)
   const [friendRequestId, setFriendRequestId] = useState<string | null>(null) // null=not sent, string=pending row id
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -341,6 +343,7 @@ export default function BattlePage() {
     }
 
     return (
+      <>
       <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
         <div className="rounded-3xl p-8 max-w-sm w-full text-center space-y-5 bg-white/5 border border-white/10 shadow-2xl backdrop-blur">
           <div className="text-7xl float">{won ? '🏆' : tied ? '🤝' : '😤'}</div>
@@ -483,6 +486,14 @@ export default function BattlePage() {
             </button>
           )}
 
+          <button
+            onClick={() => setShowReportCard(true)}
+            className="w-full py-3 rounded-2xl font-black text-sm text-white transition-all active:scale-95"
+            style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)' }}
+          >
+            📋 Report Card
+          </button>
+
           <div className="flex gap-3">
             <button
               onClick={handleRematch}
@@ -496,6 +507,19 @@ export default function BattlePage() {
           </div>
         </div>
       </div>
+
+      {showReportCard && battle && currentUser && (
+        <ReportCard
+          subject={battle.subject}
+          grade={battle.grade_level}
+          myScore={done.myScore}
+          totalQuestions={questions.length}
+          results={done.results}
+          username={currentUser.username}
+          onClose={() => setShowReportCard(false)}
+        />
+      )}
+      </>
     )
   }
 
