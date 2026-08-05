@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 import type { QuestionResult } from '@/components/battle/BattleRoom'
 
 interface ReportCardData {
@@ -26,13 +27,16 @@ interface Props {
   totalQuestions: number
   results: QuestionResult[]
   username: string
+  userId: string
   onClose: () => void
 }
 
-export function ReportCard({ subject, grade, myScore, totalQuestions, results, username, onClose }: Props) {
+export function ReportCard({ subject, grade, myScore, totalQuestions, results, username, userId, onClose }: Props) {
   const [data, setData] = useState<ReportCardData | null>(null)
+  const [reportCardId, setReportCardId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const supabase = createClient()
 
   useEffect(() => {
     fetch('/api/report-card', {
@@ -41,9 +45,22 @@ export function ReportCard({ subject, grade, myScore, totalQuestions, results, u
       body: JSON.stringify({ subject, grade, myScore, totalQuestions, results }),
     })
       .then(r => r.json())
-      .then(d => {
+      .then(async d => {
         if (d.error) { setError(d.error); setLoading(false); return }
-        setData(d); setLoading(false)
+        setData(d)
+
+        // Save to Supabase for shareable link
+        const { data: row } = await supabase.from('report_cards').insert({
+          user_id: userId,
+          subject,
+          grade,
+          my_score: myScore,
+          total_questions: totalQuestions,
+          card_data: d,
+        }).select('id').single()
+        if (row) setReportCardId(row.id)
+
+        setLoading(false)
       })
       .catch(e => { setError(e?.message ?? 'Network error'); setLoading(false) })
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -51,20 +68,15 @@ export function ReportCard({ subject, grade, myScore, totalQuestions, results, u
 
   function share() {
     if (!data) return
-    const pct = Math.round((myScore / totalQuestions) * 100)
-    const text = `📋 My ScholarBattle Report Card\n\n` +
-      `Grade: ${data.grade} | ${myScore}/${totalQuestions} (${pct}%) in ${subject}\n\n` +
-      `✅ What I crushed:\n${data.crushed.map(c => `• ${c}`).join('\n')}\n\n` +
-      `🌟 Awesome: ${data.awesome}\n\n` +
-      (data.workOn.length ? `📚 Working on:\n${data.workOn.map(w => `• ${w}`).join('\n')}\n\n` : '') +
-      `💡 Tip: ${data.tip}\n\n` +
-      `Play ScholarBattle! 🎮`
+    const url = reportCardId
+      ? `${window.location.origin}/report-card/${reportCardId}`
+      : window.location.origin
 
     if (navigator.share) {
-      navigator.share({ title: 'My ScholarBattle Report Card', text })
+      navigator.share({ title: 'Report card', url })
     } else {
-      navigator.clipboard.writeText(text)
-      alert('Report card copied to clipboard!')
+      navigator.clipboard.writeText(url)
+      alert('Link copied to clipboard!')
     }
   }
 

@@ -516,6 +516,7 @@ export default function BattlePage() {
           totalQuestions={questions.length}
           results={done.results}
           username={currentUser.username}
+          userId={currentUser.id}
           onClose={() => setShowReportCard(false)}
         />
       )}
