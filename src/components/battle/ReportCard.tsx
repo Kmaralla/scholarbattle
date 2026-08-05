@@ -32,7 +32,7 @@ interface Props {
 export function ReportCard({ subject, grade, myScore, totalQuestions, results, username, onClose }: Props) {
   const [data, setData] = useState<ReportCardData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/report-card', {
@@ -41,8 +41,11 @@ export function ReportCard({ subject, grade, myScore, totalQuestions, results, u
       body: JSON.stringify({ subject, grade, myScore, totalQuestions, results }),
     })
       .then(r => r.json())
-      .then(d => { setData(d); setLoading(false) })
-      .catch(() => { setError(true); setLoading(false) })
+      .then(d => {
+        if (d.error) { setError(d.error); setLoading(false); return }
+        setData(d); setLoading(false)
+      })
+      .catch(e => { setError(e?.message ?? 'Network error'); setLoading(false) })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -95,9 +98,10 @@ export function ReportCard({ subject, grade, myScore, totalQuestions, results, u
         )}
 
         {error && (
-          <div className="text-center py-12 px-5">
-            <p className="text-2xl mb-2">😕</p>
-            <p className="text-white/60 text-sm">Couldn't generate report card. Try again later.</p>
+          <div className="text-center py-12 px-5 space-y-2">
+            <p className="text-2xl">😕</p>
+            <p className="text-white/60 text-sm">Couldn't generate report card.</p>
+            <p className="text-red-400/70 text-xs font-mono break-all">{error}</p>
           </div>
         )}
 

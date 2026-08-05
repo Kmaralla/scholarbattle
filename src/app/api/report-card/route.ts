@@ -1,20 +1,50 @@
+import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const openai = process.env.OPENAI_API_KEY
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null
+
+const anthropic = process.env.ANTHROPIC_API_KEY
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null
+
+async function callAI(prompt: string): Promise<string> {
+  // Default to OpenAI; fall back to Anthropic
+  if (openai) {
+    const res = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      max_tokens: 512,
+      messages: [{ role: 'user', content: prompt }],
+    })
+    return res.choices[0].message.content?.trim() ?? ''
+  }
+
+  if (anthropic) {
+    const res = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 512,
+      messages: [{ role: 'user', content: prompt }],
+    })
+    return ((res.content[0] as any).text ?? '').trim()
+  }
+
+  throw new Error('No AI provider configured. Set OPENAI_API_KEY or ANTHROPIC_API_KEY.')
+}
 
 export async function POST(req: NextRequest) {
-  const { subject, grade, myScore, totalQuestions, results } = await req.json()
+  try {
+    const { subject, grade, myScore, totalQuestions, results } = await req.json()
 
-  const wrongQuestions = results
-    .filter((r: any) => !r.isCorrect)
-    .map((r: any) => `- "${r.question.question_text}" (you answered: "${r.userAnswer || 'no answer'}", correct: "${r.question.correct_answer}")`)
-    .join('\n')
+    const wrongQuestions = results
+      .filter((r: any) => !r.isCorrect)
+      .map((r: any) => `- "${r.question.question_text}" (you answered: "${r.userAnswer || 'no answer'}", correct: "${r.question.correct_answer}")`)
+      .join('\n')
 
-  const rightCount = results.filter((r: any) => r.isCorrect).length
-  const pct = Math.round((myScore / totalQuestions) * 100)
+    const pct = Math.round((myScore / totalQuestions) * 100)
 
-  const prompt = `You are a friendly, encouraging tutor giving a student their battle report card on ScholarBattle, an educational game for kids.
+    const prompt = `You are a friendly, encouraging tutor giving a student their battle report card on ScholarBattle, an educational game for kids.
 
 Subject: ${subject} | Grade: ${grade} | Score: ${myScore}/${totalQuestions} (${pct}%)
 
@@ -37,13 +67,17 @@ Rules:
 - If they got 100%, make workOn an empty array and tip something like "Keep challenging yourself!"
 - Max 2 items in crushed and workOn arrays`
 
-  const message = await client.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 512,
-    messages: [{ role: 'user', content: prompt }],
-  })
+    let text = await callAI(prompt)
+    // Strip markdown code fences if model wrapped the JSON
+    text = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
 
-  const text = (message.content[0] as any).text.trim()
-  const json = JSON.parse(text)
-  return NextResponse.json(json)
+    const json = JSON.parse(text)
+    return NextResponse.json(json)
+  } catch (err: any) {
+    console.error('[report-card] Error:', err?.message ?? err)
+    return NextResponse.json(
+      { error: err?.message ?? 'Unknown error' },
+      { status: 500 }
+    )
+  }
 }
