@@ -8,12 +8,13 @@ const GRADE_COLORS: Record<string, string> = {
   D: '#fb923c',    F: '#f87171',
 }
 
-export default async function PublicReportCardPage({ params }: { params: { id: string } }) {
+export default async function PublicReportCardPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: row } = await supabase
     .from('report_cards')
     .select('*, users(username)')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!row) notFound()
