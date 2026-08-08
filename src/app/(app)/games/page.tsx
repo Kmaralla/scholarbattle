@@ -188,6 +188,70 @@ export default function GamesPage() {
       </div>
 
       <p className="text-xs text-center text-white/20">Win battles to earn 🪙 coins and unlock more games!</p>
+
+      {/* Bonus Games */}
+      <div>
+        <p className="text-[10px] font-black uppercase tracking-widest text-yellow-400/60 mb-3">⭐ Bonus Game</p>
+        {(() => {
+          const soccerUnlocked = (profile.unlocked_games ?? []).includes('soccer')
+          const canAfford = profile.coins >= 1000
+          return (
+            <button
+              onClick={async () => {
+                if (!soccerUnlocked) {
+                  if (!canAfford) return
+                  const newUnlocked = [...(profile.unlocked_games ?? []), 'soccer']
+                  await supabase.from('users').update({
+                    coins: profile.coins - 1000,
+                    unlocked_games: newUnlocked,
+                  }).eq('id', profile.id)
+                  setProfile(p => p ? { ...p, coins: p.coins - 1000, unlocked_games: newUnlocked } : p)
+                }
+                router.push('/games/soccer')
+              }}
+              disabled={!soccerUnlocked && !canAfford}
+              className={cn(
+                'relative w-full rounded-2xl p-5 text-left transition-all border overflow-hidden',
+                soccerUnlocked || canAfford
+                  ? 'border-yellow-400/30 hover:scale-[1.02] hover:border-yellow-400/50 active:scale-[0.98] shadow-lg shadow-yellow-500/10'
+                  : 'opacity-40 cursor-not-allowed border-white/5'
+              )}
+              style={{ background: 'linear-gradient(135deg,rgba(234,179,8,0.15),rgba(234,88,12,0.12))' }}
+            >
+              {/* Mystery blur overlay */}
+              {!soccerUnlocked && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl"
+                  style={{ backdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.45)' }}>
+                  <span className="text-4xl">❓</span>
+                  <p className="font-black text-white text-sm mt-2">Mystery Bonus Game</p>
+                  {canAfford ? (
+                    <span className="mt-2 px-4 py-1.5 rounded-full text-xs font-black bg-yellow-400 text-yellow-900">🪙 1,000 — Unlock</span>
+                  ) : (
+                    <span className="mt-2 text-xs text-white/50">🪙 1,000 coins needed</span>
+                  )}
+                </div>
+              )}
+
+              {/* Actual content (blurred when locked) */}
+              <div className={soccerUnlocked ? '' : 'blur-sm select-none pointer-events-none'}>
+                <div className="flex items-center gap-4">
+                  <div className="text-5xl">⚽</div>
+                  <div>
+                    <p className="font-black text-white text-lg">Soccer</p>
+                    <p className="text-sm text-white/60 mt-0.5">5v5 · Pick your position and score goals!</p>
+                  </div>
+                  {soccerUnlocked && <span className="ml-auto text-xs bg-white/25 rounded-full px-3 py-1 font-black text-white">Play →</span>}
+                </div>
+                <div className="flex gap-1 mt-3">
+                  {['GK','LB','RB','LW','RW'].map(r => (
+                    <span key={r} className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/10 text-white/50 border border-white/10">{r}</span>
+                  ))}
+                </div>
+              </div>
+            </button>
+          )
+        })()}
+      </div>
     </div>
   )
 }
