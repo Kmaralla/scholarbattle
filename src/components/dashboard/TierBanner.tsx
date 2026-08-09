@@ -117,7 +117,7 @@ export function TierBanner({ tier, username, eloRating, coins, progress, diamond
         <div className="relative mt-5">
           <div className={`flex justify-between ${s.muted} text-xs mb-1.5`}>
             <span className="font-semibold capitalize">{tier}</span>
-            <span>{progress}% to next rank</span>
+            <span>{100 - progress}% to next rank</span>
           </div>
           <div className="h-3 bg-black/15 rounded-full overflow-hidden">
             <div className={`h-full ${s.bar} rounded-full transition-all duration-700`} style={{ width: `${progress}%` }} />
