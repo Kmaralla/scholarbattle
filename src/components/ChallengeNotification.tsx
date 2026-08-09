@@ -13,6 +13,7 @@ interface ChallengePayload {
   challenger_avatar_url: string | null
   subject: Subject
   grade_level: number
+  timeout?: number
 }
 
 export function ChallengeNotification({ userId }: { userId: string }) {
@@ -40,7 +41,7 @@ export function ChallengeNotification({ userId }: { userId: string }) {
     await supabase.from('battles')
       .update({ status: 'in_progress' })
       .eq('id', challenge.battle_id)
-    router.push(`/battle/${challenge.battle_id}`)
+    router.push(`/battle/${challenge.battle_id}?timeout=${challenge.timeout ?? 15}`)
     setVisible(false)
   }
 
@@ -84,6 +85,7 @@ export function ChallengeNotification({ userId }: { userId: string }) {
             {challenge.subject}
           </span>
           <span className="text-xs text-white/40">Grade {challenge.grade_level}</span>
+          <span className="text-xs text-white/40">⏱ {challenge.timeout ?? 15}s</span>
         </div>
         <div className="flex gap-2 pt-1">
           <button

@@ -175,6 +175,7 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
         challenger_username: currentUser.username,
         challenger_avatar_url: (currentUser as any).avatar_url ?? null,
         subject, grade_level: grade,
+        timeout: timeoutSec,
       },
     })
     supabase.removeChannel(notifCh)
