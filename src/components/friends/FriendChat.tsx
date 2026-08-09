@@ -283,13 +283,13 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
         <div className="fixed inset-0 z-50 flex items-end justify-center"
           style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
           onClick={e => { if (e.target === e.currentTarget) setShowChallenge(false) }}>
-          <div className="w-full max-w-md rounded-t-3xl pb-8"
+          <div className="w-full max-w-md rounded-t-3xl max-h-[85vh] flex flex-col"
             style={{ background: 'linear-gradient(135deg,#1a1040,#0f0a2e)', border: '1px solid rgba(167,139,250,0.2)' }}>
-            {/* Handle + header */}
-            <div className="flex justify-center pt-3 pb-1">
+            {/* Handle + header — fixed, never scrolls away */}
+            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
               <div className="w-10 h-1 rounded-full bg-white/20" />
             </div>
-            <div className="flex items-center justify-between px-5 py-3">
+            <div className="flex items-center justify-between px-5 py-3 flex-shrink-0">
               <div>
                 <h3 className="font-black text-white">⚔️ Challenge {friend.username}</h3>
                 <p className="text-xs text-white/40 mt-0.5">Pick a subject and grade</p>
@@ -299,7 +299,7 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
                 <X className="w-4 h-4 text-white" />
               </button>
             </div>
-            <div className="px-5 space-y-4">
+            <div className="px-5 space-y-4 overflow-y-auto pb-8">
               {challenging ? (
                 <div className="flex flex-col items-center py-10 gap-3">
                   <div className="w-8 h-8 border-3 border-violet-400/30 border-t-violet-400 rounded-full animate-spin" />
