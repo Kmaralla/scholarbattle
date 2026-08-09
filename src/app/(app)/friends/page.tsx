@@ -30,6 +30,7 @@ export default function FriendsPage() {
   const [addUsername, setAddUsername] = useState('')
   const [addStatus, setAddStatus] = useState<string | null>(null)
   const [challenging, setChallenging] = useState<User | null>(null)
+  const [challengeTimeout, setChallengeTimeout] = useState(15)
   const [chattingWith, setChattingWith] = useState<User | null>(null)
   const [view, setView] = useState<'friends' | 'add' | 'invites'>('friends')
   const [removingId, setRemovingId] = useState<string | null>(null)
@@ -137,10 +138,10 @@ export default function FriendsPage() {
     if (!battle) return
     const notifChannel = supabase.channel(`challenge:${challenging.id}`)
     await notifChannel.subscribe()
-    await notifChannel.send({ type: 'broadcast', event: 'incoming_challenge', payload: { battle_id: battle.id, challenger_username: currentUser.username, challenger_avatar_url: (currentUser as any).avatar_url ?? null, subject, grade_level: grade } })
+    await notifChannel.send({ type: 'broadcast', event: 'incoming_challenge', payload: { battle_id: battle.id, challenger_username: currentUser.username, challenger_avatar_url: (currentUser as any).avatar_url ?? null, subject, grade_level: grade, timeout: challengeTimeout } })
     supabase.removeChannel(notifChannel)
     setChallenging(null)
-    router.push(`/battle/${battle.id}`)
+    router.push(`/battle/${battle.id}?timeout=${challengeTimeout}`)
   }
 
   const sorted = friends
@@ -315,10 +316,29 @@ export default function FriendsPage() {
       {/* Challenge modal overlay */}
       {challenging && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[var(--bg-nav)] border border-white/15 rounded-3xl p-5 w-full max-w-sm shadow-2xl">
+          <div className="bg-[var(--bg-nav)] border border-white/15 rounded-3xl p-5 w-full max-w-sm shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <p className="font-black text-white">Challenge {challenging.username}</p>
               <button onClick={() => setChallenging(null)}><X className="w-5 h-5 text-white/40" /></button>
+            </div>
+            {/* Time per question */}
+            <div className="mb-4">
+              <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-2">Time per Question</p>
+              <div className="flex gap-2">
+                {[10, 15, 20, 30].map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setChallengeTimeout(t)}
+                    className={`flex-1 py-2 rounded-xl border-2 text-sm font-black transition-all ${
+                      challengeTimeout === t
+                        ? 'border-indigo-400 bg-indigo-500/20 text-white'
+                        : 'border-white/10 bg-white/5 text-white/40 hover:border-white/20 hover:text-white'
+                    }`}
+                  >
+                    {t}s
+                  </button>
+                ))}
+              </div>
             </div>
             <TopicPicker onSelect={handleStartBattle} onCancel={() => setChallenging(null)} />
           </div>
