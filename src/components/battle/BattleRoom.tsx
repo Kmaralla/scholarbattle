@@ -131,11 +131,14 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
     }, 1000)
   }, [questions.length, onComplete])
 
-  const checkAdvance = useCallback((myDone: boolean, myOk: boolean, oppDone: boolean, oppOk: boolean) => {
-    if (!isSolo && (myOk || oppOk || (myDone && oppDone))) {
+  const checkAdvance = useCallback((myDone: boolean, _myOk: boolean, oppDone: boolean, _oppOk: boolean) => {
+    if (!isSolo && (myDone || oppDone)) {
       scheduleAdvance()
     }
   }, [isSolo, scheduleAdvance])
+
+  const checkAdvanceRef = useRef(checkAdvance)
+  useEffect(() => { checkAdvanceRef.current = checkAdvance }, [checkAdvance])
 
   // ── Bot logic (solo) ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -179,12 +182,12 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
         setOpponentAnswered(true)
         setOpponentCorrect(payload.is_correct)
         if (timeoutFallbackRef.current) { clearTimeout(timeoutFallbackRef.current); timeoutFallbackRef.current = null }
-        checkAdvance(answeredRef.current, myCorrectRef.current, true, payload.is_correct)
+        checkAdvanceRef.current(answeredRef.current, myCorrectRef.current, true, payload.is_correct)
       })
       .subscribe()
 
     return () => { supabase.removeChannel(channel); channelRef.current = null }
-  }, [battleId, currentUser.id, isSolo, checkAdvance])
+  }, [battleId, currentUser.id, isSolo])
 
   // ── Timer ────────────────────────────────────────────────────────────────────
   useEffect(() => {
