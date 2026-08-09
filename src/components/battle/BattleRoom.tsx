@@ -127,7 +127,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
         qIndexRef.current = next
         setQIndex(next)
       }
-    }, 1800)
+    }, 1000)
   }, [questions.length, onComplete])
 
   const checkAdvance = useCallback((myDone: boolean, myOk: boolean, oppDone: boolean, oppOk: boolean) => {
@@ -248,6 +248,20 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
     })
 
     setShowResult(true)
+
+    // Solo correct: auto-advance after 1 second
+    if (isSolo && isCorrect) {
+      setTimeout(() => {
+        const next = qIndexRef.current + 1
+        const isLast = next >= TOTAL_QUESTIONS || next >= questions.length
+        if (isLast) {
+          onComplete(myScoreRef.current, opponentScoreRef.current, resultsRef.current)
+        } else {
+          qIndexRef.current = next
+          setQIndex(next)
+        }
+      }, 1000)
+    }
 
     // Check advance (PvP) or proceed (solo)
     if (!isSolo) {
@@ -438,14 +452,18 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
         <p className="text-xs text-center text-slate-400">⚡ First correct answer wins the point!</p>
       )}
 
-      {/* Solo: manual Next button */}
-      {isSolo && answered && showResult && (
+      {/* Solo: manual Next button — only shown when wrong (correct auto-advances) */}
+      {isSolo && answered && showResult && !myCorrect && (
         <button
           onClick={handleNext}
           className="w-full py-3.5 rounded-2xl font-black text-white text-sm bg-indigo-500/80 hover:bg-indigo-500 border border-indigo-400/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
           {qIndex + 1 >= Math.min(TOTAL_QUESTIONS, questions.length) ? 'See Results 🏆' : 'Next →'}
         </button>
+      )}
+      {/* Auto-advance hint when correct */}
+      {isSolo && answered && showResult && myCorrect && (
+        <p className="text-center text-xs text-emerald-400/60 animate-pulse">Next question in 1s…</p>
       )}
     </div>
   )
