@@ -20,7 +20,7 @@ export default function BattlePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [opponent, setOpponent] = useState<User | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
-  const [done, setDone] = useState<{ myScore: number; theirScore: number; eloDelta: number; coinsEarned: number; newBadges: string[]; results: QuestionResult[] } | null>(null)
+  const [done, setDone] = useState<{ myScore: number; theirScore: number; eloDelta: number; coinsEarned: number; newBadges: string[]; results: QuestionResult[]; fasterPlayer: 'me' | 'opponent' | 'equal' | null } | null>(null)
   const [showReview, setShowReview] = useState(false)
   const [showReportCard, setShowReportCard] = useState(false)
   const [alreadyFriends, setAlreadyFriends] = useState(false)
@@ -304,7 +304,26 @@ export default function BattlePage() {
       setAlreadyFriends(!!friendship)
     }
 
-    setDone({ myScore, theirScore, eloDelta, coinsEarned, newBadges, results })
+    // On a tie, compare total answer times to find who was faster
+    let fasterPlayer: 'me' | 'opponent' | 'equal' | null = null
+    if (myScore === theirScore) {
+      const myTotalTime = results.reduce((sum, r) => sum + r.timeTaken, 0)
+      if (!isSolo && opponent) {
+        const { data: oppAnswers } = await supabase
+          .from('battle_answers')
+          .select('time_ms')
+          .eq('battle_id', id)
+          .eq('user_id', opponent.id)
+        const oppTotalTime = (oppAnswers ?? []).reduce((sum, a) => sum + (a.time_ms ?? 0), 0)
+        if (oppTotalTime > 0) {
+          fasterPlayer = myTotalTime < oppTotalTime ? 'me' : myTotalTime > oppTotalTime ? 'opponent' : 'equal'
+        }
+      } else {
+        fasterPlayer = null // solo tie — bot time not meaningful
+      }
+    }
+
+    setDone({ myScore, theirScore, eloDelta, coinsEarned, newBadges, results, fasterPlayer })
   }
 
   if (done) {
@@ -354,10 +373,27 @@ export default function BattlePage() {
       <>
       <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
         <div className="rounded-3xl p-8 max-w-sm w-full text-center space-y-5 bg-white/5 border border-white/10 shadow-2xl backdrop-blur">
-          <div className="text-7xl float">{won ? '🏆' : tied ? '🤝' : '😤'}</div>
+          <div className="text-7xl float">
+            {won ? '🏆' : tied ? (done.fasterPlayer === 'me' ? '⚡' : done.fasterPlayer === 'opponent' ? '🤝' : '🤝') : '😤'}
+          </div>
           <h1 className={`text-3xl font-black ${won ? 'shimmer-text' : tied ? 'text-yellow-300' : 'text-red-400'}`}>
             {won ? 'You Won!' : tied ? "It's a Tie!" : 'You Lost!'}
           </h1>
+          {tied && done.fasterPlayer && (
+            <div className={`rounded-2xl px-4 py-3 text-sm font-bold border ${
+              done.fasterPlayer === 'me'
+                ? 'bg-emerald-400/10 border-emerald-400/30 text-emerald-300'
+                : done.fasterPlayer === 'opponent'
+                ? 'bg-orange-400/10 border-orange-400/30 text-orange-300'
+                : 'bg-white/5 border-white/10 text-white/50'
+            }`}>
+              {done.fasterPlayer === 'me'
+                ? `⚡ But you were faster! Speed advantage: YOU`
+                : done.fasterPlayer === 'opponent'
+                ? `⚡ ${opponent?.username ?? 'Opponent'} was faster though!`
+                : '⚡ Exactly the same speed — truly equal!'}
+            </div>
+          )}
           <div className="flex justify-center gap-8 py-2">
             <div>
               <p className="text-5xl font-black text-violet-400">{done.myScore}</p>

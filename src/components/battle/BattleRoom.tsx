@@ -33,6 +33,7 @@ export interface QuestionResult {
   question: Question
   userAnswer: string | null
   isCorrect: boolean
+  timeTaken: number   // ms
 }
 
 export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo, botDifficulty = 'medium', subject, gradeLevel, onComplete }: BattleRoomProps) {
@@ -207,7 +208,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
 
     myCorrectRef.current = isCorrect
     setMyCorrect(isCorrect)
-    resultsRef.current.push({ question: q, userAnswer: answer, isCorrect })
+    resultsRef.current.push({ question: q, userAnswer: answer, isCorrect, timeTaken })
 
     if (isCorrect) sounds.correct()
     else if (answer !== null) sounds.wrong()
