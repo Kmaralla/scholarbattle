@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils'
 import { gradeLabel } from '@/lib/utils'
 import { sounds } from '@/lib/sounds'
 
-const SECONDS_PER_QUESTION = 15
 const TOTAL_QUESTIONS = 10
 
 export type BotDifficulty = 'easy' | 'medium' | 'hard'
@@ -26,6 +25,7 @@ interface BattleRoomProps {
   botDifficulty?: BotDifficulty
   subject: Subject
   gradeLevel: number
+  timePerQuestion?: number
   onComplete: (myScore: number, opponentScore: number, results: QuestionResult[]) => void
 }
 
@@ -36,7 +36,8 @@ export interface QuestionResult {
   timeTaken: number   // ms
 }
 
-export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo, botDifficulty = 'medium', subject, gradeLevel, onComplete }: BattleRoomProps) {
+export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo, botDifficulty = 'medium', subject, gradeLevel, timePerQuestion = 15, onComplete }: BattleRoomProps) {
+  const SECONDS_PER_QUESTION = timePerQuestion
   const supabase = createClient()
 
   // ── Scores ──────────────────────────────────────────────────────────────────

@@ -15,9 +15,12 @@ const DIFFICULTIES: { value: BotDifficulty; label: string; desc: string }[] = [
   { value: 'hard',   label: '🔴 Hard',   desc: 'Fast & usually right'   },
 ]
 
+const TIME_OPTIONS = [10, 15, 20, 30]
+
 export default function BattlePage() {
   const [step, setStep] = useState<'pick' | 'finding'>('pick')
   const [difficulty, setDifficulty] = useState<BotDifficulty>('medium')
+  const [timeout, setTimeout_] = useState(15)
   const router = useRouter()
   const supabase = createClient()
 
@@ -38,7 +41,7 @@ export default function BattlePage() {
     }).select().single()
 
     if (battle) {
-      router.push(`/battle/${battle.id}?difficulty=${difficulty}`)
+      router.push(`/battle/${battle.id}?difficulty=${difficulty}&timeout=${timeout}`)
     } else {
       console.error('[Battle] insert failed:', battleErr?.message)
       setStep('pick')
@@ -76,6 +79,27 @@ export default function BattlePage() {
                 >
                   <span className="text-base font-bold text-white">{d.label}</span>
                   <span className="text-xs text-white/50 leading-tight">{d.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Time per question */}
+          <div>
+            <p className="text-sm font-semibold text-white/70 mb-2">Time per Question</p>
+            <div className="flex gap-2">
+              {TIME_OPTIONS.map(t => (
+                <button
+                  key={t}
+                  onClick={() => setTimeout_(t)}
+                  className={cn(
+                    'flex-1 py-2.5 rounded-xl border-2 text-sm font-black transition-all',
+                    timeout === t
+                      ? 'border-indigo-400 bg-indigo-500/20 text-white'
+                      : 'border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white'
+                  )}
+                >
+                  {t}s
                 </button>
               ))}
             </div>

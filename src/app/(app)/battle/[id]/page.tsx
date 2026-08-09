@@ -16,6 +16,7 @@ export default function BattlePage() {
   const { id } = useParams<{ id: string }>()
   const searchParams = useSearchParams()
   const botDifficulty = (searchParams.get('difficulty') ?? 'medium') as BotDifficulty
+  const timePerQuestion = Number(searchParams.get('timeout') ?? 15)
   const [battle, setBattle] = useState<Battle | null>(null)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [opponent, setOpponent] = useState<User | null>(null)
@@ -674,6 +675,7 @@ export default function BattlePage() {
         botDifficulty={botDifficulty}
         subject={battle.subject as Subject}
         gradeLevel={battle.grade_level}
+        timePerQuestion={timePerQuestion}
         onComplete={handleComplete}
       />
     </div>

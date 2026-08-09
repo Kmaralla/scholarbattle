@@ -31,6 +31,7 @@ export default function MatchmakingPage() {
   const [timeLeft, setTimeLeft] = useState(20)
   const [statusMsg, setStatusMsg] = useState('Looking for an opponent...')
   const [botDiff, setBotDiff]   = useState<BotDifficulty>('medium')
+  const [timeoutSec, setTimeoutSec] = useState(15)
   const [friends, setFriends]   = useState<User[]>([])
   const [currentUser, setCurrentUser] = useState<User | null>(null)
 
@@ -107,15 +108,15 @@ export default function MatchmakingPage() {
             question_ids: pickQuestionIndices(s, g, 10, topic),
           }).select().single()
           if (battle) {
-            await channel.send({ type: 'broadcast', event: 'battle_ready', payload: { battle_id: battle.id } })
-            cleanup(); router.push(`/battle/${battle.id}`)
+            await channel.send({ type: 'broadcast', event: 'battle_ready', payload: { battle_id: battle.id, timeout: timeoutSec } })
+            cleanup(); router.push(`/battle/${battle.id}?timeout=${timeoutSec}`)
           }
         }
       })
       .on('broadcast', { event: 'battle_ready' }, ({ payload }) => {
         if (alreadyMatchedRef.current) return
         alreadyMatchedRef.current = true
-        cleanup(); router.push(`/battle/${payload.battle_id}`)
+        cleanup(); router.push(`/battle/${payload.battle_id}?timeout=${payload.timeout ?? 15}`)
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED')
@@ -146,7 +147,7 @@ export default function MatchmakingPage() {
       challenger_score: 0, opponent_score: 0,
       question_ids: pickQuestionIndices(s, g, 10, topic),
     }).select().single()
-    if (battle) router.push(`/battle/${battle.id}?difficulty=${botDiff}`)
+    if (battle) router.push(`/battle/${battle.id}?difficulty=${botDiff}&timeout=${timeoutSec}`)
   }
 
   // ── Friend challenge ──────────────────────────────────────────
@@ -170,7 +171,7 @@ export default function MatchmakingPage() {
       payload: { battle_id: battle.id, challenger_username: currentUser.username, challenger_avatar_url: (currentUser as any).avatar_url ?? null, subject: s, grade_level: g },
     })
     supabase.removeChannel(notifChannel)
-    router.push(`/battle/${battle.id}`)
+    router.push(`/battle/${battle.id}?timeout=${timeoutSec}`)
   }
 
   useEffect(() => () => cleanup(), [])
@@ -237,10 +238,29 @@ export default function MatchmakingPage() {
 
         {step === 'pick' && (
           <Card>
-            <CardContent className="p-5 space-y-3">
+            <CardContent className="p-5 space-y-4">
               {statusMsg !== 'Looking for an opponent...' && (
                 <p className="text-sm text-amber-400 font-semibold bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2">{statusMsg}</p>
               )}
+              <div>
+                <p className="text-sm font-bold text-white/60 uppercase tracking-wider text-xs mb-2">Time per Question</p>
+                <div className="flex gap-2">
+                  {[10, 15, 20, 30].map(t => (
+                    <button
+                      key={t}
+                      onClick={() => setTimeoutSec(t)}
+                      className={cn(
+                        'flex-1 py-2.5 rounded-xl border-2 text-sm font-black transition-all',
+                        timeoutSec === t
+                          ? 'border-indigo-400 bg-indigo-500/20 text-white'
+                          : 'border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white'
+                      )}
+                    >
+                      {t}s
+                    </button>
+                  ))}
+                </div>
+              </div>
               <p className="text-sm text-white/50">Pick a topic — we'll match you with someone online playing the same subject and grade.</p>
               <TopicPicker onSelect={startSearch} />
             </CardContent>
@@ -290,27 +310,48 @@ export default function MatchmakingPage() {
           <h1 className="text-xl font-black text-white">🤖 vs Scholar Bot</h1>
         </div>
 
-        {/* Difficulty picker */}
+        {/* Difficulty + Time pickers */}
         <Card>
-          <CardContent className="p-5 space-y-3">
-            <p className="text-sm font-bold text-white/60 uppercase tracking-wider text-xs">Difficulty</p>
-            <div className="grid grid-cols-3 gap-2">
-              {BOT_OPTIONS.map(opt => (
-                <button
-                  key={opt.difficulty}
-                  onClick={() => setBotDiff(opt.difficulty)}
-                  className={cn(
-                    'rounded-2xl p-3 border text-center transition-all',
-                    botDiff === opt.difficulty
-                      ? 'bg-white/15 border-white/30'
-                      : 'bg-white/5 border-white/10 hover:bg-white/10'
-                  )}
-                >
-                  <p className="text-2xl mb-1">{opt.emoji}</p>
-                  <p className="text-xs font-black text-white">{opt.label}</p>
-                  <p className="text-[10px] text-white/40 mt-0.5 leading-tight">{opt.desc}</p>
-                </button>
-              ))}
+          <CardContent className="p-5 space-y-4">
+            <div>
+              <p className="text-sm font-bold text-white/60 uppercase tracking-wider text-xs mb-2">Difficulty</p>
+              <div className="grid grid-cols-3 gap-2">
+                {BOT_OPTIONS.map(opt => (
+                  <button
+                    key={opt.difficulty}
+                    onClick={() => setBotDiff(opt.difficulty)}
+                    className={cn(
+                      'rounded-2xl p-3 border text-center transition-all',
+                      botDiff === opt.difficulty
+                        ? 'bg-white/15 border-white/30'
+                        : 'bg-white/5 border-white/10 hover:bg-white/10'
+                    )}
+                  >
+                    <p className="text-2xl mb-1">{opt.emoji}</p>
+                    <p className="text-xs font-black text-white">{opt.label}</p>
+                    <p className="text-[10px] text-white/40 mt-0.5 leading-tight">{opt.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white/60 uppercase tracking-wider text-xs mb-2">Time per Question</p>
+              <div className="flex gap-2">
+                {[10, 15, 20, 30].map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setTimeoutSec(t)}
+                    className={cn(
+                      'flex-1 py-2.5 rounded-xl border-2 text-sm font-black transition-all',
+                      timeoutSec === t
+                        ? 'border-indigo-400 bg-indigo-500/20 text-white'
+                        : 'border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white'
+                    )}
+                  >
+                    {t}s
+                  </button>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
