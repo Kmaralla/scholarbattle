@@ -25,8 +25,10 @@ function channelName(a: string, b: string) {
 }
 
 function ChallengeCard({ content, isMe }: { content: string; isMe: boolean }) {
-  // Format: __challenge__:battleId:subject:grade
-  const [, battleId, subject, grade] = content.split(':')
+  // Format: __challenge__:battleId:subject:grade:timeout
+  const parts = content.split(':')
+  const [, battleId, subject, grade] = parts
+  const timeout = parts[4] ?? '15'
   const router = useRouter()
   return (
     <div className={cn(
@@ -42,10 +44,11 @@ function ChallengeCard({ content, isMe }: { content: string; isMe: boolean }) {
         <div className="flex gap-1.5 flex-wrap">
           <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 capitalize">{subject}</span>
           <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-white/10 text-white/50 border border-white/10">Grade {grade}</span>
+          <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-white/10 text-white/50 border border-white/10">⏱ {timeout}s</span>
         </div>
         {!isMe && (
           <button
-            onClick={() => router.push(`/battle/${battleId}`)}
+            onClick={() => router.push(`/battle/${battleId}?timeout=${timeout}`)}
             className="w-full py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-black transition active:scale-95"
           >
             ⚔️ Accept &amp; Fight!
@@ -63,6 +66,7 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
   const [sending, setSending] = useState(false)
   const [showChallenge, setShowChallenge] = useState(false)
   const [challenging, setChallenging] = useState(false)
+  const [timeoutSec, setTimeoutSec] = useState(15)
   const bottomRef = useRef<HTMLDivElement>(null)
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
   const supabase = createClient()
@@ -175,11 +179,11 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
     })
     supabase.removeChannel(notifCh)
 
-    // Send challenge card message in chat
-    await sendMessage(`${CHALLENGE_PREFIX}${battle.id}:${subject}:${grade}`)
+    // Send challenge card message in chat (includes timeout so recipient sees same setting)
+    await sendMessage(`${CHALLENGE_PREFIX}${battle.id}:${subject}:${grade}:${timeoutSec}`)
 
     setChallenging(false)
-    router.push(`/battle/${battle.id}`)
+    router.push(`/battle/${battle.id}?timeout=${timeoutSec}`)
   }
 
   function formatTime(iso: string) {
@@ -294,14 +298,36 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
                 <X className="w-4 h-4 text-white" />
               </button>
             </div>
-            <div className="px-5">
+            <div className="px-5 space-y-4">
               {challenging ? (
                 <div className="flex flex-col items-center py-10 gap-3">
                   <div className="w-8 h-8 border-3 border-violet-400/30 border-t-violet-400 rounded-full animate-spin" />
                   <p className="text-white/50 text-sm">Sending challenge...</p>
                 </div>
               ) : (
-                <TopicPicker onSelect={handleChallenge} />
+                <>
+                  {/* Time per question picker */}
+                  <div>
+                    <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-2">Time per Question</p>
+                    <div className="flex gap-2">
+                      {[10, 15, 20, 30].map(t => (
+                        <button
+                          key={t}
+                          onClick={() => setTimeoutSec(t)}
+                          className={cn(
+                            'flex-1 py-2 rounded-xl border-2 text-sm font-black transition-all',
+                            timeoutSec === t
+                              ? 'border-indigo-400 bg-indigo-500/20 text-white'
+                              : 'border-white/10 bg-white/5 text-white/40 hover:border-white/20 hover:text-white'
+                          )}
+                        >
+                          {t}s
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <TopicPicker onSelect={handleChallenge} />
+                </>
               )}
             </div>
           </div>
