@@ -5,6 +5,7 @@ import { LogOut } from 'lucide-react'
 import { AvatarPicker } from '@/components/profile/AvatarPicker'
 import { ColorsSidePanel } from '@/components/profile/ColorsSidePanel'
 import { BadgesSection } from '@/components/profile/BadgesSection'
+import { ReportCardsButton } from '@/components/profile/ReportCardsButton'
 import type { PrestigeMap } from '@/lib/badges'
 
 const TIER_COLORS: Record<string, string> = {
@@ -47,7 +48,10 @@ export default async function ProfilePage() {
           currentAvatar={(profile as any).avatar_url ?? null}
         />
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-black text-white truncate">{profile.username}</h2>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-lg font-black text-white truncate">{profile.username}</h2>
+            <ReportCardsButton userId={user.id} />
+          </div>
           <p className="text-xs text-white/40 truncate">{user.email}</p>
           <div className={`mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r ${TIER_COLORS[tier]} text-white font-bold text-xs`}>
             <span>{TIER_EMOJI[tier]}</span>
