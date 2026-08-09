@@ -175,9 +175,17 @@ export default function BattlePage() {
       const atDiamond = newElo >= 1800 || isAlreadyLegend
       if (!atDiamond) return fields
 
-      // Set diamond_since the first time they reach Diamond
+      // Reset diamond_since if they dropped below Diamond and just came back
+      const wasAtDiamond = (myProfile as any)?.rank_tier === 'diamond' || isAlreadyLegend
       const currentDiamondSince = (myProfile as any)?.diamond_since ?? null
-      if (!currentDiamondSince) fields.diamond_since = new Date().toISOString()
+      if (!wasAtDiamond) {
+        // Re-entering diamond — reset timer and wins
+        fields.diamond_since = new Date().toISOString()
+        fields.diamond_wins = 0
+      } else if (!currentDiamondSince) {
+        // First time ever reaching diamond
+        fields.diamond_since = new Date().toISOString()
+      }
 
       // Increment diamond_wins on a win at Diamond
       if (won) {
