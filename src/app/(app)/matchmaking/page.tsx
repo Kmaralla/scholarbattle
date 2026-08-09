@@ -151,7 +151,7 @@ export default function MatchmakingPage() {
   }
 
   // ── Friend challenge ──────────────────────────────────────────
-  async function challengeFriend(friend: User, s: Subject, g: number, topic: string) {
+  async function challengeFriend(friend: User, s: Subject, g: number, topic: string, timeout: number) {
     if (!currentUser) return
     const { data: battle, error: battleErr } = await supabase.from('battles').insert({
       challenger_id: currentUser.id,
@@ -168,10 +168,10 @@ export default function MatchmakingPage() {
     await notifChannel.subscribe()
     await notifChannel.send({
       type: 'broadcast', event: 'incoming_challenge',
-      payload: { battle_id: battle.id, challenger_username: currentUser.username, challenger_avatar_url: (currentUser as any).avatar_url ?? null, subject: s, grade_level: g },
+      payload: { battle_id: battle.id, challenger_username: currentUser.username, challenger_avatar_url: (currentUser as any).avatar_url ?? null, subject: s, grade_level: g, timeout },
     })
     supabase.removeChannel(notifChannel)
-    router.push(`/battle/${battle.id}?timeout=${timeoutSec}`)
+    router.push(`/battle/${battle.id}?timeout=${timeout}`)
   }
 
   useEffect(() => () => cleanup(), [])
@@ -391,9 +391,10 @@ function FriendChallengeFlow({
   currentUser: User | null
   friends: User[]
   onBack: () => void
-  onChallenge: (friend: User, subject: Subject, grade: number, topic: string) => void
+  onChallenge: (friend: User, subject: Subject, grade: number, topic: string, timeout: number) => void
 }) {
   const [selected, setSelected] = useState<User | null>(null)
+  const [timeoutSec, setTimeoutSec] = useState(15)
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-4">
@@ -439,9 +440,28 @@ function FriendChallengeFlow({
             <button onClick={() => setSelected(null)} className="text-white/30 hover:text-white text-xs font-semibold transition">Change</button>
           </div>
           <Card>
-            <CardContent className="p-5 space-y-2">
+            <CardContent className="p-5 space-y-4">
+              <div>
+                <p className="text-sm font-bold text-white/60 uppercase tracking-wider text-xs mb-2">Time per Question</p>
+                <div className="flex gap-2">
+                  {[10, 15, 20, 30].map(t => (
+                    <button
+                      key={t}
+                      onClick={() => setTimeoutSec(t)}
+                      className={cn(
+                        'flex-1 py-2.5 rounded-xl border-2 text-sm font-black transition-all',
+                        timeoutSec === t
+                          ? 'border-indigo-400 bg-indigo-500/20 text-white'
+                          : 'border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white'
+                      )}
+                    >
+                      {t}s
+                    </button>
+                  ))}
+                </div>
+              </div>
               <p className="text-sm text-white/50">Pick a subject and grade for the battle.</p>
-              <TopicPicker onSelect={(s, g, t) => onChallenge(selected, s, g, t)} />
+              <TopicPicker onSelect={(s, g, t) => onChallenge(selected, s, g, t, timeoutSec)} />
             </CardContent>
           </Card>
         </div>
