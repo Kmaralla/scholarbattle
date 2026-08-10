@@ -3,64 +3,85 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
 // ── Constants ──────────────────────────────────────────────────────────────
-const W = 620, H = 400
-const FX = 70, FY = 40, FW = 480, FH = 320
-const GOAL_H = 90, GOAL_D = 48
-const GOAL_L = { x: FX - GOAL_D, y: FY + FH / 2 - GOAL_H / 2, w: GOAL_D, h: GOAL_H }
-const GOAL_R = { x: FX + FW,     y: FY + FH / 2 - GOAL_H / 2, w: GOAL_D, h: GOAL_H }
-const PLAYER_R = 13, BALL_R = 9
-const PLAYER_SPEED = 2.8, BALL_FRICTION = 0.965, KICK_POWER = 6.5
+const W = 800, H = 530
+const FX = 65, FY = 45, FW = 670, FH = 440
+const GOAL_H = 120, GOAL_D = 52
+const GOAL_L = { x: FX - GOAL_D, y: FY + FH/2 - GOAL_H/2, w: GOAL_D, h: GOAL_H }
+const GOAL_R = { x: FX + FW,     y: FY + FH/2 - GOAL_H/2, w: GOAL_D, h: GOAL_H }
+const PLAYER_R = 14, BALL_R = 9
+const PLAYER_SPEED = 3.0, BALL_FRICTION = 0.96
+const SHOOT_POWER = 14, AI_SHOOT_POWER = 11
+const CARRY_OFFSET = PLAYER_R + BALL_R + 1
 const GAME_DURATION = 90
 
 type Role = 'GK' | 'LB' | 'RB' | 'LW' | 'RW'
-interface Player { id: number; team: 'blue'|'red'; role: Role; x: number; y: number; vx: number; vy: number; isUser: boolean }
-interface Ball   { x: number; y: number; vx: number; vy: number }
-interface Touch  { active: boolean; startX: number; startY: number; dx: number; dy: number }
+interface Player {
+  id: number; team: 'blue'|'red'; role: Role
+  x: number; y: number; vx: number; vy: number
+  facingX: number; facingY: number; isUser: boolean
+}
+interface Ball { x: number; y: number; vx: number; vy: number }
+interface Touch { active: boolean; startX: number; startY: number; dx: number; dy: number }
 interface GS {
   players: Player[]; ball: Ball; keys: Set<string>; touch: Touch
   score: { blue: number; red: number }; timeLeft: number; lastGoalTime: number
   animFrame: number | null; timerInterval: ReturnType<typeof setInterval> | null
-  stuckFrames: number
+  stuckFrames: number; possessorId: number | null
+  shootTrigger: boolean; sprintHeld: boolean
 }
 
 const BLUE_HOME: Record<Role,[number,number]> = {
-  GK: [FX+28,        FY+FH/2],
-  LB: [FX+110,       FY+FH/2-75],
-  RB: [FX+110,       FY+FH/2+75],
-  LW: [FX+FW*0.6,    FY+FH/2-75],
-  RW: [FX+FW*0.6,    FY+FH/2+75],
+  GK: [FX+32,       FY+FH/2],
+  LB: [FX+145,      FY+FH/2-95],
+  RB: [FX+145,      FY+FH/2+95],
+  LW: [FX+FW*0.62,  FY+FH/2-85],
+  RW: [FX+FW*0.62,  FY+FH/2+85],
 }
 const RED_HOME: Record<Role,[number,number]> = {
-  GK: [FX+FW-28,     FY+FH/2],
-  LB: [FX+FW-110,    FY+FH/2+75],
-  RB: [FX+FW-110,    FY+FH/2-75],
-  LW: [FX+FW*0.4,    FY+FH/2+75],
-  RW: [FX+FW*0.4,    FY+FH/2-75],
+  GK: [FX+FW-32,    FY+FH/2],
+  LB: [FX+FW-145,   FY+FH/2+95],
+  RB: [FX+FW-145,   FY+FH/2-95],
+  LW: [FX+FW*0.38,  FY+FH/2+85],
+  RW: [FX+FW*0.38,  FY+FH/2-85],
 }
 
 const POSITIONS: { id: Role; name: string; desc: string; emoji: string }[] = [
-  { id:'GK', name:'Goalkeeper',     desc:'Guard your goal and make big saves!',      emoji:'🧤' },
-  { id:'LB', name:'Left Defender',  desc:'Defend and support from the left side',    emoji:'🛡️' },
-  { id:'RB', name:'Right Defender', desc:'Defend and support from the right side',   emoji:'🛡️' },
-  { id:'LW', name:'Left Striker',   desc:'Attack and score from the left wing',      emoji:'⚡' },
-  { id:'RW', name:'Right Striker',  desc:'Attack and score from the right wing',     emoji:'⚡' },
+  { id:'GK', name:'Goalkeeper',     desc:'Guard your goal and make big saves!',    emoji:'🧤' },
+  { id:'LB', name:'Left Defender',  desc:'Defend and support from the left side',  emoji:'🛡️' },
+  { id:'RB', name:'Right Defender', desc:'Defend and support from the right side', emoji:'🛡️' },
+  { id:'LW', name:'Left Striker',   desc:'Attack and score from the left wing',    emoji:'⚡' },
+  { id:'RW', name:'Right Striker',  desc:'Attack and score from the right wing',   emoji:'⚡' },
 ]
 
 function makePlayers(userRole: Role): Player[] {
   const roles: Role[] = ['GK','LB','RB','LW','RW']
   return [
-    ...roles.map((r,i) => ({ id:i,    team:'blue' as const, role:r, x:BLUE_HOME[r][0], y:BLUE_HOME[r][1], vx:0, vy:0, isUser:r===userRole })),
-    ...roles.map((r,i) => ({ id:10+i, team:'red'  as const, role:r, x:RED_HOME[r][0],  y:RED_HOME[r][1],  vx:0, vy:0, isUser:false })),
+    ...roles.map((r,i) => ({ id:i,    team:'blue' as const, role:r, x:BLUE_HOME[r][0], y:BLUE_HOME[r][1], vx:0, vy:0, facingX:1,  facingY:0, isUser:r===userRole })),
+    ...roles.map((r,i) => ({ id:10+i, team:'red'  as const, role:r, x:RED_HOME[r][0],  y:RED_HOME[r][1],  vx:0, vy:0, facingX:-1, facingY:0, isUser:false })),
   ]
 }
 
-// ── Physics helpers ────────────────────────────────────────────────────────
 function steerTo(p: Player, tx: number, ty: number, spd: number) {
-  const dx = tx-p.x, dy = ty-p.y, d = Math.hypot(dx,dy)
+  const dx = tx-p.x, dy = ty-p.y, d = Math.hypot(dx, dy)
   if (d < 2) { p.vx=0; p.vy=0; return }
   p.vx = dx/d*spd; p.vy = dy/d*spd
+  p.facingX = dx/d; p.facingY = dy/d
 }
 
+function doShoot(gs: GS, shooter: Player, power: number) {
+  const isBlue = shooter.team === 'blue'
+  const goalCX  = isBlue ? GOAL_R.x + 5 : GOAL_L.x + GOAL_L.w - 5
+  const goalCY  = FY + FH/2 + (Math.random()-0.5) * GOAL_H * 0.45
+  const dx = goalCX - shooter.x, dy = goalCY - shooter.y
+  const len = Math.hypot(dx, dy) || 1
+  gs.ball.vx = dx/len * power
+  gs.ball.vy = dy/len * power
+  gs.ball.x  = shooter.x + dx/len * (CARRY_OFFSET + 4)
+  gs.ball.y  = shooter.y + dy/len * (CARRY_OFFSET + 4)
+  gs.possessorId = null
+}
+
+// ── Move user ──────────────────────────────────────────────────────────────
 function moveUser(gs: GS) {
   const u = gs.players.find(p => p.isUser)!
   let dx=0, dy=0
@@ -74,22 +95,36 @@ function moveUser(gs: GS) {
     dy += Math.max(-1, Math.min(1, gs.touch.dy / MAX))
   }
   const len = Math.hypot(dx, dy)
-  if (len > 0) { u.vx = dx/len*PLAYER_SPEED; u.vy = dy/len*PLAYER_SPEED }
-  else { u.vx *= 0.85; u.vy *= 0.85 }
+  const hasBall = gs.possessorId === u.id
+  const spd = (gs.sprintHeld && hasBall) ? PLAYER_SPEED * 1.45 : PLAYER_SPEED
+  if (len > 0) {
+    u.vx = dx/len*spd; u.vy = dy/len*spd
+    u.facingX = dx/len; u.facingY = dy/len
+  } else {
+    u.vx *= 0.8; u.vy *= 0.8
+  }
   u.x = Math.max(FX+PLAYER_R, Math.min(FX+FW-PLAYER_R, u.x+u.vx))
   u.y = Math.max(FY+PLAYER_R, Math.min(FY+FH-PLAYER_R, u.y+u.vy))
+
+  if (gs.shootTrigger) {
+    if (hasBall) doShoot(gs, u, SHOOT_POWER)
+    gs.shootTrigger = false
+  }
 }
 
+// ── Move AI ────────────────────────────────────────────────────────────────
 function moveAI(gs: GS) {
   const bx = gs.ball.x, by = gs.ball.y
 
-  // Only the single closest non-GK AI per team chases the ball
+  // Designated chaser per team (or the one with possession)
   const chaser: Record<string, number> = {}
   for (const team of ['blue', 'red'] as const) {
+    const withBall = gs.players.find(p => p.id === gs.possessorId && p.team === team && !p.isUser && p.role !== 'GK')
+    if (withBall) { chaser[team] = withBall.id; continue }
     let minDist = Infinity, minId = -1
     for (const p of gs.players) {
       if (p.isUser || p.team !== team || p.role === 'GK') continue
-      const d = Math.hypot(p.x - bx, p.y - by)
+      const d = Math.hypot(p.x-bx, p.y-by)
       if (d < minDist) { minDist = d; minId = p.id }
     }
     chaser[team] = minId
@@ -98,88 +133,103 @@ function moveAI(gs: GS) {
   for (const p of gs.players) {
     if (p.isUser) continue
     const isBlue = p.team === 'blue'
-    const home = isBlue ? BLUE_HOME[p.role] : RED_HOME[p.role]
-    let tx = home[0], ty = home[1]
+    const home   = isBlue ? BLUE_HOME[p.role] : RED_HOME[p.role]
+    const hasBall = gs.possessorId === p.id
+    let tx = home[0], ty = home[1], spd = PLAYER_SPEED * 0.88
 
     if (p.role === 'GK') {
-      // Hug goal line, track ball on y, only rush if ball very close
-      tx = isBlue ? FX + 35 : FX + FW - 35
-      ty = Math.max(FY + GOAL_H / 2, Math.min(FY + FH - GOAL_H / 2, by))
-      if (Math.hypot(p.x - bx, p.y - by) < 70) { tx = bx; ty = by }
+      tx = isBlue ? FX+40 : FX+FW-40
+      ty = Math.max(FY+GOAL_H/2, Math.min(FY+FH-GOAL_H/2, by))
+      if (Math.hypot(p.x-bx, p.y-by) < 85) { tx=bx; ty=by }
+    } else if (hasBall) {
+      const goalX = isBlue ? FX+FW+20 : FX-20
+      if (Math.hypot(p.x-goalX, p.y-(FY+FH/2)) < 230) {
+        doShoot(gs, p, AI_SHOOT_POWER)
+      } else {
+        tx = goalX; ty = FY+FH/2; spd = PLAYER_SPEED * 0.95
+      }
     } else if (p.id === chaser[p.team]) {
-      // The designated chaser goes for the ball
       tx = bx; ty = by
     } else {
-      // Everyone else holds their home position with slight y tracking
-      tx = home[0]
-      ty = home[1] + (by - home[1]) * 0.18
+      ty = home[1] + (by-home[1])*0.18
     }
 
-    steerTo(p, tx, ty, PLAYER_SPEED * 0.88)
-    p.x = Math.max(FX + PLAYER_R, Math.min(FX + FW - PLAYER_R, p.x + p.vx))
-    p.y = Math.max(FY + PLAYER_R, Math.min(FY + FH - PLAYER_R, p.y + p.vy))
+    steerTo(p, tx, ty, spd)
+    p.x = Math.max(FX+PLAYER_R, Math.min(FX+FW-PLAYER_R, p.x+p.vx))
+    p.y = Math.max(FY+PLAYER_R, Math.min(FY+FH-PLAYER_R, p.y+p.vy))
   }
 }
 
+// ── Move ball / possession ─────────────────────────────────────────────────
 function moveBall(gs: GS) {
   const b = gs.ball
-  const cx = FX + FW / 2, cy = FY + FH / 2
+  const cx = FX+FW/2, cy = FY+FH/2
 
-  // Wall bounces — always push away from wall with minimum speed
-  if (b.x - BALL_R < FX)    { b.x = FX + BALL_R;    b.vx =  Math.max(3, Math.abs(b.vx)) }
-  if (b.x + BALL_R > FX+FW) { b.x = FX+FW - BALL_R; b.vx = -Math.max(3, Math.abs(b.vx)) }
-  if (b.y - BALL_R < FY)    { b.y = FY + BALL_R;    b.vy =  Math.max(3, Math.abs(b.vy)) }
-  if (b.y + BALL_R > FY+FH) { b.y = FY+FH - BALL_R; b.vy = -Math.max(3, Math.abs(b.vy)) }
+  if (gs.possessorId !== null) {
+    const p = gs.players.find(pl => pl.id === gs.possessorId)
+    if (p) {
+      // Ball sticks in front of possessor
+      b.x = p.x + p.facingX * CARRY_OFFSET
+      b.y = p.y + p.facingY * CARRY_OFFSET
+      b.vx = p.vx; b.vy = p.vy
 
+      // Steal: opponent overlaps the possessor
+      for (const opp of gs.players) {
+        if (opp.team === p.team) continue
+        if (Math.hypot(opp.x-p.x, opp.y-p.y) < PLAYER_R * 2 + 2) {
+          gs.possessorId = opp.id
+          opp.facingX = -p.facingX || 1
+          opp.facingY = -p.facingY
+          break
+        }
+      }
+      return
+    }
+    gs.possessorId = null
+  }
+
+  // Wall bounce (minimum speed so ball never stops at wall)
+  if (b.x-BALL_R < FX)    { b.x=FX+BALL_R;    b.vx= Math.max(3, Math.abs(b.vx)) }
+  if (b.x+BALL_R > FX+FW) { b.x=FX+FW-BALL_R; b.vx=-Math.max(3, Math.abs(b.vx)) }
+  if (b.y-BALL_R < FY)    { b.y=FY+BALL_R;    b.vy= Math.max(3, Math.abs(b.vy)) }
+  if (b.y+BALL_R > FY+FH) { b.y=FY+FH-BALL_R; b.vy=-Math.max(3, Math.abs(b.vy)) }
+
+  // First player to touch free ball gains possession
   for (const p of gs.players) {
-    const dx = b.x - p.x, dy = b.y - p.y, d = Math.hypot(dx, dy)
-    if (d < PLAYER_R + BALL_R && d > 0) {
-      const nx = dx / d, ny = dy / d
-      const spd = Math.max(KICK_POWER, Math.hypot(p.vx, p.vy) * 1.5 + 4)
-      b.vx = nx * spd; b.vy = ny * spd
-      b.x = p.x + nx * (PLAYER_R + BALL_R + 2)
-      b.y = p.y + ny * (PLAYER_R + BALL_R + 2)
+    if (Math.hypot(b.x-p.x, b.y-p.y) < PLAYER_R+BALL_R) {
+      gs.possessorId = p.id; return
     }
   }
 
-  // Stuck detection: if ball barely moves for ~1s (60 frames), kick it toward center
+  // Stuck detection
   if (Math.hypot(b.vx, b.vy) < 0.6) {
     gs.stuckFrames++
-    if (gs.stuckFrames > 60) {
-      const toCx = cx - b.x, toCy = cy - b.y
-      const len = Math.hypot(toCx, toCy) || 1
-      b.vx = (toCx / len) * 7 + (Math.random() - 0.5) * 3
-      b.vy = (toCy / len) * 7 + (Math.random() - 0.5) * 3
-      gs.stuckFrames = 0
+    if (gs.stuckFrames > 55) {
+      const tx=cx-b.x, ty=cy-b.y, tl=Math.hypot(tx,ty)||1
+      b.vx = tx/tl*8+(Math.random()-.5)*3
+      b.vy = ty/tl*8+(Math.random()-.5)*3
+      gs.stuckFrames=0
     }
-  } else {
-    gs.stuckFrames = 0
-  }
+  } else { gs.stuckFrames=0 }
 
-  b.x += b.vx; b.y += b.vy
-  b.vx *= BALL_FRICTION; b.vy *= BALL_FRICTION
+  b.x+=b.vx; b.y+=b.vy
+  b.vx*=BALL_FRICTION; b.vy*=BALL_FRICTION
 }
 
-function checkGoal(gs: GS, onGoal: (team:'blue'|'red', userRole: Role) => void, userRole: Role) {
+function checkGoal(gs: GS, onGoal: (t:'blue'|'red')=>void, userRole: Role) {
   const b = gs.ball
   if (b.x-BALL_R < GOAL_L.x+GOAL_L.w && b.y>GOAL_L.y && b.y<GOAL_L.y+GOAL_L.h) {
-    gs.lastGoalTime = Date.now()
-    gs.score.red++
-    gs.players = makePlayers(userRole)
-    gs.ball = { x:W/2, y:H/2, vx:0, vy:0 }
-    onGoal('red', userRole)
+    gs.lastGoalTime=Date.now(); gs.score.red++
+    gs.players=makePlayers(userRole); gs.ball={x:W/2,y:H/2,vx:1,vy:0}; gs.possessorId=null; onGoal('red')
   }
   if (b.x+BALL_R > GOAL_R.x && b.y>GOAL_R.y && b.y<GOAL_R.y+GOAL_R.h) {
-    gs.lastGoalTime = Date.now()
-    gs.score.blue++
-    gs.players = makePlayers(userRole)
-    gs.ball = { x:W/2, y:H/2, vx:0, vy:0 }
-    onGoal('blue', userRole)
+    gs.lastGoalTime=Date.now(); gs.score.blue++
+    gs.players=makePlayers(userRole); gs.ball={x:W/2,y:H/2,vx:-1,vy:0}; gs.possessorId=null; onGoal('blue')
   }
 }
 
-// ── Canvas draw ────────────────────────────────────────────────────────────
-function draw(ctx: CanvasRenderingContext2D, gs: GS, score:{blue:number,red:number}) {
+// ── Draw ───────────────────────────────────────────────────────────────────
+function draw(ctx: CanvasRenderingContext2D, gs: GS) {
   ctx.clearRect(0,0,W,H)
   ctx.fillStyle='#1a1040'; ctx.fillRect(0,0,W,H)
 
@@ -188,80 +238,80 @@ function draw(ctx: CanvasRenderingContext2D, gs: GS, score:{blue:number,red:numb
   ctx.beginPath(); (ctx as any).roundRect(FX,FY,FW,FH,4); ctx.fill()
 
   // Stripes
-  ctx.fillStyle='rgba(0,0,0,0.06)'
-  for (let i=0;i<6;i++) { ctx.fillRect(FX+i*FW/6, FY, FW/6, FH); i++ }
+  ctx.fillStyle='rgba(0,0,0,0.05)'
+  for (let i=0; i<8; i+=2) { ctx.fillRect(FX+i*FW/8, FY, FW/8, FH) }
 
   // Lines
   ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=2
   ctx.strokeRect(FX,FY,FW,FH)
   ctx.beginPath(); ctx.moveTo(FX+FW/2,FY); ctx.lineTo(FX+FW/2,FY+FH); ctx.stroke()
-  ctx.beginPath(); ctx.arc(FX+FW/2,FY+FH/2,50,0,Math.PI*2); ctx.stroke()
-  ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fill()
+  ctx.beginPath(); ctx.arc(FX+FW/2,FY+FH/2,55,0,Math.PI*2); ctx.stroke()
+  ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fill()
   ctx.fillStyle='white'; ctx.beginPath(); ctx.arc(FX+FW/2,FY+FH/2,3,0,Math.PI*2); ctx.fill()
-  ctx.strokeStyle='rgba(255,255,255,0.35)'
-  ctx.strokeRect(FX,FY+FH/2-70,90,140)
-  ctx.strokeRect(FX+FW-90,FY+FH/2-70,90,140)
+  ctx.strokeStyle='rgba(255,255,255,0.3)'
+  ctx.strokeRect(FX,FY+FH/2-75,100,150)
+  ctx.strokeRect(FX+FW-100,FY+FH/2-75,100,150)
 
   // Goals
   const drawGoal = (g:{x:number,y:number,w:number,h:number}, left:boolean) => {
-    ctx.fillStyle='rgba(255,255,255,0.12)'; ctx.strokeStyle='white'; ctx.lineWidth=2.5
+    ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.strokeStyle='white'; ctx.lineWidth=2.5
     ctx.beginPath()
     if (left) (ctx as any).roundRect(g.x,g.y,g.w,g.h,[4,0,0,4])
     else       (ctx as any).roundRect(g.x,g.y,g.w,g.h,[0,4,4,0])
     ctx.fill(); ctx.stroke()
-    ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=0.8
-    for (let i=1;i<4;i++) { const x=g.x+i*g.w/4; ctx.beginPath(); ctx.moveTo(x,g.y); ctx.lineTo(x,g.y+g.h); ctx.stroke() }
-    for (let i=1;i<3;i++) { const y=g.y+i*g.h/3; ctx.beginPath(); ctx.moveTo(g.x,y); ctx.lineTo(g.x+g.w,y); ctx.stroke() }
+    ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=0.8
+    for (let i=1;i<5;i++) { const x=g.x+i*g.w/5; ctx.beginPath(); ctx.moveTo(x,g.y); ctx.lineTo(x,g.y+g.h); ctx.stroke() }
+    for (let i=1;i<4;i++) { const y=g.y+i*g.h/4; ctx.beginPath(); ctx.moveTo(g.x,y); ctx.lineTo(g.x+g.w,y); ctx.stroke() }
   }
   drawGoal(GOAL_L,true); drawGoal(GOAL_R,false)
 
   // Team labels
-  ctx.font='bold 10px sans-serif'; ctx.textBaseline='top'
-  ctx.fillStyle='rgba(147,197,253,0.7)'; ctx.textAlign='left';  ctx.fillText('◀ BLUE (You)', FX+4, FY+5)
-  ctx.fillStyle='rgba(252,165,165,0.7)'; ctx.textAlign='right'; ctx.fillText('RED ▶', FX+FW-4, FY+5)
+  ctx.font='bold 11px sans-serif'; ctx.textBaseline='top'
+  ctx.fillStyle='rgba(147,197,253,0.7)'; ctx.textAlign='left';  ctx.fillText('◀ BLUE (You)', FX+5, FY+6)
+  ctx.fillStyle='rgba(252,165,165,0.7)'; ctx.textAlign='right'; ctx.fillText('RED ▶', FX+FW-5, FY+6)
 
   // Players
   for (const p of gs.players) {
+    const hasBall = gs.possessorId === p.id
     const col = p.team==='blue' ? '#3b82f6' : '#ef4444'
     const bdr = p.team==='blue' ? '#93c5fd' : '#fca5a5'
-    ctx.fillStyle='rgba(0,0,0,0.25)'
-    ctx.beginPath(); ctx.ellipse(p.x+2,p.y+PLAYER_R+2,PLAYER_R,4,0,0,Math.PI*2); ctx.fill()
+    // Shadow
+    ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(p.x+2,p.y+PLAYER_R+2,PLAYER_R,4,0,0,Math.PI*2); ctx.fill()
+    // Body
     ctx.fillStyle=col; ctx.beginPath(); ctx.arc(p.x,p.y,PLAYER_R,0,Math.PI*2); ctx.fill()
-    ctx.strokeStyle=bdr; ctx.lineWidth=2; ctx.stroke()
-    ctx.fillStyle='white'; ctx.font='bold 7px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'
-    ctx.fillText(p.role,p.x,p.y)
-
-    // Upside-down blue triangle for user
+    ctx.strokeStyle=hasBall ? '#facc15' : bdr; ctx.lineWidth=hasBall ? 2.5 : 1.8; ctx.stroke()
+    // Label
+    ctx.fillStyle='white'; ctx.font='bold 8px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'
+    ctx.fillText(p.role, p.x, p.y)
+    // Triangle marker for user
     if (p.isUser) {
-      const tx=p.x, ty=p.y-PLAYER_R-16
+      const tx=p.x, ty=p.y-PLAYER_R-17
       ctx.fillStyle='#1d4ed8'; ctx.strokeStyle='#93c5fd'; ctx.lineWidth=1.5
       ctx.beginPath()
-      ctx.moveTo(tx, ty+11)     // tip pointing down
-      ctx.lineTo(tx-8, ty)      // top-left
-      ctx.lineTo(tx+8, ty)      // top-right
+      ctx.moveTo(tx, ty+11); ctx.lineTo(tx-8, ty); ctx.lineTo(tx+8, ty)
       ctx.closePath(); ctx.fill(); ctx.stroke()
     }
   }
 
   // Ball
-  const b=gs.ball
-  ctx.fillStyle='rgba(0,0,0,0.25)'; ctx.beginPath(); ctx.ellipse(b.x+2,b.y+BALL_R,BALL_R*0.8,3,0,0,Math.PI*2); ctx.fill()
+  const b = gs.ball
+  ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(b.x+2,b.y+BALL_R,BALL_R*0.8,3,0,0,Math.PI*2); ctx.fill()
   ctx.fillStyle='white'; ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R,0,Math.PI*2); ctx.fill()
   ctx.strokeStyle='#1f2937'; ctx.lineWidth=1; ctx.stroke()
   ctx.strokeStyle='#374151'; ctx.lineWidth=0.8
-  for (let a=0;a<Math.PI*2;a+=Math.PI/3) {
-    const bx=b.x+Math.cos(a)*BALL_R*0.5, by=b.y+Math.sin(a)*BALL_R*0.5
-    ctx.beginPath(); ctx.arc(bx,by,2.5,0,Math.PI*2); ctx.stroke()
+  for (let a=0; a<Math.PI*2; a+=Math.PI/3) {
+    const bx2=b.x+Math.cos(a)*BALL_R*0.5, by2=b.y+Math.sin(a)*BALL_R*0.5
+    ctx.beginPath(); ctx.arc(bx2,by2,2.5,0,Math.PI*2); ctx.stroke()
   }
 
   // Touch joystick
   if (gs.touch.active) {
     const {startX,startY,dx,dy} = gs.touch
-    ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=2
-    ctx.fillStyle='rgba(255,255,255,0.08)'
-    ctx.beginPath(); ctx.arc(startX,startY,36,0,Math.PI*2); ctx.fill(); ctx.stroke()
-    const jx=startX+Math.max(-36,Math.min(36,dx)), jy=startY+Math.max(-36,Math.min(36,dy))
-    ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.beginPath(); ctx.arc(jx,jy,14,0,Math.PI*2); ctx.fill()
+    ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=2
+    ctx.fillStyle='rgba(255,255,255,0.07)'
+    ctx.beginPath(); ctx.arc(startX,startY,38,0,Math.PI*2); ctx.fill(); ctx.stroke()
+    const jx=startX+Math.max(-38,Math.min(38,dx)), jy=startY+Math.max(-38,Math.min(38,dy))
+    ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.beginPath(); ctx.arc(jx,jy,14,0,Math.PI*2); ctx.fill()
   }
 }
 
@@ -273,12 +323,24 @@ export default function SoccerPage() {
   const [score, setScore] = useState({blue:0, red:0})
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [lastGoal, setLastGoal] = useState<'blue'|'red'|null>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const gsRef = useRef<GS | null>(null)
+  const [hasBall, setHasBall] = useState(false)
+  const canvasRef  = useRef<HTMLCanvasElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const gsRef      = useRef<GS | null>(null)
+  const hasBallRef = useRef(false)
 
   const startGame = useCallback((role: Role) => {
-    setUserRole(role); setScore({blue:0,red:0}); setTimeLeft(GAME_DURATION); setLastGoal(null); setPhase('play')
+    setUserRole(role); setScore({blue:0,red:0}); setTimeLeft(GAME_DURATION)
+    setLastGoal(null); setHasBall(false); setPhase('play')
   }, [])
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) wrapperRef.current?.requestFullscreen()
+    else document.exitFullscreen()
+  }
+  function triggerShoot() { if (gsRef.current) gsRef.current.shootTrigger = true }
+  function startSprint()  { if (gsRef.current) gsRef.current.sprintHeld = true  }
+  function stopSprint()   { if (gsRef.current) gsRef.current.sprintHeld = false }
 
   useEffect(() => {
     if (phase !== 'play') return
@@ -289,7 +351,7 @@ export default function SoccerPage() {
 
     const gs: GS = {
       players: makePlayers(userRole),
-      ball: { x:W/2, y:H/2, vx:0, vy:0 },
+      ball: { x:W/2, y:H/2, vx:1, vy:0 },
       keys: new Set(),
       touch: { active:false, startX:0, startY:0, dx:0, dy:0 },
       score: { blue:0, red:0 },
@@ -298,20 +360,26 @@ export default function SoccerPage() {
       animFrame: null,
       timerInterval: null,
       stuckFrames: 0,
+      possessorId: null,
+      shootTrigger: false,
+      sprintHeld: false,
     }
     gsRef.current = gs
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(e.key)) {
-        e.preventDefault(); gs.keys.add(e.key)
-      }
+      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d',' '].includes(e.key)) e.preventDefault()
+      gs.keys.add(e.key)
+      if (e.key === ' ')     gs.shootTrigger = true
+      if (e.key === 'Shift') gs.sprintHeld   = true
     }
-    const onKeyUp = (e: KeyboardEvent) => gs.keys.delete(e.key)
+    const onKeyUp = (e: KeyboardEvent) => {
+      gs.keys.delete(e.key)
+      if (e.key === 'Shift') gs.sprintHeld = false
+    }
     window.addEventListener('keydown', onKeyDown)
-    window.addEventListener('keyup', onKeyUp)
+    window.addEventListener('keyup',   onKeyUp)
 
     const getScale = () => W / canvas.getBoundingClientRect().width
-
     const onTouchStart = (e: TouchEvent) => {
       e.preventDefault()
       const t=e.touches[0], r=canvas.getBoundingClientRect(), sc=getScale()
@@ -324,7 +392,7 @@ export default function SoccerPage() {
       gs.touch.dx=(t.clientX-r.left)*sc-gs.touch.startX
       gs.touch.dy=(t.clientY-r.top)*sc-gs.touch.startY
     }
-    const onTouchEnd = () => { gs.touch = {active:false,startX:0,startY:0,dx:0,dy:0} }
+    const onTouchEnd = () => { gs.touch={active:false,startX:0,startY:0,dx:0,dy:0} }
     canvas.addEventListener('touchstart', onTouchStart, {passive:false})
     canvas.addEventListener('touchmove',  onTouchMove,  {passive:false})
     canvas.addEventListener('touchend',   onTouchEnd)
@@ -333,14 +401,11 @@ export default function SoccerPage() {
       if (!gsRef.current) return
       gsRef.current.timeLeft = Math.max(0, gsRef.current.timeLeft-1)
       setTimeLeft(gsRef.current.timeLeft)
-      if (gsRef.current.timeLeft <= 0) {
-        setScore({...gsRef.current.score}); setPhase('over')
-      }
+      if (gsRef.current.timeLeft <= 0) { setScore({...gsRef.current.score}); setPhase('over') }
     }, 1000)
 
     const onGoal = (team: 'blue'|'red') => {
-      setScore({...gs.score})
-      setLastGoal(team)
+      setScore({...gs.score}); setLastGoal(team)
       setTimeout(() => setLastGoal(null), 2500)
     }
 
@@ -349,17 +414,20 @@ export default function SoccerPage() {
       if (!paused) {
         moveUser(gs); moveAI(gs); moveBall(gs)
         checkGoal(gs, onGoal, userRole)
+        const user = gs.players.find(p => p.isUser)
+        const nowHasBall = user ? gs.possessorId === user.id : false
+        if (nowHasBall !== hasBallRef.current) { hasBallRef.current = nowHasBall; setHasBall(nowHasBall) }
       }
-      draw(ctx, gs, gs.score)
+      draw(ctx, gs)
       gs.animFrame = requestAnimationFrame(loop)
     }
     gs.animFrame = requestAnimationFrame(loop)
 
     return () => {
-      if (gs.animFrame) cancelAnimationFrame(gs.animFrame)
+      if (gs.animFrame)    cancelAnimationFrame(gs.animFrame)
       if (gs.timerInterval) clearInterval(gs.timerInterval)
       window.removeEventListener('keydown', onKeyDown)
-      window.removeEventListener('keyup', onKeyUp)
+      window.removeEventListener('keyup',   onKeyUp)
       canvas.removeEventListener('touchstart', onTouchStart)
       canvas.removeEventListener('touchmove',  onTouchMove)
       canvas.removeEventListener('touchend',   onTouchEnd)
@@ -368,7 +436,7 @@ export default function SoccerPage() {
   }, [phase, userRole])
 
   return (
-    <div className="flex flex-col items-center min-h-screen p-4" style={{background:'linear-gradient(135deg,#0f0a2e,#1a1040)'}}>
+    <div className="flex flex-col items-center min-h-screen p-3" style={{background:'linear-gradient(135deg,#0f0a2e,#1a1040)'}}>
 
       {/* Position picker */}
       {phase==='pick' && (
@@ -383,9 +451,7 @@ export default function SoccerPage() {
             {POSITIONS.map(pos => (
               <button key={pos.id} onClick={() => setUserRole(pos.id)}
                 className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl border transition-all ${
-                  userRole===pos.id
-                    ? 'bg-indigo-500/25 border-indigo-400/50 text-white'
-                    : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/8'
+                  userRole===pos.id ? 'bg-indigo-500/25 border-indigo-400/50 text-white' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/8'
                 }`}>
                 <span className="text-2xl">{pos.emoji}</span>
                 <div className="text-left">
@@ -406,29 +472,57 @@ export default function SoccerPage() {
 
       {/* Game */}
       {phase==='play' && (
-        <div className="w-full max-w-2xl space-y-3 pt-2">
-          <div className="flex items-center justify-between">
-            <button onClick={() => setPhase('over')} className="text-white/40 text-xs font-semibold hover:text-white transition">✕ Quit</button>
-            <div className="flex items-center gap-4">
-              <span className="text-2xl font-black text-blue-400">{score.blue}</span>
-              <span className="text-white/30 font-black">—</span>
-              <span className="text-2xl font-black text-red-400">{score.red}</span>
-            </div>
-            <div className={`font-black text-sm px-3 py-1 rounded-full ${timeLeft<=15?'text-red-400 bg-red-400/15':'text-white/60'}`}>
-              {Math.floor(timeLeft/60)}:{String(timeLeft%60).padStart(2,'0')}
-            </div>
-          </div>
-          <canvas ref={canvasRef} width={W} height={H}
-            className="w-full rounded-2xl touch-none"
-            style={{maxHeight:'62vh',objectFit:'contain'}} />
+        <div ref={wrapperRef} className="w-full max-w-3xl space-y-2 pt-1">
+          {/* HUD */}
           <div className="flex items-center justify-between px-1">
-            <p className="text-white/30 text-xs">WASD / arrow keys · drag on mobile</p>
-            {lastGoal && (
-              <p className={`text-sm font-black animate-bounce ${lastGoal==='blue'?'text-blue-400':'text-red-400'}`}>
-                {lastGoal==='blue'?'🎉 GOAL! You scored!':'😤 Red scores!'}
-              </p>
-            )}
+            <button onClick={() => setPhase('over')} className="text-white/40 text-xs font-semibold hover:text-white transition px-2 py-1">✕ Quit</button>
+            <div className="flex items-center gap-5">
+              <span className="text-3xl font-black text-blue-400">{score.blue}</span>
+              <span className="text-white/20 font-black text-xl">—</span>
+              <span className="text-3xl font-black text-red-400">{score.red}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className={`font-black text-sm px-3 py-1 rounded-full ${timeLeft<=15?'text-red-400 bg-red-400/15':'text-white/60 bg-white/5'}`}>
+                {Math.floor(timeLeft/60)}:{String(timeLeft%60).padStart(2,'0')}
+              </div>
+              <button onClick={toggleFullscreen}
+                className="text-white/40 hover:text-white text-lg px-2 py-1 rounded-lg hover:bg-white/10 transition"
+                title="Fullscreen">⛶</button>
+            </div>
           </div>
+
+          <canvas ref={canvasRef} width={W} height={H}
+            className="w-full rounded-2xl touch-none block"
+            style={{maxHeight:'58vh', objectFit:'contain'}} />
+
+          {/* Goal flash */}
+          {lastGoal && (
+            <div className={`text-center py-1 font-black text-sm animate-bounce ${lastGoal==='blue'?'text-blue-400':'text-red-400'}`}>
+              {lastGoal==='blue' ? '🎉 GOAL! Blue scores!' : '😤 Red scores!'}
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="flex gap-3 px-1 pb-2">
+            <button
+              onPointerDown={startSprint} onPointerUp={stopSprint} onPointerLeave={stopSprint}
+              className="flex-1 py-5 rounded-2xl font-black text-white text-lg bg-indigo-600/70 hover:bg-indigo-500/80 border border-indigo-400/30 active:scale-95 transition-all select-none touch-none"
+            >
+              💨 Dribble
+            </button>
+            <button
+              onPointerDown={triggerShoot}
+              className={`flex-1 py-5 rounded-2xl font-black text-lg border active:scale-95 transition-all select-none touch-none ${
+                hasBall
+                  ? 'bg-green-500/80 hover:bg-green-400/80 border-green-400/40 text-white'
+                  : 'bg-white/8 border-white/10 text-white/30'
+              }`}
+            >
+              ⚽ Shoot
+            </button>
+          </div>
+
+          <p className="text-white/25 text-xs text-center pb-1">WASD/arrows to move · Space = shoot · Shift = sprint</p>
         </div>
       )}
 
