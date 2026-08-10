@@ -28,6 +28,8 @@ interface GS {
   animFrame: number | null; timerInterval: ReturnType<typeof setInterval> | null
   stuckFrames: number; possessorId: number | null
   shootTrigger: boolean; sprintHeld: boolean
+  pickupCooldown: number  // frames ball can't be picked up after a kick
+  stealCooldown: number   // frames before another steal can happen
 }
 
 const BLUE_HOME: Record<Role,[number,number]> = {
@@ -68,10 +70,10 @@ function steerTo(p: Player, tx: number, ty: number, spd: number) {
   p.facingX = dx/d; p.facingY = dy/d
 }
 
-function doShoot(gs: GS, shooter: Player, power: number) {
+function doShoot(gs: GS, shooter: Player, power: number, aimX?: number, aimY?: number) {
   const isBlue = shooter.team === 'blue'
-  const goalCX  = isBlue ? GOAL_R.x + 5 : GOAL_L.x + GOAL_L.w - 5
-  const goalCY  = FY + FH/2 + (Math.random()-0.5) * GOAL_H * 0.45
+  const goalCX = aimX ?? (isBlue ? GOAL_R.x + 5 : GOAL_L.x + GOAL_L.w - 5)
+  const goalCY = aimY ?? FY + FH/2 + (Math.random()-0.5) * GOAL_H * 0.45
   const dx = goalCX - shooter.x, dy = goalCY - shooter.y
   const len = Math.hypot(dx, dy) || 1
   gs.ball.vx = dx/len * power
@@ -79,6 +81,8 @@ function doShoot(gs: GS, shooter: Player, power: number) {
   gs.ball.x  = shooter.x + dx/len * (CARRY_OFFSET + 4)
   gs.ball.y  = shooter.y + dy/len * (CARRY_OFFSET + 4)
   gs.possessorId = null
+  gs.pickupCooldown = 30  // 0.5s before anyone can pick up
+  gs.stealCooldown = 0
 }
 
 // ── Move user ──────────────────────────────────────────────────────────────
@@ -116,9 +120,12 @@ function moveUser(gs: GS) {
 function moveAI(gs: GS) {
   const bx = gs.ball.x, by = gs.ball.y
 
-  // Designated chaser per team (or the one with possession)
+  // When GK has ball: no chaser (GK will clear immediately, team holds)
+  // When field player has ball: that player is the chaser (they attack)
   const chaser: Record<string, number> = {}
   for (const team of ['blue', 'red'] as const) {
+    const gkHasBall = gs.players.some(p => p.id === gs.possessorId && p.team === team && p.role === 'GK')
+    if (gkHasBall) { chaser[team] = -1; continue }
     const withBall = gs.players.find(p => p.id === gs.possessorId && p.team === team && !p.isUser && p.role !== 'GK')
     if (withBall) { chaser[team] = withBall.id; continue }
     let minDist = Infinity, minId = -1
@@ -138,9 +145,16 @@ function moveAI(gs: GS) {
     let tx = home[0], ty = home[1], spd = PLAYER_SPEED * 0.88
 
     if (p.role === 'GK') {
-      tx = isBlue ? FX+40 : FX+FW-40
-      ty = Math.max(FY+GOAL_H/2, Math.min(FY+FH-GOAL_H/2, by))
-      if (Math.hypot(p.x-bx, p.y-by) < 85) { tx=bx; ty=by }
+      if (hasBall) {
+        // Clear immediately toward midfield — avoids oscillation bug
+        const midX = FX + FW/2 + (isBlue ? 60 : -60)
+        const midY = FY + FH/2 + (Math.random()-0.5)*100
+        doShoot(gs, p, AI_SHOOT_POWER * 0.75, midX, midY)
+      } else {
+        tx = isBlue ? FX+40 : FX+FW-40
+        ty = Math.max(FY+GOAL_H/2, Math.min(FY+FH-GOAL_H/2, by))
+        if (Math.hypot(p.x-bx, p.y-by) < 85) { tx=bx; ty=by }
+      }
     } else if (hasBall) {
       const goalX = isBlue ? FX+FW+20 : FX-20
       if (Math.hypot(p.x-goalX, p.y-(FY+FH/2)) < 230) {
@@ -165,22 +179,31 @@ function moveBall(gs: GS) {
   const b = gs.ball
   const cx = FX+FW/2, cy = FY+FH/2
 
+  gs.pickupCooldown = Math.max(0, gs.pickupCooldown - 1)
+  gs.stealCooldown  = Math.max(0, gs.stealCooldown  - 1)
+
   if (gs.possessorId !== null) {
     const p = gs.players.find(pl => pl.id === gs.possessorId)
     if (p) {
-      // Ball sticks in front of possessor
-      b.x = p.x + p.facingX * CARRY_OFFSET
-      b.y = p.y + p.facingY * CARRY_OFFSET
+      // Use velocity direction for carry if moving, else use stored facing
+      const sp = Math.hypot(p.vx, p.vy)
+      const fx = sp > 0.4 ? p.vx/sp : p.facingX
+      const fy = sp > 0.4 ? p.vy/sp : p.facingY
+      b.x = p.x + fx * CARRY_OFFSET
+      b.y = p.y + fy * CARRY_OFFSET
       b.vx = p.vx; b.vy = p.vy
 
-      // Steal: opponent overlaps the possessor
-      for (const opp of gs.players) {
-        if (opp.team === p.team) continue
-        if (Math.hypot(opp.x-p.x, opp.y-p.y) < PLAYER_R * 2 + 2) {
-          gs.possessorId = opp.id
-          opp.facingX = -p.facingX || 1
-          opp.facingY = -p.facingY
-          break
+      // Steal: opponent body-contacts possessor (with cooldown to prevent ping-pong)
+      if (gs.stealCooldown <= 0) {
+        for (const opp of gs.players) {
+          if (opp.team === p.team) continue
+          if (Math.hypot(opp.x-p.x, opp.y-p.y) < PLAYER_R * 2 + 2) {
+            gs.possessorId = opp.id
+            opp.facingX = -fx || 1
+            opp.facingY = -fy
+            gs.stealCooldown = 25
+            break
+          }
         }
       }
       return
@@ -194,10 +217,12 @@ function moveBall(gs: GS) {
   if (b.y-BALL_R < FY)    { b.y=FY+BALL_R;    b.vy= Math.max(3, Math.abs(b.vy)) }
   if (b.y+BALL_R > FY+FH) { b.y=FY+FH-BALL_R; b.vy=-Math.max(3, Math.abs(b.vy)) }
 
-  // First player to touch free ball gains possession
-  for (const p of gs.players) {
-    if (Math.hypot(b.x-p.x, b.y-p.y) < PLAYER_R+BALL_R) {
-      gs.possessorId = p.id; return
+  // First player to touch free ball gains possession (respect pickup cooldown)
+  if (gs.pickupCooldown <= 0) {
+    for (const p of gs.players) {
+      if (Math.hypot(b.x-p.x, b.y-p.y) < PLAYER_R+BALL_R) {
+        gs.possessorId = p.id; return
+      }
     }
   }
 
@@ -216,15 +241,39 @@ function moveBall(gs: GS) {
   b.vx*=BALL_FRICTION; b.vy*=BALL_FRICTION
 }
 
+function separatePlayers(gs: GS) {
+  const ps = gs.players
+  for (let i = 0; i < ps.length; i++) {
+    for (let j = i+1; j < ps.length; j++) {
+      const a = ps[i], b = ps[j]
+      const dx = b.x-a.x, dy = b.y-a.y
+      const d = Math.hypot(dx, dy)
+      const minD = PLAYER_R * 2 + 1
+      if (d < minD && d > 0) {
+        const push = (minD - d) * 0.5
+        const nx = dx/d, ny = dy/d
+        a.x -= nx*push; a.y -= ny*push
+        b.x += nx*push; b.y += ny*push
+        a.x = Math.max(FX+PLAYER_R, Math.min(FX+FW-PLAYER_R, a.x))
+        a.y = Math.max(FY+PLAYER_R, Math.min(FY+FH-PLAYER_R, a.y))
+        b.x = Math.max(FX+PLAYER_R, Math.min(FX+FW-PLAYER_R, b.x))
+        b.y = Math.max(FY+PLAYER_R, Math.min(FY+FH-PLAYER_R, b.y))
+      }
+    }
+  }
+}
+
 function checkGoal(gs: GS, onGoal: (t:'blue'|'red')=>void, userRole: Role) {
   const b = gs.ball
   if (b.x-BALL_R < GOAL_L.x+GOAL_L.w && b.y>GOAL_L.y && b.y<GOAL_L.y+GOAL_L.h) {
     gs.lastGoalTime=Date.now(); gs.score.red++
-    gs.players=makePlayers(userRole); gs.ball={x:W/2,y:H/2,vx:1,vy:0}; gs.possessorId=null; onGoal('red')
+    gs.players=makePlayers(userRole); gs.ball={x:W/2,y:H/2,vx:1,vy:0}
+    gs.possessorId=null; gs.pickupCooldown=0; gs.stealCooldown=0; onGoal('red')
   }
   if (b.x+BALL_R > GOAL_R.x && b.y>GOAL_R.y && b.y<GOAL_R.y+GOAL_R.h) {
     gs.lastGoalTime=Date.now(); gs.score.blue++
-    gs.players=makePlayers(userRole); gs.ball={x:W/2,y:H/2,vx:-1,vy:0}; gs.possessorId=null; onGoal('blue')
+    gs.players=makePlayers(userRole); gs.ball={x:W/2,y:H/2,vx:-1,vy:0}
+    gs.possessorId=null; gs.pickupCooldown=0; gs.stealCooldown=0; onGoal('blue')
   }
 }
 
@@ -363,6 +412,8 @@ export default function SoccerPage() {
       possessorId: null,
       shootTrigger: false,
       sprintHeld: false,
+      pickupCooldown: 0,
+      stealCooldown: 0,
     }
     gsRef.current = gs
 
@@ -413,6 +464,7 @@ export default function SoccerPage() {
       const paused = Date.now()-gs.lastGoalTime < 1800
       if (!paused) {
         moveUser(gs); moveAI(gs); moveBall(gs)
+        separatePlayers(gs)
         checkGoal(gs, onGoal, userRole)
         const user = gs.players.find(p => p.isUser)
         const nowHasBall = user ? gs.possessorId === user.id : false
