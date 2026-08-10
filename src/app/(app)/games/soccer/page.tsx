@@ -20,6 +20,7 @@ interface GS {
   players: Player[]; ball: Ball; keys: Set<string>; touch: Touch
   score: { blue: number; red: number }; timeLeft: number; lastGoalTime: number
   animFrame: number | null; timerInterval: ReturnType<typeof setInterval> | null
+  stuckFrames: number
 }
 
 const BLUE_HOME: Record<Role,[number,number]> = {
@@ -80,40 +81,38 @@ function moveUser(gs: GS) {
 }
 
 function moveAI(gs: GS) {
-  const midX = FX + FW / 2
+  const bx = gs.ball.x, by = gs.ball.y
+
+  // Only the single closest non-GK AI per team chases the ball
+  const chaser: Record<string, number> = {}
+  for (const team of ['blue', 'red'] as const) {
+    let minDist = Infinity, minId = -1
+    for (const p of gs.players) {
+      if (p.isUser || p.team !== team || p.role === 'GK') continue
+      const d = Math.hypot(p.x - bx, p.y - by)
+      if (d < minDist) { minDist = d; minId = p.id }
+    }
+    chaser[team] = minId
+  }
+
   for (const p of gs.players) {
     if (p.isUser) continue
     const isBlue = p.team === 'blue'
     const home = isBlue ? BLUE_HOME[p.role] : RED_HOME[p.role]
-    const bx = gs.ball.x, by = gs.ball.y
-    const dist = Math.hypot(p.x - bx, p.y - by)
     let tx = home[0], ty = home[1]
 
     if (p.role === 'GK') {
-      // Hug goal line, track ball vertically, only charge if ball very close
+      // Hug goal line, track ball on y, only rush if ball very close
       tx = isBlue ? FX + 35 : FX + FW - 35
       ty = Math.max(FY + GOAL_H / 2, Math.min(FY + FH - GOAL_H / 2, by))
-      if (dist < 75) { tx = bx; ty = by }
-    } else if (p.role === 'LB' || p.role === 'RB') {
-      // Defenders stay in their defensive half; chase only when ball is in that half and close
-      const ballInDefHalf = isBlue ? bx < midX + 60 : bx > midX - 60
-      if (ballInDefHalf && dist < 130) {
-        tx = bx; ty = by
-      } else {
-        // Stay home but drift slightly toward ball on y-axis
-        tx = home[0]
-        ty = home[1] + (by - home[1]) * 0.25
-      }
+      if (Math.hypot(p.x - bx, p.y - by) < 70) { tx = bx; ty = by }
+    } else if (p.id === chaser[p.team]) {
+      // The designated chaser goes for the ball
+      tx = bx; ty = by
     } else {
-      // Strikers (LW/RW): only chase when ball is in offensive half
-      const ballInAttHalf = isBlue ? bx > midX - 80 : bx < midX + 80
-      if (ballInAttHalf) {
-        tx = bx; ty = by
-      } else {
-        // Hold at home, slight y drift
-        tx = home[0]
-        ty = home[1] + (by - home[1]) * 0.15
-      }
+      // Everyone else holds their home position with slight y tracking
+      tx = home[0]
+      ty = home[1] + (by - home[1]) * 0.18
     }
 
     steerTo(p, tx, ty, PLAYER_SPEED * 0.88)
@@ -124,26 +123,41 @@ function moveAI(gs: GS) {
 
 function moveBall(gs: GS) {
   const b = gs.ball
-  const MIN_BOUNCE = 2.0
-  if (b.x-BALL_R < FX)    { b.x=FX+BALL_R;    b.vx= Math.max(MIN_BOUNCE, Math.abs(b.vx)*0.75) }
-  if (b.x+BALL_R > FX+FW) { b.x=FX+FW-BALL_R; b.vx=-Math.max(MIN_BOUNCE, Math.abs(b.vx)*0.75) }
-  if (b.y-BALL_R < FY)    { b.y=FY+BALL_R;    b.vy= Math.max(MIN_BOUNCE, Math.abs(b.vy)*0.75) }
-  if (b.y+BALL_R > FY+FH) { b.y=FY+FH-BALL_R; b.vy=-Math.max(MIN_BOUNCE, Math.abs(b.vy)*0.75) }
+  const cx = FX + FW / 2, cy = FY + FH / 2
+
+  // Wall bounces — always push away from wall with minimum speed
+  if (b.x - BALL_R < FX)    { b.x = FX + BALL_R;    b.vx =  Math.max(3, Math.abs(b.vx)) }
+  if (b.x + BALL_R > FX+FW) { b.x = FX+FW - BALL_R; b.vx = -Math.max(3, Math.abs(b.vx)) }
+  if (b.y - BALL_R < FY)    { b.y = FY + BALL_R;    b.vy =  Math.max(3, Math.abs(b.vy)) }
+  if (b.y + BALL_R > FY+FH) { b.y = FY+FH - BALL_R; b.vy = -Math.max(3, Math.abs(b.vy)) }
+
   for (const p of gs.players) {
-    const dx=b.x-p.x, dy=b.y-p.y, d=Math.hypot(dx,dy)
-    if (d < PLAYER_R+BALL_R && d > 0) {
-      const nx=dx/d, ny=dy/d
-      const spd = Math.max(KICK_POWER, Math.hypot(p.vx,p.vy)*1.5+4)
-      b.vx=nx*spd; b.vy=ny*spd
-      b.x=p.x+nx*(PLAYER_R+BALL_R+2); b.y=p.y+ny*(PLAYER_R+BALL_R+2)
+    const dx = b.x - p.x, dy = b.y - p.y, d = Math.hypot(dx, dy)
+    if (d < PLAYER_R + BALL_R && d > 0) {
+      const nx = dx / d, ny = dy / d
+      const spd = Math.max(KICK_POWER, Math.hypot(p.vx, p.vy) * 1.5 + 4)
+      b.vx = nx * spd; b.vy = ny * spd
+      b.x = p.x + nx * (PLAYER_R + BALL_R + 2)
+      b.y = p.y + ny * (PLAYER_R + BALL_R + 2)
     }
   }
-  // Anti-stuck: nudge if nearly motionless
-  if (Math.hypot(b.vx,b.vy) < 0.4) {
-    b.vx += (Math.random()-0.5)*2.5
-    b.vy += (Math.random()-0.5)*2.5
+
+  // Stuck detection: if ball barely moves for ~1s (60 frames), kick it toward center
+  if (Math.hypot(b.vx, b.vy) < 0.6) {
+    gs.stuckFrames++
+    if (gs.stuckFrames > 60) {
+      const toCx = cx - b.x, toCy = cy - b.y
+      const len = Math.hypot(toCx, toCy) || 1
+      b.vx = (toCx / len) * 7 + (Math.random() - 0.5) * 3
+      b.vy = (toCy / len) * 7 + (Math.random() - 0.5) * 3
+      gs.stuckFrames = 0
+    }
+  } else {
+    gs.stuckFrames = 0
   }
-  b.x+=b.vx; b.y+=b.vy; b.vx*=BALL_FRICTION; b.vy*=BALL_FRICTION
+
+  b.x += b.vx; b.y += b.vy
+  b.vx *= BALL_FRICTION; b.vy *= BALL_FRICTION
 }
 
 function checkGoal(gs: GS, onGoal: (team:'blue'|'red', userRole: Role) => void, userRole: Role) {
@@ -283,6 +297,7 @@ export default function SoccerPage() {
       lastGoalTime: 0,
       animFrame: null,
       timerInterval: null,
+      stuckFrames: 0,
     }
     gsRef.current = gs
 
