@@ -330,13 +330,19 @@ function checkGoal(gs: GS, onGoal: (t:'blue'|'red')=>void, userRole: Role) {
   const b = gs.ball
   if (b.x-BALL_R < GOAL_L.x+GOAL_L.w && b.y>GOAL_L.y && b.y<GOAL_L.y+GOAL_L.h) {
     gs.lastGoalTime=Date.now(); gs.score.red++
-    gs.players=makePlayers(userRole); gs.ball={x:W/2,y:H/2,vx:1,vy:0}
-    gs.possessorId=null; gs.pickupCooldown=0; onGoal('red')
+    gs.players=makePlayers(userRole); gs.ball={x:W/2,y:H/2,vx:0,vy:0}
+    gs.possessorId=null; gs.pickupCooldown=80
+    // Red scored → Blue concedes → Blue kicks off: lock Red out so Blue reaches ball first
+    for (const pl of gs.players) if (pl.team === 'red') pl.stealLock = 120
+    onGoal('red')
   }
   if (b.x+BALL_R > GOAL_R.x && b.y>GOAL_R.y && b.y<GOAL_R.y+GOAL_R.h) {
     gs.lastGoalTime=Date.now(); gs.score.blue++
-    gs.players=makePlayers(userRole); gs.ball={x:W/2,y:H/2,vx:-1,vy:0}
-    gs.possessorId=null; gs.pickupCooldown=0; onGoal('blue')
+    gs.players=makePlayers(userRole); gs.ball={x:W/2,y:H/2,vx:0,vy:0}
+    gs.possessorId=null; gs.pickupCooldown=80
+    // Blue scored → Red concedes → Red kicks off: lock Blue out so Red reaches ball first
+    for (const pl of gs.players) if (pl.team === 'blue') pl.stealLock = 120
+    onGoal('blue')
   }
 }
 
@@ -469,7 +475,7 @@ export default function SoccerPage() {
 
     const gs: GS = {
       players: makePlayers(userRole),
-      ball: { x:W/2, y:H/2, vx:1, vy:0 },
+      ball: { x:W/2, y:H/2, vx:0, vy:0 },
       keys: new Set(),
       touch: { active:false, startX:0, startY:0, dx:0, dy:0 },
       score: { blue:0, red:0 },
@@ -481,7 +487,7 @@ export default function SoccerPage() {
       possessorId: null,
       shootTrigger: false,
       dribbleFrames: 0,
-      pickupCooldown: 0,
+      pickupCooldown: 80,
     }
     gsRef.current = gs
 
