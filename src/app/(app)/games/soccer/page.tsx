@@ -270,6 +270,20 @@ function moveBall(gs: GS) {
   if (b.y-BALL_R < FY)    { b.y=FY+BALL_R;    b.vy= Math.max(5, Math.abs(b.vy)) }
   if (b.y+BALL_R > FY+FH) { b.y=FY+FH-BALL_R; b.vy=-Math.max(5, Math.abs(b.vy)) }
 
+  // GK save: runs BEFORE pickupCooldown/stealLock so shots can always be caught
+  for (const p of gs.players) {
+    if (p.role !== 'GK') continue
+    if (Math.hypot(b.x-p.x, b.y-p.y) < PLAYER_R+BALL_R+4) {
+      p.carryFrames = 0
+      gs.possessorId = p.id
+      gs.pickupCooldown = 0
+      for (const opp of gs.players) {
+        if (opp.team !== p.team) opp.stealLock = Math.max(opp.stealLock, 200)
+      }
+      return
+    }
+  }
+
   // First player to touch free ball gains possession (respect pickup cooldown + stealLock)
   if (gs.pickupCooldown <= 0) {
     for (const p of gs.players) {
