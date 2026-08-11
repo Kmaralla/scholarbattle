@@ -14,6 +14,27 @@ const SHOOT_POWER = 22, AI_SHOOT_POWER = 17
 const CARRY_OFFSET = PLAYER_R + BALL_R + 1
 const GAME_DURATION = 90
 
+interface Country {
+  id: string; name: string; flag: string
+  primary: string; secondary: string; textColor: string
+}
+const COUNTRIES: Country[] = [
+  { id:'brazil',      name:'Brazil',      flag:'🇧🇷', primary:'#ca8a04', secondary:'#15803d', textColor:'#111' },
+  { id:'argentina',   name:'Argentina',   flag:'🇦🇷', primary:'#38bdf8', secondary:'#e0f2fe', textColor:'#111' },
+  { id:'portugal',    name:'Portugal',    flag:'🇵🇹', primary:'#991b1b', secondary:'#15803d', textColor:'white' },
+  { id:'france',      name:'France',      flag:'🇫🇷', primary:'#1e3a8a', secondary:'#bfdbfe', textColor:'white' },
+  { id:'netherlands', name:'Netherlands', flag:'🇳🇱', primary:'#ea580c', secondary:'#1e3a8a', textColor:'white' },
+  { id:'italy',       name:'Italy',       flag:'🇮🇹', primary:'#0284c7', secondary:'#e0f2fe', textColor:'white' },
+  { id:'germany',     name:'Germany',     flag:'🇩🇪', primary:'#d4d4d8', secondary:'#18181b', textColor:'#111' },
+  { id:'mexico',      name:'Mexico',      flag:'🇲🇽', primary:'#15803d', secondary:'#ef4444', textColor:'white' },
+  { id:'spain',       name:'Spain',       flag:'🇪🇸', primary:'#dc2626', secondary:'#fbbf24', textColor:'white' },
+  { id:'england',     name:'England',     flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', primary:'#f1f5f9', secondary:'#dc2626', textColor:'#111' },
+]
+function hexToRgba(hex: string, alpha: number) {
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16)
+  return `rgba(${r},${g},${b},${alpha})`
+}
+
 type Role = 'GK' | 'LB' | 'RB' | 'LW' | 'RW'
 interface Player {
   id: number; team: 'blue'|'red'; role: Role
@@ -361,7 +382,7 @@ function checkGoal(gs: GS, onGoal: (t:'blue'|'red')=>void, userRole: Role) {
 }
 
 // ── Draw ───────────────────────────────────────────────────────────────────
-function draw(ctx: CanvasRenderingContext2D, gs: GS) {
+function draw(ctx: CanvasRenderingContext2D, gs: GS, blueCountry: Country, redCountry: Country) {
   ctx.clearRect(0, 0, W, H)
   ctx.fillStyle = '#080518'; ctx.fillRect(0, 0, W, H)
 
@@ -407,12 +428,12 @@ function draw(ctx: CanvasRenderingContext2D, gs: GS) {
   ctx.beginPath(); ctx.arc(FX,      FY + FH, 13, 3*Math.PI/2, 2*Math.PI);       ctx.stroke()
 
   // ── Goals ──
-  const drawGoal = (g: {x:number,y:number,w:number,h:number}, left: boolean) => {
+  const drawGoal = (g: {x:number,y:number,w:number,h:number}, left: boolean, country: Country) => {
     // Net fill
-    ctx.fillStyle = left ? 'rgba(59,130,246,0.1)' : 'rgba(239,68,68,0.1)'
+    ctx.fillStyle = hexToRgba(country.primary, 0.12)
     ctx.fillRect(g.x, g.y, g.w, g.h)
     // Net grid
-    ctx.strokeStyle = left ? 'rgba(100,160,255,0.25)' : 'rgba(255,120,120,0.25)'; ctx.lineWidth = 0.8
+    ctx.strokeStyle = hexToRgba(country.primary, 0.28); ctx.lineWidth = 0.8
     for (let i=1;i<6;i++){const x=g.x+i*g.w/6;ctx.beginPath();ctx.moveTo(x,g.y);ctx.lineTo(x,g.y+g.h);ctx.stroke()}
     for (let i=1;i<5;i++){const y=g.y+i*g.h/5;ctx.beginPath();ctx.moveTo(g.x,y);ctx.lineTo(g.x+g.w,y);ctx.stroke()}
     // Posts
@@ -422,25 +443,26 @@ function draw(ctx: CanvasRenderingContext2D, gs: GS) {
     else     { ctx.moveTo(g.x,g.y);     ctx.lineTo(g.x+g.w,g.y); ctx.lineTo(g.x+g.w,g.y+g.h); ctx.lineTo(g.x,g.y+g.h) }
     ctx.stroke()
     // Goal-line accent
-    ctx.strokeStyle = left ? 'rgba(99,179,237,0.8)' : 'rgba(252,129,129,0.8)'; ctx.lineWidth = 2.5
+    ctx.strokeStyle = hexToRgba(country.primary, 0.9); ctx.lineWidth = 2.5
     ctx.beginPath()
     if (left){ ctx.moveTo(g.x+g.w, g.y); ctx.lineTo(g.x+g.w, g.y+g.h) }
     else     { ctx.moveTo(g.x,     g.y); ctx.lineTo(g.x,     g.y+g.h) }
     ctx.stroke()
   }
-  drawGoal(GOAL_L, true); drawGoal(GOAL_R, false)
+  drawGoal(GOAL_L, true, blueCountry); drawGoal(GOAL_R, false, redCountry)
 
   // Team labels
   ctx.font = 'bold 11px sans-serif'; ctx.textBaseline = 'top'
-  ctx.fillStyle = 'rgba(147,197,253,0.65)'; ctx.textAlign = 'left';  ctx.fillText('◀ BLUE', FX + 6, FY + 7)
-  ctx.fillStyle = 'rgba(252,165,165,0.65)'; ctx.textAlign = 'right'; ctx.fillText('RED ▶',  FX + FW - 6, FY + 7)
+  ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.textAlign = 'left';  ctx.fillText(`◀ ${blueCountry.flag} ${blueCountry.name}`, FX + 6, FY + 7)
+  ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.textAlign = 'right'; ctx.fillText(`${redCountry.name} ${redCountry.flag} ▶`,  FX + FW - 6, FY + 7)
 
   // ── Players ──
   for (const p of gs.players) {
     const hasBall = gs.possessorId === p.id
     const isBlue  = p.team === 'blue'
-    const col     = isBlue ? '#2563eb' : '#dc2626'
-    const border  = isBlue ? '#93c5fd' : '#fca5a5'
+    const country = isBlue ? blueCountry : redCountry
+    const col     = country.primary
+    const border  = country.secondary
 
     // Drop shadow
     ctx.fillStyle = 'rgba(0,0,0,0.35)'
@@ -469,7 +491,7 @@ function draw(ctx: CanvasRenderingContext2D, gs: GS) {
     ctx.beginPath(); ctx.arc(p.x - 3, p.y - 3, PLAYER_R * 0.48, 0, Math.PI*2); ctx.fill()
 
     // Role label
-    ctx.fillStyle = 'white'; ctx.font = 'bold 8px sans-serif'
+    ctx.fillStyle = country.textColor; ctx.font = 'bold 8px sans-serif'
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
     ctx.fillText(p.role, p.x, p.y)
 
@@ -521,17 +543,21 @@ function draw(ctx: CanvasRenderingContext2D, gs: GS) {
 // ── Page component ─────────────────────────────────────────────────────────
 export default function SoccerPage() {
   const router = useRouter()
-  const [phase, setPhase] = useState<'pick'|'play'|'over'>('pick')
+  const [phase, setPhase] = useState<'country'|'pick'|'play'|'over'>('country')
   const [userRole, setUserRole] = useState<Role>('LW')
+  const [userCountry, setUserCountry] = useState<Country>(COUNTRIES[0])
+  const [oppCountry, setOppCountry]   = useState<Country>(COUNTRIES[1])
   const [score, setScore] = useState({blue:0, red:0})
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [lastGoal, setLastGoal] = useState<'blue'|'red'|null>(null)
   const [hasBall, setHasBall] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const canvasRef  = useRef<HTMLCanvasElement>(null)
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  const gsRef      = useRef<GS | null>(null)
-  const hasBallRef = useRef(false)
+  const canvasRef       = useRef<HTMLCanvasElement>(null)
+  const wrapperRef      = useRef<HTMLDivElement>(null)
+  const gsRef           = useRef<GS | null>(null)
+  const hasBallRef      = useRef(false)
+  const blueCountryRef  = useRef<Country>(COUNTRIES[0])
+  const redCountryRef   = useRef<Country>(COUNTRIES[1])
 
   useEffect(() => {
     const onFull = () => setIsFullscreen(!!document.fullscreenElement)
@@ -540,9 +566,14 @@ export default function SoccerPage() {
   }, [])
 
   const startGame = useCallback((role: Role) => {
+    const others = COUNTRIES.filter(c => c.id !== userCountry.id)
+    const opp = others[Math.floor(Math.random() * others.length)]
+    setOppCountry(opp)
+    blueCountryRef.current = userCountry
+    redCountryRef.current  = opp
     setUserRole(role); setScore({blue:0,red:0}); setTimeLeft(GAME_DURATION)
     setLastGoal(null); setHasBall(false); setPhase('play')
-  }, [])
+  }, [userCountry])
 
   function toggleFullscreen() {
     if (!document.fullscreenElement) wrapperRef.current?.requestFullscreen()
@@ -626,7 +657,7 @@ export default function SoccerPage() {
         const nowHasBall = user ? gs.possessorId === user.id : false
         if (nowHasBall !== hasBallRef.current) { hasBallRef.current = nowHasBall; setHasBall(nowHasBall) }
       }
-      draw(ctx, gs)
+      draw(ctx, gs, blueCountryRef.current, redCountryRef.current)
       gs.animFrame = requestAnimationFrame(loop)
     }
     gs.animFrame = requestAnimationFrame(loop)
@@ -646,13 +677,47 @@ export default function SoccerPage() {
   return (
     <div className="flex flex-col items-center min-h-screen p-3" style={{background:'linear-gradient(135deg,#0f0a2e,#1a1040)'}}>
 
-      {/* Position picker */}
-      {phase==='pick' && (
+      {/* Country picker */}
+      {phase==='country' && (
         <div className="w-full max-w-md space-y-4 pt-4">
           <button onClick={() => router.back()} className="text-white/40 text-sm font-semibold hover:text-white transition">← Back</button>
           <div className="text-center space-y-1">
             <div className="text-5xl">⚽</div>
             <h1 className="text-2xl font-black text-white">ScholarBattle Soccer</h1>
+            <p className="text-white/50 text-sm">Pick your country</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {COUNTRIES.map(c => (
+              <button key={c.id} onClick={() => setUserCountry(c)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all"
+                style={userCountry.id===c.id
+                  ? { border: `1.5px solid ${c.primary}`, background: c.primary + '28', color: 'white' }
+                  : { border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)' }
+                }>
+                <span className="text-2xl leading-none">{c.flag}</span>
+                <div className="flex-1 text-left">
+                  <p className="font-bold text-sm leading-tight">{c.name}</p>
+                </div>
+                <div className="w-4 h-4 rounded-full border border-white/20 shrink-0" style={{background: c.primary}} />
+                {userCountry.id===c.id && <span className="text-xs font-black">✓</span>}
+              </button>
+            ))}
+          </div>
+          <button onClick={() => setPhase('pick')}
+            className="w-full py-4 rounded-2xl font-black text-white text-lg active:scale-95 transition-all"
+            style={{background:'linear-gradient(135deg,#6366f1,#4338ca)'}}>
+            Choose Position →
+          </button>
+        </div>
+      )}
+
+      {/* Position picker */}
+      {phase==='pick' && (
+        <div className="w-full max-w-md space-y-4 pt-4">
+          <button onClick={() => setPhase('country')} className="text-white/40 text-sm font-semibold hover:text-white transition">← Back</button>
+          <div className="text-center space-y-1">
+            <div className="text-5xl">{userCountry.flag}</div>
+            <h1 className="text-2xl font-black text-white">{userCountry.name}</h1>
             <p className="text-white/50 text-sm">5v5 · Choose your position</p>
           </div>
           <div className="space-y-2">
@@ -688,14 +753,14 @@ export default function SoccerPage() {
             <div className="flex items-center gap-3">
               <div className="text-right">
                 <div className="text-2xl font-black text-blue-400 leading-none">{score.blue}</div>
-                <div className="text-[10px] text-blue-400/50 font-bold">YOU</div>
+                <div className="text-[10px] text-blue-400/50 font-bold">{userCountry.flag} YOU</div>
               </div>
               <div className={`px-4 py-1 rounded-xl border font-black text-sm tabular-nums ${timeLeft<=15?'border-red-500/50 bg-red-500/15 text-red-400':'border-white/10 bg-white/5 text-white/70'}`}>
                 {Math.floor(timeLeft/60)}:{String(timeLeft%60).padStart(2,'0')}
               </div>
               <div className="text-left">
                 <div className="text-2xl font-black text-red-400 leading-none">{score.red}</div>
-                <div className="text-[10px] text-red-400/50 font-bold">RED</div>
+                <div className="text-[10px] text-red-400/50 font-bold">{oppCountry.flag} OPP</div>
               </div>
             </div>
             <button onClick={toggleFullscreen} className="text-white/30 hover:text-white/70 text-lg px-2 py-1 transition" title="Fullscreen">⛶</button>
@@ -717,7 +782,7 @@ export default function SoccerPage() {
           {/* Goal flash */}
           {lastGoal && (
             <div className={`text-center py-0.5 font-black text-sm tracking-wide ${lastGoal==='blue'?'text-blue-300':'text-red-300'}`}>
-              {lastGoal==='blue' ? '🎉 GOAL — Blue scores!' : '💥 GOAL — Red scores!'}
+              {lastGoal==='blue' ? `🎉 GOAL — ${userCountry.flag} ${userCountry.name} scores!` : `💥 GOAL — ${oppCountry.flag} ${oppCountry.name} scores!`}
             </div>
           )}
 
@@ -750,12 +815,18 @@ export default function SoccerPage() {
         <div className="w-full max-w-sm space-y-5 pt-8 text-center">
           <div className="text-6xl">{score.blue>score.red?'🏆':score.blue===score.red?'🤝':'😤'}</div>
           <h2 className="text-2xl font-black text-white">
-            {score.blue>score.red?'You Won!':score.blue===score.red?"It's a Draw!":'Red Wins!'}
+            {score.blue>score.red?`${userCountry.flag} You Won!`:score.blue===score.red?"It's a Draw!":score.red>score.blue?`${oppCountry.flag} They Win!`:''}
           </h2>
           <div className="flex justify-center gap-8">
-            <div><p className="text-5xl font-black text-blue-400">{score.blue}</p><p className="text-xs text-white/40 mt-1">Blue (You)</p></div>
+            <div>
+              <p className="text-5xl font-black text-blue-400">{score.blue}</p>
+              <p className="text-xs text-white/40 mt-1">{userCountry.flag} {userCountry.name}</p>
+            </div>
             <div className="text-2xl font-black text-white/20 self-center">—</div>
-            <div><p className="text-5xl font-black text-red-400">{score.red}</p><p className="text-xs text-white/40 mt-1">Red</p></div>
+            <div>
+              <p className="text-5xl font-black text-red-400">{score.red}</p>
+              <p className="text-xs text-white/40 mt-1">{oppCountry.flag} {oppCountry.name}</p>
+            </div>
           </div>
           <div className="flex gap-3 pt-2">
             <button onClick={() => startGame(userRole)}
@@ -765,10 +836,11 @@ export default function SoccerPage() {
             </button>
             <button onClick={() => setPhase('pick')}
               className="flex-1 py-3 rounded-2xl border border-white/15 text-white/70 font-bold text-sm hover:bg-white/5 transition">
-              Change Position
+              Position
             </button>
           </div>
-          <button onClick={() => router.back()} className="text-white/30 text-sm hover:text-white transition">Back to Games</button>
+          <button onClick={() => setPhase('country')} className="text-white/40 text-sm hover:text-white transition">Change Country</button>
+          <button onClick={() => router.back()} className="text-white/30 text-sm hover:text-white transition block mx-auto mt-1">Back to Games</button>
         </div>
       )}
     </div>
