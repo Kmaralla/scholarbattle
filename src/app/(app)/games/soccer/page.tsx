@@ -560,7 +560,7 @@ export default function SoccerPage() {
 
       {/* Game */}
       {phase==='play' && (
-        <div ref={wrapperRef} className={isFullscreen ? 'w-full h-screen flex flex-col p-2 gap-1' : 'w-full max-w-3xl space-y-2 pt-1'}
+        <div ref={wrapperRef} className={isFullscreen ? 'w-full h-screen flex flex-col p-2 gap-1' : 'w-full space-y-2 pt-1'}
           style={isFullscreen ? {background:'#08051c'} : {}}>
           {/* HUD */}
           <div className="flex items-center justify-between px-1">
@@ -584,7 +584,7 @@ export default function SoccerPage() {
             className="touch-none block"
             style={isFullscreen
               ? { flex: 1, minHeight: 0, width: '100%', height: '100%', objectFit: 'contain' }
-              : { width: '100%', maxHeight: '62vh', objectFit: 'contain', borderRadius: '1rem' }
+              : { width: '100%', height: 'auto', borderRadius: '1rem', display: 'block' }
             } />
 
           {/* Goal flash */}
