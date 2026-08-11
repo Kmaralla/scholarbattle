@@ -84,10 +84,11 @@ function doShoot(gs: GS, shooter: Player, power: number, aimX?: number, aimY?: n
   gs.ball.y  = shooter.y + dy/len * (CARRY_OFFSET + 4)
   gs.possessorId = null
   gs.pickupCooldown = 90  // ball must travel far before anyone can pick up
-  // Refresh opponent stealLock from the moment of the shot so they can't
-  // instantly grab the rebound — they stay locked for 120 frames after shot
+  // Lock opponent for 120 frames AFTER the ball is free (not just 120 from shot).
+  // Previously max(current,120) left only 30 frames of exclusive pickup window after
+  // the 90-frame cooldown — the GK standing at the goal grabbed it instantly.
   for (const pl of gs.players) {
-    if (pl.team !== shooter.team) pl.stealLock = Math.max(pl.stealLock, 120)
+    if (pl.team !== shooter.team) pl.stealLock = Math.max(pl.stealLock, 90 + 120)
   }
 }
 
