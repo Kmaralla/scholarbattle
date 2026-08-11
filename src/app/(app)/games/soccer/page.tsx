@@ -201,13 +201,16 @@ function moveBall(gs: GS) {
       b.y = p.y + fy * CARRY_OFFSET
       b.vx = p.vx; b.vy = p.vy
 
-      // Steal: opponent body-contacts possessor; but the player who JUST lost
-      // the ball has a personal lock so they can't immediately steal back.
+      // Steal: opponent body-contacts possessor.
+      // Lock the ENTIRE losing team so no teammate can immediately steal back
+      // (the single-player lock let a different nearby teammate still steal on frame+1).
       for (const opp of gs.players) {
         if (opp.team === p.team) continue
         if (opp.stealLock > 0) continue
         if (Math.hypot(opp.x-p.x, opp.y-p.y) < PLAYER_R * 2 + 2) {
-          p.stealLock = 75   // ~1.25s before the previous holder can steal back
+          for (const loser of gs.players) {
+            if (loser.team === p.team) loser.stealLock = 80  // ~1.3s no steal for whole team
+          }
           gs.possessorId = opp.id
           opp.facingX = -fx || 1
           opp.facingY = -fy
