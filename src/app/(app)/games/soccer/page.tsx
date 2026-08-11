@@ -165,7 +165,14 @@ function moveAI(gs: GS) {
     } else if (p.id === chaser[p.team]) {
       tx = bx; ty = by
     } else {
-      ty = home[1] + (by-home[1])*0.18
+      // Hold home position; actively move away if ball is too close
+      const distToBall = Math.hypot(p.x-bx, p.y-by)
+      if (distToBall < 55) {
+        const awayX = p.x-bx, awayY = p.y-by
+        const al = Math.hypot(awayX,awayY)||1
+        tx = p.x + (awayX/al) * (55-distToBall+10)
+        ty = p.y + (awayY/al) * (55-distToBall+10)
+      }
     }
 
     steerTo(p, tx, ty, spd)
@@ -243,21 +250,24 @@ function moveBall(gs: GS) {
 
 function separatePlayers(gs: GS) {
   const ps = gs.players
-  for (let i = 0; i < ps.length; i++) {
-    for (let j = i+1; j < ps.length; j++) {
-      const a = ps[i], b = ps[j]
-      const dx = b.x-a.x, dy = b.y-a.y
-      const d = Math.hypot(dx, dy)
-      const minD = PLAYER_R * 2 + 1
-      if (d < minD && d > 0) {
-        const push = (minD - d) * 0.5
-        const nx = dx/d, ny = dy/d
-        a.x -= nx*push; a.y -= ny*push
-        b.x += nx*push; b.y += ny*push
-        a.x = Math.max(FX+PLAYER_R, Math.min(FX+FW-PLAYER_R, a.x))
-        a.y = Math.max(FY+PLAYER_R, Math.min(FY+FH-PLAYER_R, a.y))
-        b.x = Math.max(FX+PLAYER_R, Math.min(FX+FW-PLAYER_R, b.x))
-        b.y = Math.max(FY+PLAYER_R, Math.min(FY+FH-PLAYER_R, b.y))
+  const minD = PLAYER_R * 2 + 2
+  // Run multiple iterations so dense clusters fully resolve each frame
+  for (let iter = 0; iter < 4; iter++) {
+    for (let i = 0; i < ps.length; i++) {
+      for (let j = i+1; j < ps.length; j++) {
+        const a = ps[i], b = ps[j]
+        const dx = b.x-a.x, dy = b.y-a.y
+        const d = Math.hypot(dx, dy)
+        if (d < minD && d > 0) {
+          const push = (minD - d) / 2
+          const nx = dx/d, ny = dy/d
+          a.x -= nx*push; a.y -= ny*push
+          b.x += nx*push; b.y += ny*push
+          a.x = Math.max(FX+PLAYER_R, Math.min(FX+FW-PLAYER_R, a.x))
+          a.y = Math.max(FY+PLAYER_R, Math.min(FY+FH-PLAYER_R, a.y))
+          b.x = Math.max(FX+PLAYER_R, Math.min(FX+FW-PLAYER_R, b.x))
+          b.y = Math.max(FY+PLAYER_R, Math.min(FY+FH-PLAYER_R, b.y))
+        }
       }
     }
   }
