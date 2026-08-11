@@ -246,7 +246,7 @@ function moveBall(gs: GS) {
       // (the single-player lock let a different nearby teammate still steal on frame+1).
       for (const opp of gs.players) {
         if (opp.team === p.team) continue
-        if (opp.stealLock > 0) continue
+        if (opp.stealLock > 0 && !opp.isUser) continue
         if (Math.hypot(opp.x-p.x, opp.y-p.y) < PLAYER_R * 2 + 2) {
           for (const loser of gs.players) {
             if (loser.team === p.team) loser.stealLock = 200
