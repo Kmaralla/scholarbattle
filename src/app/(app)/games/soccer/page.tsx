@@ -3,14 +3,14 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
 // ── Constants ──────────────────────────────────────────────────────────────
-const W = 800, H = 530
-const FX = 65, FY = 45, FW = 670, FH = 440
-const GOAL_H = 120, GOAL_D = 52
+const W = 1400, H = 840
+const FX = 80, FY = 60, FW = 1240, FH = 720
+const GOAL_H = 200, GOAL_D = 85
 const GOAL_L = { x: FX - GOAL_D, y: FY + FH/2 - GOAL_H/2, w: GOAL_D, h: GOAL_H }
 const GOAL_R = { x: FX + FW,     y: FY + FH/2 - GOAL_H/2, w: GOAL_D, h: GOAL_H }
-const PLAYER_R = 14, BALL_R = 9
-const PLAYER_SPEED = 3.0, BALL_FRICTION = 0.96
-const SHOOT_POWER = 14, AI_SHOOT_POWER = 11
+const PLAYER_R = 18, BALL_R = 12
+const PLAYER_SPEED = 4.5, BALL_FRICTION = 0.965
+const SHOOT_POWER = 22, AI_SHOOT_POWER = 17
 const CARRY_OFFSET = PLAYER_R + BALL_R + 1
 const GAME_DURATION = 90
 
@@ -34,18 +34,18 @@ interface GS {
 }
 
 const BLUE_HOME: Record<Role,[number,number]> = {
-  GK: [FX+32,       FY+FH/2],
-  LB: [FX+145,      FY+FH/2-95],
-  RB: [FX+145,      FY+FH/2+95],
-  LW: [FX+FW*0.62,  FY+FH/2-85],
-  RW: [FX+FW*0.62,  FY+FH/2+85],
+  GK: [FX+55,       FY+FH/2],
+  LB: [FX+250,      FY+FH/2-165],
+  RB: [FX+250,      FY+FH/2+165],
+  LW: [FX+FW*0.62,  FY+FH/2-148],
+  RW: [FX+FW*0.62,  FY+FH/2+148],
 }
 const RED_HOME: Record<Role,[number,number]> = {
-  GK: [FX+FW-32,    FY+FH/2],
-  LB: [FX+FW-145,   FY+FH/2+95],
-  RB: [FX+FW-145,   FY+FH/2-95],
-  LW: [FX+FW*0.38,  FY+FH/2+85],
-  RW: [FX+FW*0.38,  FY+FH/2-85],
+  GK: [FX+FW-55,    FY+FH/2],
+  LB: [FX+FW-250,   FY+FH/2+165],
+  RB: [FX+FW-250,   FY+FH/2-165],
+  LW: [FX+FW*0.38,  FY+FH/2+148],
+  RW: [FX+FW*0.38,  FY+FH/2-148],
 }
 
 const POSITIONS: { id: Role; name: string; desc: string; emoji: string }[] = [
@@ -150,18 +150,18 @@ function moveAI(gs: GS) {
         // Dribble toward own penalty-area exit for 25 frames before clearing —
         // prevents the instant-clear-then-immediate-pickup loop near goal
         if (p.carryFrames >= 25) {
-          const midX = FX + FW/2 + (isBlue ? 80 : -80)
-          const midY = FY + FH/2 + (Math.random()-0.5)*80
+          const midX = FX + FW/2 + (isBlue ? 140 : -140)
+          const midY = FY + FH/2 + (Math.random()-0.5)*130
           doShoot(gs, p, AI_SHOOT_POWER, midX, midY)
           p.carryFrames = 0
         } else {
-          tx = isBlue ? FX+90 : FX+FW-90
+          tx = isBlue ? FX+160 : FX+FW-160
           ty = FY + FH/2
         }
       } else {
-        tx = isBlue ? FX+40 : FX+FW-40
+        tx = isBlue ? FX+60 : FX+FW-60
         ty = Math.max(FY+GOAL_H/2, Math.min(FY+FH-GOAL_H/2, by))
-        if (Math.hypot(p.x-bx, p.y-by) < 85) { tx=bx; ty=by }
+        if (Math.hypot(p.x-bx, p.y-by) < 150) { tx=bx; ty=by }
       }
     } else if (hasBall) {
       p.carryFrames++
@@ -169,7 +169,7 @@ function moveAI(gs: GS) {
       const distToGoal = Math.hypot(p.x-goalX, p.y-(FY+FH/2))
       // Must carry at least 40 frames AND be within 130px before shooting
       // This prevents the immediate-shoot-then-pickup loop
-      if (p.carryFrames >= 40 && distToGoal < 130) {
+      if (p.carryFrames >= 40 && distToGoal < 220) {
         doShoot(gs, p, AI_SHOOT_POWER)
         p.carryFrames = 0
       } else {
@@ -180,11 +180,11 @@ function moveAI(gs: GS) {
     } else {
       // Hold home position; actively move away if ball is too close
       const distToBall = Math.hypot(p.x-bx, p.y-by)
-      if (distToBall < 55) {
+      if (distToBall < 95) {
         const awayX = p.x-bx, awayY = p.y-by
         const al = Math.hypot(awayX,awayY)||1
-        tx = p.x + (awayX/al) * (55-distToBall+10)
-        ty = p.y + (awayY/al) * (55-distToBall+10)
+        tx = p.x + (awayX/al) * (95-distToBall+15)
+        ty = p.y + (awayY/al) * (95-distToBall+15)
       }
     }
 
@@ -238,10 +238,10 @@ function moveBall(gs: GS) {
   }
 
   // Wall bounce (minimum speed so ball never stops at wall)
-  if (b.x-BALL_R < FX)    { b.x=FX+BALL_R;    b.vx= Math.max(3, Math.abs(b.vx)) }
-  if (b.x+BALL_R > FX+FW) { b.x=FX+FW-BALL_R; b.vx=-Math.max(3, Math.abs(b.vx)) }
-  if (b.y-BALL_R < FY)    { b.y=FY+BALL_R;    b.vy= Math.max(3, Math.abs(b.vy)) }
-  if (b.y+BALL_R > FY+FH) { b.y=FY+FH-BALL_R; b.vy=-Math.max(3, Math.abs(b.vy)) }
+  if (b.x-BALL_R < FX)    { b.x=FX+BALL_R;    b.vx= Math.max(5, Math.abs(b.vx)) }
+  if (b.x+BALL_R > FX+FW) { b.x=FX+FW-BALL_R; b.vx=-Math.max(5, Math.abs(b.vx)) }
+  if (b.y-BALL_R < FY)    { b.y=FY+BALL_R;    b.vy= Math.max(5, Math.abs(b.vy)) }
+  if (b.y+BALL_R > FY+FH) { b.y=FY+FH-BALL_R; b.vy=-Math.max(5, Math.abs(b.vy)) }
 
   // First player to touch free ball gains possession (respect pickup cooldown)
   if (gs.pickupCooldown <= 0) {
@@ -254,12 +254,12 @@ function moveBall(gs: GS) {
   }
 
   // Stuck detection
-  if (Math.hypot(b.vx, b.vy) < 0.6) {
+  if (Math.hypot(b.vx, b.vy) < 1.0) {
     gs.stuckFrames++
     if (gs.stuckFrames > 55) {
       const tx=cx-b.x, ty=cy-b.y, tl=Math.hypot(tx,ty)||1
-      b.vx = tx/tl*8+(Math.random()-.5)*3
-      b.vy = ty/tl*8+(Math.random()-.5)*3
+      b.vx = tx/tl*13+(Math.random()-.5)*5
+      b.vy = ty/tl*13+(Math.random()-.5)*5
       gs.stuckFrames=0
     }
   } else { gs.stuckFrames=0 }
@@ -403,10 +403,17 @@ export default function SoccerPage() {
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [lastGoal, setLastGoal] = useState<'blue'|'red'|null>(null)
   const [hasBall, setHasBall] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const canvasRef  = useRef<HTMLCanvasElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const gsRef      = useRef<GS | null>(null)
   const hasBallRef = useRef(false)
+
+  useEffect(() => {
+    const onFull = () => setIsFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onFull)
+    return () => document.removeEventListener('fullscreenchange', onFull)
+  }, [])
 
   const startGame = useCallback((role: Role) => {
     setUserRole(role); setScore({blue:0,red:0}); setTimeLeft(GAME_DURATION)
@@ -553,7 +560,8 @@ export default function SoccerPage() {
 
       {/* Game */}
       {phase==='play' && (
-        <div ref={wrapperRef} className="w-full max-w-3xl space-y-2 pt-1">
+        <div ref={wrapperRef} className={isFullscreen ? 'w-full h-screen flex flex-col p-2 gap-1' : 'w-full max-w-3xl space-y-2 pt-1'}
+          style={isFullscreen ? {background:'#08051c'} : {}}>
           {/* HUD */}
           <div className="flex items-center justify-between px-1">
             <button onClick={() => setPhase('over')} className="text-white/40 text-xs font-semibold hover:text-white transition px-2 py-1">✕ Quit</button>
@@ -573,8 +581,11 @@ export default function SoccerPage() {
           </div>
 
           <canvas ref={canvasRef} width={W} height={H}
-            className="w-full rounded-2xl touch-none block"
-            style={{maxHeight:'58vh', objectFit:'contain'}} />
+            className="touch-none block"
+            style={isFullscreen
+              ? { flex: 1, minHeight: 0, width: '100%', height: '100%', objectFit: 'contain' }
+              : { width: '100%', maxHeight: '62vh', objectFit: 'contain', borderRadius: '1rem' }
+            } />
 
           {/* Goal flash */}
           {lastGoal && (
