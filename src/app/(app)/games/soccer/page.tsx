@@ -362,88 +362,159 @@ function checkGoal(gs: GS, onGoal: (t:'blue'|'red')=>void, userRole: Role) {
 
 // ── Draw ───────────────────────────────────────────────────────────────────
 function draw(ctx: CanvasRenderingContext2D, gs: GS) {
-  ctx.clearRect(0,0,W,H)
-  ctx.fillStyle='#1a1040'; ctx.fillRect(0,0,W,H)
+  ctx.clearRect(0, 0, W, H)
+  ctx.fillStyle = '#080518'; ctx.fillRect(0, 0, W, H)
 
-  // Field
-  ctx.fillStyle='#15803d'
-  ctx.beginPath(); (ctx as any).roundRect(FX,FY,FW,FH,4); ctx.fill()
-
-  // Stripes
-  ctx.fillStyle='rgba(0,0,0,0.05)'
-  for (let i=0; i<8; i+=2) { ctx.fillRect(FX+i*FW/8, FY, FW/8, FH) }
-
-  // Lines
-  ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=2
-  ctx.strokeRect(FX,FY,FW,FH)
-  ctx.beginPath(); ctx.moveTo(FX+FW/2,FY); ctx.lineTo(FX+FW/2,FY+FH); ctx.stroke()
-  ctx.beginPath(); ctx.arc(FX+FW/2,FY+FH/2,55,0,Math.PI*2); ctx.stroke()
-  ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fill()
-  ctx.fillStyle='white'; ctx.beginPath(); ctx.arc(FX+FW/2,FY+FH/2,3,0,Math.PI*2); ctx.fill()
-  ctx.strokeStyle='rgba(255,255,255,0.3)'
-  ctx.strokeRect(FX,FY+FH/2-75,100,150)
-  ctx.strokeRect(FX+FW-100,FY+FH/2-75,100,150)
-
-  // Goals
-  const drawGoal = (g:{x:number,y:number,w:number,h:number}, left:boolean) => {
-    ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.strokeStyle='white'; ctx.lineWidth=2.5
-    ctx.beginPath()
-    if (left) (ctx as any).roundRect(g.x,g.y,g.w,g.h,[4,0,0,4])
-    else       (ctx as any).roundRect(g.x,g.y,g.w,g.h,[0,4,4,0])
-    ctx.fill(); ctx.stroke()
-    ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=0.8
-    for (let i=1;i<5;i++) { const x=g.x+i*g.w/5; ctx.beginPath(); ctx.moveTo(x,g.y); ctx.lineTo(x,g.y+g.h); ctx.stroke() }
-    for (let i=1;i<4;i++) { const y=g.y+i*g.h/4; ctx.beginPath(); ctx.moveTo(g.x,y); ctx.lineTo(g.x+g.w,y); ctx.stroke() }
+  // ── Field ──
+  ctx.save()
+  ctx.beginPath(); (ctx as any).roundRect(FX, FY, FW, FH, 6); ctx.clip()
+  ctx.fillStyle = '#166534'; ctx.fillRect(FX, FY, FW, FH)
+  // Alternating grass stripes
+  for (let i = 0; i < 10; i++) {
+    ctx.fillStyle = i % 2 === 0 ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.025)'
+    ctx.fillRect(FX + i * FW / 10, FY, FW / 10, FH)
   }
-  drawGoal(GOAL_L,true); drawGoal(GOAL_R,false)
+  ctx.restore()
+
+  // Field markings
+  ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 2
+  ctx.strokeRect(FX + 1, FY + 1, FW - 2, FH - 2)
+  // Halfway line
+  ctx.beginPath(); ctx.moveTo(FX + FW/2, FY); ctx.lineTo(FX + FW/2, FY + FH); ctx.stroke()
+  // Center circle
+  ctx.beginPath(); ctx.arc(FX + FW/2, FY + FH/2, 70, 0, Math.PI*2)
+  ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill()
+  ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 2; ctx.stroke()
+  // Center spot
+  ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(FX + FW/2, FY + FH/2, 4, 0, Math.PI*2); ctx.fill()
+  // Penalty areas
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 1.5
+  ctx.strokeRect(FX, FY + FH/2 - 130, 170, 260)
+  ctx.strokeRect(FX + FW - 170, FY + FH/2 - 130, 170, 260)
+  // 6-yard boxes
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1
+  ctx.strokeRect(FX, FY + FH/2 - 65, 65, 130)
+  ctx.strokeRect(FX + FW - 65, FY + FH/2 - 65, 65, 130)
+  // Penalty spots
+  ctx.fillStyle = 'rgba(255,255,255,0.5)'
+  ctx.beginPath(); ctx.arc(FX + 130, FY + FH/2, 3, 0, Math.PI*2); ctx.fill()
+  ctx.beginPath(); ctx.arc(FX + FW - 130, FY + FH/2, 3, 0, Math.PI*2); ctx.fill()
+  // Corner arcs
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1.5
+  ctx.beginPath(); ctx.arc(FX,      FY,      13, 0,          Math.PI/2);        ctx.stroke()
+  ctx.beginPath(); ctx.arc(FX + FW, FY,      13, Math.PI/2,  Math.PI);          ctx.stroke()
+  ctx.beginPath(); ctx.arc(FX + FW, FY + FH, 13, Math.PI,    3*Math.PI/2);      ctx.stroke()
+  ctx.beginPath(); ctx.arc(FX,      FY + FH, 13, 3*Math.PI/2, 2*Math.PI);       ctx.stroke()
+
+  // ── Goals ──
+  const drawGoal = (g: {x:number,y:number,w:number,h:number}, left: boolean) => {
+    // Net fill
+    ctx.fillStyle = left ? 'rgba(59,130,246,0.1)' : 'rgba(239,68,68,0.1)'
+    ctx.fillRect(g.x, g.y, g.w, g.h)
+    // Net grid
+    ctx.strokeStyle = left ? 'rgba(100,160,255,0.25)' : 'rgba(255,120,120,0.25)'; ctx.lineWidth = 0.8
+    for (let i=1;i<6;i++){const x=g.x+i*g.w/6;ctx.beginPath();ctx.moveTo(x,g.y);ctx.lineTo(x,g.y+g.h);ctx.stroke()}
+    for (let i=1;i<5;i++){const y=g.y+i*g.h/5;ctx.beginPath();ctx.moveTo(g.x,y);ctx.lineTo(g.x+g.w,y);ctx.stroke()}
+    // Posts
+    ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 3.5
+    ctx.beginPath()
+    if (left){ ctx.moveTo(g.x+g.w,g.y); ctx.lineTo(g.x,g.y); ctx.lineTo(g.x,g.y+g.h); ctx.lineTo(g.x+g.w,g.y+g.h) }
+    else     { ctx.moveTo(g.x,g.y);     ctx.lineTo(g.x+g.w,g.y); ctx.lineTo(g.x+g.w,g.y+g.h); ctx.lineTo(g.x,g.y+g.h) }
+    ctx.stroke()
+    // Goal-line accent
+    ctx.strokeStyle = left ? 'rgba(99,179,237,0.8)' : 'rgba(252,129,129,0.8)'; ctx.lineWidth = 2.5
+    ctx.beginPath()
+    if (left){ ctx.moveTo(g.x+g.w, g.y); ctx.lineTo(g.x+g.w, g.y+g.h) }
+    else     { ctx.moveTo(g.x,     g.y); ctx.lineTo(g.x,     g.y+g.h) }
+    ctx.stroke()
+  }
+  drawGoal(GOAL_L, true); drawGoal(GOAL_R, false)
 
   // Team labels
-  ctx.font='bold 11px sans-serif'; ctx.textBaseline='top'
-  ctx.fillStyle='rgba(147,197,253,0.7)'; ctx.textAlign='left';  ctx.fillText('◀ BLUE (You)', FX+5, FY+6)
-  ctx.fillStyle='rgba(252,165,165,0.7)'; ctx.textAlign='right'; ctx.fillText('RED ▶', FX+FW-5, FY+6)
+  ctx.font = 'bold 11px sans-serif'; ctx.textBaseline = 'top'
+  ctx.fillStyle = 'rgba(147,197,253,0.65)'; ctx.textAlign = 'left';  ctx.fillText('◀ BLUE', FX + 6, FY + 7)
+  ctx.fillStyle = 'rgba(252,165,165,0.65)'; ctx.textAlign = 'right'; ctx.fillText('RED ▶',  FX + FW - 6, FY + 7)
 
-  // Players
+  // ── Players ──
   for (const p of gs.players) {
     const hasBall = gs.possessorId === p.id
-    const col = p.team==='blue' ? '#3b82f6' : '#ef4444'
-    const bdr = p.team==='blue' ? '#93c5fd' : '#fca5a5'
-    // Shadow
-    ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(p.x+2,p.y+PLAYER_R+2,PLAYER_R,4,0,0,Math.PI*2); ctx.fill()
+    const isBlue  = p.team === 'blue'
+    const col     = isBlue ? '#2563eb' : '#dc2626'
+    const border  = isBlue ? '#93c5fd' : '#fca5a5'
+
+    // Drop shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.35)'
+    ctx.beginPath(); ctx.ellipse(p.x + 3, p.y + PLAYER_R + 2, PLAYER_R * 0.9, 4, 0, 0, Math.PI*2); ctx.fill()
+
+    // Glow ring when possessing
+    if (hasBall) {
+      ctx.beginPath(); ctx.arc(p.x, p.y, PLAYER_R + 6, 0, Math.PI*2)
+      ctx.strokeStyle = 'rgba(250,204,21,0.8)'; ctx.lineWidth = 3; ctx.stroke()
+    }
+    // GK dashed ring
+    if (p.role === 'GK') {
+      ctx.setLineDash([3,3])
+      ctx.beginPath(); ctx.arc(p.x, p.y, PLAYER_R + 3, 0, Math.PI*2)
+      ctx.strokeStyle = 'rgba(253,230,138,0.6)'; ctx.lineWidth = 1.5; ctx.stroke()
+      ctx.setLineDash([])
+    }
+
     // Body
-    ctx.fillStyle=col; ctx.beginPath(); ctx.arc(p.x,p.y,PLAYER_R,0,Math.PI*2); ctx.fill()
-    ctx.strokeStyle=hasBall ? '#facc15' : bdr; ctx.lineWidth=hasBall ? 2.5 : 1.8; ctx.stroke()
-    // Label
-    ctx.fillStyle='white'; ctx.font='bold 8px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'
+    ctx.beginPath(); ctx.arc(p.x, p.y, PLAYER_R, 0, Math.PI*2)
+    ctx.fillStyle = col; ctx.fill()
+    ctx.strokeStyle = hasBall ? '#facc15' : border; ctx.lineWidth = hasBall ? 2.5 : 1.8; ctx.stroke()
+
+    // Inner highlight (3-D feel)
+    ctx.fillStyle = 'rgba(255,255,255,0.22)'
+    ctx.beginPath(); ctx.arc(p.x - 3, p.y - 3, PLAYER_R * 0.48, 0, Math.PI*2); ctx.fill()
+
+    // Role label
+    ctx.fillStyle = 'white'; ctx.font = 'bold 8px sans-serif'
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
     ctx.fillText(p.role, p.x, p.y)
-    // Triangle marker for user
+
+    // User marker (yellow arrow)
     if (p.isUser) {
-      const tx=p.x, ty=p.y-PLAYER_R-17
-      ctx.fillStyle='#1d4ed8'; ctx.strokeStyle='#93c5fd'; ctx.lineWidth=1.5
-      ctx.beginPath()
-      ctx.moveTo(tx, ty+11); ctx.lineTo(tx-8, ty); ctx.lineTo(tx+8, ty)
-      ctx.closePath(); ctx.fill(); ctx.stroke()
+      const ay = p.y - PLAYER_R - 9
+      ctx.fillStyle = '#fde047'
+      ctx.beginPath(); ctx.moveTo(p.x, ay - 7); ctx.lineTo(p.x - 6, ay); ctx.lineTo(p.x + 6, ay)
+      ctx.closePath(); ctx.fill()
+      ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1; ctx.stroke()
     }
   }
 
-  // Ball
+  // ── Ball ──
   const b = gs.ball
-  ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(b.x+2,b.y+BALL_R,BALL_R*0.8,3,0,0,Math.PI*2); ctx.fill()
-  ctx.fillStyle='white'; ctx.beginPath(); ctx.arc(b.x,b.y,BALL_R,0,Math.PI*2); ctx.fill()
-  ctx.strokeStyle='#1f2937'; ctx.lineWidth=1; ctx.stroke()
-  ctx.strokeStyle='#374151'; ctx.lineWidth=0.8
-  for (let a=0; a<Math.PI*2; a+=Math.PI/3) {
-    const bx2=b.x+Math.cos(a)*BALL_R*0.5, by2=b.y+Math.sin(a)*BALL_R*0.5
-    ctx.beginPath(); ctx.arc(bx2,by2,2.5,0,Math.PI*2); ctx.stroke()
+  const spd = Math.hypot(b.vx, b.vy)
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.32)'
+  ctx.beginPath(); ctx.ellipse(b.x + 3, b.y + BALL_R + 1, BALL_R * 0.85, 3.5, 0, 0, Math.PI*2); ctx.fill()
+  // Body
+  ctx.fillStyle = '#f1f5f9'
+  ctx.beginPath(); ctx.arc(b.x, b.y, BALL_R, 0, Math.PI*2); ctx.fill()
+  ctx.strokeStyle = '#374151'; ctx.lineWidth = 1; ctx.stroke()
+  // Spinning panels
+  ctx.fillStyle = '#111827'
+  const spin = (Date.now() * 0.004 * Math.max(0.4, spd * 0.12)) % (Math.PI*2)
+  for (let i = 0; i < 5; i++) {
+    const a  = spin + (i * Math.PI*2) / 5
+    const px = b.x + Math.cos(a) * BALL_R * 0.42
+    const py = b.y + Math.sin(a) * BALL_R * 0.42
+    ctx.beginPath(); ctx.arc(px, py, 2.1, 0, Math.PI*2); ctx.fill()
   }
+  // Specular highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'
+  ctx.beginPath(); ctx.arc(b.x - 2.5, b.y - 2.5, 2.4, 0, Math.PI*2); ctx.fill()
 
-  // Touch joystick
+  // ── Touch joystick ──
   if (gs.touch.active) {
-    const {startX,startY,dx,dy} = gs.touch
-    ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=2
-    ctx.fillStyle='rgba(255,255,255,0.07)'
-    ctx.beginPath(); ctx.arc(startX,startY,38,0,Math.PI*2); ctx.fill(); ctx.stroke()
-    const jx=startX+Math.max(-38,Math.min(38,dx)), jy=startY+Math.max(-38,Math.min(38,dy))
-    ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.beginPath(); ctx.arc(jx,jy,14,0,Math.PI*2); ctx.fill()
+    const {startX, startY, dx, dy} = gs.touch
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 2
+    ctx.fillStyle = 'rgba(255,255,255,0.07)'
+    ctx.beginPath(); ctx.arc(startX, startY, 42, 0, Math.PI*2); ctx.fill(); ctx.stroke()
+    const jx = startX + Math.max(-42, Math.min(42, dx))
+    const jy = startY + Math.max(-42, Math.min(42, dy))
+    ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.beginPath(); ctx.arc(jx, jy, 16, 0, Math.PI*2); ctx.fill()
   }
 }
 
@@ -612,21 +683,22 @@ export default function SoccerPage() {
         <div ref={wrapperRef} className={isFullscreen ? 'w-full h-screen flex flex-col p-2 gap-1' : 'w-full space-y-2 pt-1'}
           style={isFullscreen ? {background:'#08051c'} : {}}>
           {/* HUD */}
-          <div className="flex items-center justify-between px-1">
-            <button onClick={() => setPhase('over')} className="text-white/40 text-xs font-semibold hover:text-white transition px-2 py-1">✕ Quit</button>
-            <div className="flex items-center gap-5">
-              <span className="text-3xl font-black text-blue-400">{score.blue}</span>
-              <span className="text-white/20 font-black text-xl">—</span>
-              <span className="text-3xl font-black text-red-400">{score.red}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className={`font-black text-sm px-3 py-1 rounded-full ${timeLeft<=15?'text-red-400 bg-red-400/15':'text-white/60 bg-white/5'}`}>
+          <div className="flex items-center justify-between px-2 py-0.5">
+            <button onClick={() => setPhase('over')} className="text-white/25 text-xs hover:text-white/60 transition px-2 py-1">✕</button>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-2xl font-black text-blue-400 leading-none">{score.blue}</div>
+                <div className="text-[10px] text-blue-400/50 font-bold">YOU</div>
+              </div>
+              <div className={`px-4 py-1 rounded-xl border font-black text-sm tabular-nums ${timeLeft<=15?'border-red-500/50 bg-red-500/15 text-red-400':'border-white/10 bg-white/5 text-white/70'}`}>
                 {Math.floor(timeLeft/60)}:{String(timeLeft%60).padStart(2,'0')}
               </div>
-              <button onClick={toggleFullscreen}
-                className="text-white/40 hover:text-white text-lg px-2 py-1 rounded-lg hover:bg-white/10 transition"
-                title="Fullscreen">⛶</button>
+              <div className="text-left">
+                <div className="text-2xl font-black text-red-400 leading-none">{score.red}</div>
+                <div className="text-[10px] text-red-400/50 font-bold">RED</div>
+              </div>
             </div>
+            <button onClick={toggleFullscreen} className="text-white/30 hover:text-white/70 text-lg px-2 py-1 transition" title="Fullscreen">⛶</button>
           </div>
 
           {/* Aspect-ratio wrapper prevents zoom glitch when layout changes (score/goal flash) */}
@@ -644,32 +716,32 @@ export default function SoccerPage() {
 
           {/* Goal flash */}
           {lastGoal && (
-            <div className={`text-center py-1 font-black text-sm animate-bounce ${lastGoal==='blue'?'text-blue-400':'text-red-400'}`}>
-              {lastGoal==='blue' ? '🎉 GOAL! Blue scores!' : '😤 Red scores!'}
+            <div className={`text-center py-0.5 font-black text-sm tracking-wide ${lastGoal==='blue'?'text-blue-300':'text-red-300'}`}>
+              {lastGoal==='blue' ? '🎉 GOAL — Blue scores!' : '💥 GOAL — Red scores!'}
             </div>
           )}
 
           {/* Action buttons */}
-          <div className="flex gap-3 px-1 pb-2">
+          <div className="flex gap-2 px-2 pb-1">
             <button
               onPointerDown={triggerDribble}
-              className="flex-1 py-5 rounded-2xl font-black text-white text-lg bg-indigo-600/70 hover:bg-indigo-500/80 border border-indigo-400/30 active:scale-95 transition-all select-none touch-none"
+              className="flex-1 py-4 rounded-2xl font-black text-white text-base select-none touch-none active:scale-95 transition-transform"
+              style={{background:'linear-gradient(160deg,#6366f1,#4338ca)', boxShadow:'0 4px 14px rgba(99,102,241,0.4)', border:'1px solid rgba(165,180,252,0.25)'}}
             >
               💨 Dribble
             </button>
             <button
               onPointerDown={triggerShoot}
-              className={`flex-1 py-5 rounded-2xl font-black text-lg border active:scale-95 transition-all select-none touch-none ${
-                hasBall
-                  ? 'bg-green-500/80 hover:bg-green-400/80 border-green-400/40 text-white'
-                  : 'bg-white/8 border-white/10 text-white/30'
-              }`}
+              className={`flex-1 py-4 rounded-2xl font-black text-base select-none touch-none active:scale-95 transition-all ${hasBall ? 'text-white' : 'text-white/25'}`}
+              style={hasBall
+                ? {background:'linear-gradient(160deg,#22c55e,#15803d)', boxShadow:'0 4px 14px rgba(34,197,94,0.45)', border:'1px solid rgba(134,239,172,0.3)'}
+                : {background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)'}}
             >
               ⚽ Shoot
             </button>
           </div>
 
-          <p className="text-white/25 text-xs text-center pb-1">Arrow keys to move · Space = shoot · X = dribble</p>
+          <p className="text-white/20 text-xs text-center pb-1">Arrow keys · Space = shoot · X = dribble</p>
         </div>
       )}
 
