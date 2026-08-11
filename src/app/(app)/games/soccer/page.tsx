@@ -8,7 +8,7 @@ const FX = 80, FY = 60, FW = 1240, FH = 720
 const GOAL_H = 200, GOAL_D = 85
 const GOAL_L = { x: FX - GOAL_D, y: FY + FH/2 - GOAL_H/2, w: GOAL_D, h: GOAL_H }
 const GOAL_R = { x: FX + FW,     y: FY + FH/2 - GOAL_H/2, w: GOAL_D, h: GOAL_H }
-const PLAYER_R = 18, BALL_R = 12
+const PLAYER_R = 12, BALL_R = 8
 const PLAYER_SPEED = 4.5, BALL_FRICTION = 0.965
 const SHOOT_POWER = 22, AI_SHOOT_POWER = 17
 const CARRY_OFFSET = PLAYER_R + BALL_R + 1
@@ -33,19 +33,20 @@ interface GS {
   pickupCooldown: number  // frames ball can't be picked up after a kick
 }
 
+// All Blue players start in LEFT half, all Red in RIGHT half
 const BLUE_HOME: Record<Role,[number,number]> = {
   GK: [FX+55,       FY+FH/2],
-  LB: [FX+250,      FY+FH/2-165],
-  RB: [FX+250,      FY+FH/2+165],
-  LW: [FX+FW*0.62,  FY+FH/2-148],
-  RW: [FX+FW*0.62,  FY+FH/2+148],
+  LB: [FX+220,      FY+FH/2-155],
+  RB: [FX+220,      FY+FH/2+155],
+  LW: [FX+FW*0.40,  FY+FH/2-140],
+  RW: [FX+FW*0.40,  FY+FH/2+140],
 }
 const RED_HOME: Record<Role,[number,number]> = {
   GK: [FX+FW-55,    FY+FH/2],
-  LB: [FX+FW-250,   FY+FH/2+165],
-  RB: [FX+FW-250,   FY+FH/2-165],
-  LW: [FX+FW*0.38,  FY+FH/2+148],
-  RW: [FX+FW*0.38,  FY+FH/2-148],
+  LB: [FX+FW-220,   FY+FH/2+155],
+  RB: [FX+FW-220,   FY+FH/2-155],
+  LW: [FX+FW*0.60,  FY+FH/2+140],
+  RW: [FX+FW*0.60,  FY+FH/2-140],
 }
 
 const POSITIONS: { id: Role; name: string; desc: string; emoji: string }[] = [
@@ -170,13 +171,15 @@ function moveAI(gs: GS) {
       // Must carry at least 40 frames AND be within 130px before shooting
       // This prevents the immediate-shoot-then-pickup loop
       if (p.carryFrames >= 40 && distToGoal < 220) {
-        doShoot(gs, p, AI_SHOOT_POWER)
+        // Vary power and angle so not every shot is identical
+        const powerVar = AI_SHOOT_POWER * (0.8 + Math.random() * 0.4)
+        doShoot(gs, p, powerVar)
         p.carryFrames = 0
       } else {
         tx = goalX; ty = FY+FH/2; spd = PLAYER_SPEED * 1.2  // faster than chaser so possessor can escape
       }
     } else if (p.id === chaser[p.team]) {
-      tx = bx; ty = by
+      tx = bx + (Math.random()-0.5)*20; ty = by + (Math.random()-0.5)*20
     } else {
       // Hold home position; actively move away if ball is too close
       const distToBall = Math.hypot(p.x-bx, p.y-by)
@@ -580,12 +583,18 @@ export default function SoccerPage() {
             </div>
           </div>
 
-          <canvas ref={canvasRef} width={W} height={H}
-            className="touch-none block"
-            style={isFullscreen
-              ? { flex: 1, minHeight: 0, width: '100%', height: '100%', objectFit: 'contain' }
-              : { width: '100%', height: 'auto', borderRadius: '1rem', display: 'block' }
-            } />
+          {/* Aspect-ratio wrapper prevents zoom glitch when layout changes (score/goal flash) */}
+          <div style={isFullscreen
+            ? { flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }
+            : { width: '100%', aspectRatio: `${W}/${H}`, borderRadius: '1rem', overflow: 'hidden' }
+          }>
+            <canvas ref={canvasRef} width={W} height={H}
+              className="touch-none"
+              style={isFullscreen
+                ? { maxWidth: '100%', maxHeight: '100%', display: 'block', borderRadius: '0.5rem' }
+                : { width: '100%', height: '100%', display: 'block' }
+              } />
+          </div>
 
           {/* Goal flash */}
           {lastGoal && (
