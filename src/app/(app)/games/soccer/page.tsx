@@ -19,7 +19,8 @@ interface Player {
   id: number; team: 'blue'|'red'; role: Role
   x: number; y: number; vx: number; vy: number
   facingX: number; facingY: number; isUser: boolean
-  stealLock: number  // frames this player cannot steal (set when they just lost the ball)
+  stealLock: number    // frames this player cannot steal
+  carryFrames: number  // how many frames this player has held the ball this possession
 }
 interface Ball { x: number; y: number; vx: number; vy: number }
 interface Touch { active: boolean; startX: number; startY: number; dx: number; dy: number }
@@ -58,8 +59,8 @@ const POSITIONS: { id: Role; name: string; desc: string; emoji: string }[] = [
 function makePlayers(userRole: Role): Player[] {
   const roles: Role[] = ['GK','LB','RB','LW','RW']
   return [
-    ...roles.map((r,i) => ({ id:i,    team:'blue' as const, role:r, x:BLUE_HOME[r][0], y:BLUE_HOME[r][1], vx:0, vy:0, facingX:1,  facingY:0, isUser:r===userRole, stealLock:0 })),
-    ...roles.map((r,i) => ({ id:10+i, team:'red'  as const, role:r, x:RED_HOME[r][0],  y:RED_HOME[r][1],  vx:0, vy:0, facingX:-1, facingY:0, isUser:false,        stealLock:0 })),
+    ...roles.map((r,i) => ({ id:i,    team:'blue' as const, role:r, x:BLUE_HOME[r][0], y:BLUE_HOME[r][1], vx:0, vy:0, facingX:1,  facingY:0, isUser:r===userRole, stealLock:0, carryFrames:0 })),
+    ...roles.map((r,i) => ({ id:10+i, team:'red'  as const, role:r, x:RED_HOME[r][0],  y:RED_HOME[r][1],  vx:0, vy:0, facingX:-1, facingY:0, isUser:false,        stealLock:0, carryFrames:0 })),
   ]
 }
 
@@ -156,9 +157,14 @@ function moveAI(gs: GS) {
         if (Math.hypot(p.x-bx, p.y-by) < 85) { tx=bx; ty=by }
       }
     } else if (hasBall) {
+      p.carryFrames++
       const goalX = isBlue ? FX+FW+20 : FX-20
-      if (Math.hypot(p.x-goalX, p.y-(FY+FH/2)) < 230) {
+      const distToGoal = Math.hypot(p.x-goalX, p.y-(FY+FH/2))
+      // Must carry at least 40 frames AND be within 130px before shooting
+      // This prevents the immediate-shoot-then-pickup loop
+      if (p.carryFrames >= 40 && distToGoal < 130) {
         doShoot(gs, p, AI_SHOOT_POWER)
+        p.carryFrames = 0
       } else {
         tx = goalX; ty = FY+FH/2; spd = PLAYER_SPEED * 0.95
       }
@@ -209,8 +215,10 @@ function moveBall(gs: GS) {
         if (opp.stealLock > 0) continue
         if (Math.hypot(opp.x-p.x, opp.y-p.y) < PLAYER_R * 2 + 2) {
           for (const loser of gs.players) {
-            if (loser.team === p.team) loser.stealLock = 80  // ~1.3s no steal for whole team
+            if (loser.team === p.team) loser.stealLock = 80
           }
+          p.carryFrames = 0
+          opp.carryFrames = 0
           gs.possessorId = opp.id
           opp.facingX = -fx || 1
           opp.facingY = -fy
@@ -232,6 +240,7 @@ function moveBall(gs: GS) {
   if (gs.pickupCooldown <= 0) {
     for (const p of gs.players) {
       if (Math.hypot(b.x-p.x, b.y-p.y) < PLAYER_R+BALL_R) {
+        p.carryFrames = 0
         gs.possessorId = p.id; return
       }
     }
