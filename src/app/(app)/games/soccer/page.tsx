@@ -287,7 +287,7 @@ function moveBall(gs: GS) {
   // First player to touch free ball gains possession (respect pickup cooldown + stealLock)
   if (gs.pickupCooldown <= 0) {
     for (const p of gs.players) {
-      if (p.stealLock > 0) continue
+      if (p.stealLock > 0 && !p.isUser) continue
       if (Math.hypot(b.x-p.x, b.y-p.y) < PLAYER_R+BALL_R) {
         p.carryFrames = 0
         gs.possessorId = p.id
