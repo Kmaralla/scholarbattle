@@ -381,6 +381,114 @@ function checkGoal(gs: GS, onGoal: (t:'blue'|'red')=>void, userRole: Role) {
   }
 }
 
+// ── Audio ──────────────────────────────────────────────────────────────────
+let _ac: AudioContext | null = null
+function getAC(): AudioContext {
+  if (!_ac) _ac = new (window.AudioContext || (window as unknown as {webkitAudioContext: typeof AudioContext}).webkitAudioContext)()
+  if (_ac.state === 'suspended') _ac.resume()
+  return _ac
+}
+
+function noise(c: AudioContext, dur: number, fType: BiquadFilterType, freq: number, q: number, vol: number, t: number) {
+  const buf = c.createBuffer(1, Math.ceil(c.sampleRate * dur), c.sampleRate)
+  const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random()*2-1
+  const src = c.createBufferSource(); src.buffer = buf
+  const flt = c.createBiquadFilter(); flt.type = fType; flt.frequency.value = freq; flt.Q.value = q
+  const g = c.createGain()
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur)
+  src.connect(flt); flt.connect(g); g.connect(c.destination)
+  src.start(t); src.stop(t + dur)
+}
+
+function playWhistle(dur = 0.65) {
+  const c = getAC(), t = c.currentTime
+  const osc = c.createOscillator(), g = c.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(2400, t)
+  osc.frequency.linearRampToValueAtTime(2760, t + 0.04)
+  osc.frequency.linearRampToValueAtTime(2640, t + dur)
+  g.gain.setValueAtTime(0, t)
+  g.gain.linearRampToValueAtTime(0.38, t + 0.025)
+  g.gain.setValueAtTime(0.38, t + dur - 0.08)
+  g.gain.linearRampToValueAtTime(0, t + dur)
+  osc.connect(g); g.connect(c.destination)
+  osc.start(t); osc.stop(t + dur)
+  noise(c, dur, 'bandpass', 2620, 18, 0.07, t)
+}
+
+function playGoalWhistle() {
+  playWhistle(0.35)
+  setTimeout(() => playWhistle(0.55), 430)
+}
+
+function playKick() {
+  const c = getAC(), t = c.currentTime
+  const osc = c.createOscillator(), g = c.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(230, t)
+  osc.frequency.exponentialRampToValueAtTime(58, t + 0.08)
+  g.gain.setValueAtTime(0.42, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.14)
+  osc.connect(g); g.connect(c.destination); osc.start(t); osc.stop(t + 0.15)
+}
+
+function playTouch() {
+  const c = getAC(), t = c.currentTime
+  const osc = c.createOscillator(), g = c.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(290, t)
+  osc.frequency.exponentialRampToValueAtTime(130, t + 0.05)
+  g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.08)
+  osc.connect(g); g.connect(c.destination); osc.start(t); osc.stop(t + 0.09)
+}
+
+function startMusic(): () => void {
+  const c = getAC()
+  let nextT = c.currentTime + 0.1, beat = 0, stopped = false
+  const bd = 60 / 124  // seconds per beat @ 124 BPM
+  const bassF = [65.4, 73.4, 82.4, 73.4, 98.0, 87.3, 73.4, 65.4]
+  const melF  = [261.6, 329.6, 392, 349.2, 440, 392, 329.6, 293.7]
+
+  function sched(t: number, i: number) {
+    const b8 = i % 8
+    // Kick
+    if (b8 === 0 || b8 === 4) {
+      const o = c.createOscillator(), g = c.createGain()
+      o.type = 'sine'; o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(30, t + 0.2)
+      g.gain.setValueAtTime(0.44, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.24)
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.24)
+    }
+    // Snare
+    if (b8 === 2 || b8 === 6) {
+      noise(c, 0.14, 'bandpass', 1100, 0.9, 0.3, t)
+      const o = c.createOscillator(), g = c.createGain()
+      o.frequency.value = 200; g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.08)
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.08)
+    }
+    // Hi-hat
+    noise(c, 0.034, 'highpass', 8500, 1, 0.11, t)
+    // Bass (every 2 beats)
+    if (b8 % 2 === 0) {
+      const o = c.createOscillator(), g = c.createGain()
+      o.type = 'triangle'; o.frequency.value = bassF[(i / 2) % 8]
+      g.gain.setValueAtTime(0.17, t); g.gain.linearRampToValueAtTime(0.001, t + bd * 1.85)
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + bd * 2)
+    }
+    // Melody (every 2 beats)
+    if (b8 % 2 === 0) {
+      const o = c.createOscillator(), g = c.createGain()
+      o.type = 'sine'; o.frequency.value = melF[(i / 2) % 8]
+      g.gain.setValueAtTime(0.058, t); g.gain.linearRampToValueAtTime(0, t + bd * 1.75)
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + bd * 2)
+    }
+  }
+
+  const iv = setInterval(() => {
+    if (stopped) return
+    while (nextT < c.currentTime + 0.5) { sched(nextT, beat); nextT += bd; beat++ }
+  }, 100)
+  return () => { stopped = true; clearInterval(iv) }
+}
+
 // ── Draw ───────────────────────────────────────────────────────────────────
 function draw(ctx: CanvasRenderingContext2D, gs: GS, blueCountry: Country, redCountry: Country) {
   ctx.clearRect(0, 0, W, H)
@@ -607,6 +715,10 @@ export default function SoccerPage() {
     }
     gsRef.current = gs
 
+    // Kickoff whistle + background music
+    playWhistle()
+    const stopMusic = startMusic()
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault()
       gs.keys.add(e.key)
@@ -645,14 +757,32 @@ export default function SoccerPage() {
     const onGoal = (team: 'blue'|'red') => {
       setScore({...gs.score}); setLastGoal(team)
       setTimeout(() => setLastGoal(null), 2500)
+      playGoalWhistle()
     }
+
+    let lastTouchSoundTime = 0  // throttle ball-touch sound to avoid rapid fire
 
     const loop = () => {
       const paused = Date.now()-gs.lastGoalTime < 1800
       if (!paused) {
+        const prevPossessorId = gs.possessorId
+        const userId = gs.players.find(p => p.isUser)?.id
+        const userWillShoot = gs.shootTrigger && gs.possessorId === userId
+
         moveUser(gs); moveAI(gs); moveBall(gs)
         separatePlayers(gs)
         checkGoal(gs, onGoal, userRole)
+
+        // Sound: kick when user shoots, touch when anyone picks up a free ball
+        const now = Date.now()
+        if (userWillShoot) {
+          playKick()
+          lastTouchSoundTime = now
+        } else if (gs.possessorId !== null && gs.possessorId !== prevPossessorId && now - lastTouchSoundTime > 180) {
+          playTouch()
+          lastTouchSoundTime = now
+        }
+
         const user = gs.players.find(p => p.isUser)
         const nowHasBall = user ? gs.possessorId === user.id : false
         if (nowHasBall !== hasBallRef.current) { hasBallRef.current = nowHasBall; setHasBall(nowHasBall) }
@@ -665,6 +795,7 @@ export default function SoccerPage() {
     return () => {
       if (gs.animFrame)    cancelAnimationFrame(gs.animFrame)
       if (gs.timerInterval) clearInterval(gs.timerInterval)
+      stopMusic()
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('keyup',   onKeyUp)
       canvas.removeEventListener('touchstart', onTouchStart)
