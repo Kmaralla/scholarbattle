@@ -19,6 +19,7 @@ interface Player {
   id: number; team: 'blue'|'red'; role: Role
   x: number; y: number; vx: number; vy: number
   facingX: number; facingY: number; isUser: boolean
+  stealLock: number  // frames this player cannot steal (set when they just lost the ball)
 }
 interface Ball { x: number; y: number; vx: number; vy: number }
 interface Touch { active: boolean; startX: number; startY: number; dx: number; dy: number }
@@ -29,7 +30,6 @@ interface GS {
   stuckFrames: number; possessorId: number | null
   shootTrigger: boolean; sprintHeld: boolean
   pickupCooldown: number  // frames ball can't be picked up after a kick
-  stealCooldown: number   // frames before another steal can happen
 }
 
 const BLUE_HOME: Record<Role,[number,number]> = {
@@ -58,8 +58,8 @@ const POSITIONS: { id: Role; name: string; desc: string; emoji: string }[] = [
 function makePlayers(userRole: Role): Player[] {
   const roles: Role[] = ['GK','LB','RB','LW','RW']
   return [
-    ...roles.map((r,i) => ({ id:i,    team:'blue' as const, role:r, x:BLUE_HOME[r][0], y:BLUE_HOME[r][1], vx:0, vy:0, facingX:1,  facingY:0, isUser:r===userRole })),
-    ...roles.map((r,i) => ({ id:10+i, team:'red'  as const, role:r, x:RED_HOME[r][0],  y:RED_HOME[r][1],  vx:0, vy:0, facingX:-1, facingY:0, isUser:false })),
+    ...roles.map((r,i) => ({ id:i,    team:'blue' as const, role:r, x:BLUE_HOME[r][0], y:BLUE_HOME[r][1], vx:0, vy:0, facingX:1,  facingY:0, isUser:r===userRole, stealLock:0 })),
+    ...roles.map((r,i) => ({ id:10+i, team:'red'  as const, role:r, x:RED_HOME[r][0],  y:RED_HOME[r][1],  vx:0, vy:0, facingX:-1, facingY:0, isUser:false,        stealLock:0 })),
   ]
 }
 
@@ -82,7 +82,7 @@ function doShoot(gs: GS, shooter: Player, power: number, aimX?: number, aimY?: n
   gs.ball.y  = shooter.y + dy/len * (CARRY_OFFSET + 4)
   gs.possessorId = null
   gs.pickupCooldown = 30  // 0.5s before anyone can pick up
-  gs.stealCooldown = 0
+  // stealLock per player intentionally NOT reset — shooter earned a cooldown-free ball
 }
 
 // ── Move user ──────────────────────────────────────────────────────────────
@@ -187,7 +187,8 @@ function moveBall(gs: GS) {
   const cx = FX+FW/2, cy = FY+FH/2
 
   gs.pickupCooldown = Math.max(0, gs.pickupCooldown - 1)
-  gs.stealCooldown  = Math.max(0, gs.stealCooldown  - 1)
+  // Tick per-player steal locks
+  for (const pl of gs.players) pl.stealLock = Math.max(0, pl.stealLock - 1)
 
   if (gs.possessorId !== null) {
     const p = gs.players.find(pl => pl.id === gs.possessorId)
@@ -200,17 +201,17 @@ function moveBall(gs: GS) {
       b.y = p.y + fy * CARRY_OFFSET
       b.vx = p.vx; b.vy = p.vy
 
-      // Steal: opponent body-contacts possessor (with cooldown to prevent ping-pong)
-      if (gs.stealCooldown <= 0) {
-        for (const opp of gs.players) {
-          if (opp.team === p.team) continue
-          if (Math.hypot(opp.x-p.x, opp.y-p.y) < PLAYER_R * 2 + 2) {
-            gs.possessorId = opp.id
-            opp.facingX = -fx || 1
-            opp.facingY = -fy
-            gs.stealCooldown = 25
-            break
-          }
+      // Steal: opponent body-contacts possessor; but the player who JUST lost
+      // the ball has a personal lock so they can't immediately steal back.
+      for (const opp of gs.players) {
+        if (opp.team === p.team) continue
+        if (opp.stealLock > 0) continue
+        if (Math.hypot(opp.x-p.x, opp.y-p.y) < PLAYER_R * 2 + 2) {
+          p.stealLock = 75   // ~1.25s before the previous holder can steal back
+          gs.possessorId = opp.id
+          opp.facingX = -fx || 1
+          opp.facingY = -fy
+          break
         }
       }
       return
@@ -278,12 +279,12 @@ function checkGoal(gs: GS, onGoal: (t:'blue'|'red')=>void, userRole: Role) {
   if (b.x-BALL_R < GOAL_L.x+GOAL_L.w && b.y>GOAL_L.y && b.y<GOAL_L.y+GOAL_L.h) {
     gs.lastGoalTime=Date.now(); gs.score.red++
     gs.players=makePlayers(userRole); gs.ball={x:W/2,y:H/2,vx:1,vy:0}
-    gs.possessorId=null; gs.pickupCooldown=0; gs.stealCooldown=0; onGoal('red')
+    gs.possessorId=null; gs.pickupCooldown=0; onGoal('red')
   }
   if (b.x+BALL_R > GOAL_R.x && b.y>GOAL_R.y && b.y<GOAL_R.y+GOAL_R.h) {
     gs.lastGoalTime=Date.now(); gs.score.blue++
     gs.players=makePlayers(userRole); gs.ball={x:W/2,y:H/2,vx:-1,vy:0}
-    gs.possessorId=null; gs.pickupCooldown=0; gs.stealCooldown=0; onGoal('blue')
+    gs.possessorId=null; gs.pickupCooldown=0; onGoal('blue')
   }
 }
 
@@ -423,7 +424,6 @@ export default function SoccerPage() {
       shootTrigger: false,
       sprintHeld: false,
       pickupCooldown: 0,
-      stealCooldown: 0,
     }
     gsRef.current = gs
 
