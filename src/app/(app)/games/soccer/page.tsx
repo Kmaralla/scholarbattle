@@ -83,7 +83,12 @@ function doShoot(gs: GS, shooter: Player, power: number, aimX?: number, aimY?: n
   gs.ball.x  = shooter.x + dx/len * (CARRY_OFFSET + 4)
   gs.ball.y  = shooter.y + dy/len * (CARRY_OFFSET + 4)
   gs.possessorId = null
-  gs.pickupCooldown = 50  // ~0.83s so ball travels far from the cluster before pickup
+  gs.pickupCooldown = 90  // ball must travel far before anyone can pick up
+  // Refresh opponent stealLock from the moment of the shot so they can't
+  // instantly grab the rebound — they stay locked for 120 frames after shot
+  for (const pl of gs.players) {
+    if (pl.team !== shooter.team) pl.stealLock = Math.max(pl.stealLock, 120)
+  }
 }
 
 // ── Move user ──────────────────────────────────────────────────────────────
@@ -150,7 +155,7 @@ function moveAI(gs: GS) {
         p.carryFrames++
         // Dribble toward own penalty-area exit for 25 frames before clearing —
         // prevents the instant-clear-then-immediate-pickup loop near goal
-        if (p.carryFrames >= 25) {
+        if (p.carryFrames >= 50) {
           const midX = FX + FW/2 + (isBlue ? 140 : -140)
           const midY = FY + FH/2 + (Math.random()-0.5)*130
           doShoot(gs, p, AI_SHOOT_POWER, midX, midY)
@@ -170,7 +175,7 @@ function moveAI(gs: GS) {
       const distToGoal = Math.hypot(p.x-goalX, p.y-(FY+FH/2))
       // Must carry at least 40 frames AND be within 130px before shooting
       // This prevents the immediate-shoot-then-pickup loop
-      if (p.carryFrames >= 40 && distToGoal < 220) {
+      if (p.carryFrames >= 70 && distToGoal < 260) {
         // Vary power and angle so not every shot is identical
         const powerVar = AI_SHOOT_POWER * (0.8 + Math.random() * 0.4)
         doShoot(gs, p, powerVar)
@@ -241,7 +246,7 @@ function moveBall(gs: GS) {
         if (opp.stealLock > 0) continue
         if (Math.hypot(opp.x-p.x, opp.y-p.y) < PLAYER_R * 2 + 2) {
           for (const loser of gs.players) {
-            if (loser.team === p.team) loser.stealLock = 120
+            if (loser.team === p.team) loser.stealLock = 200
           }
           p.carryFrames = 0
           opp.carryFrames = 0
@@ -271,7 +276,7 @@ function moveBall(gs: GS) {
         gs.possessorId = p.id
         // Lock the other team so they can't immediately steal it back
         for (const opp of gs.players) {
-          if (opp.team !== p.team) opp.stealLock = 120
+          if (opp.team !== p.team) opp.stealLock = 200
         }
         return
       }
