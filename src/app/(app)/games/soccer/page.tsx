@@ -9,7 +9,7 @@ const GOAL_H = 200, GOAL_D = 85
 const GOAL_L = { x: FX - GOAL_D, y: FY + FH/2 - GOAL_H/2, w: GOAL_D, h: GOAL_H }
 const GOAL_R = { x: FX + FW,     y: FY + FH/2 - GOAL_H/2, w: GOAL_D, h: GOAL_H }
 const PLAYER_R = 12, BALL_R = 8
-const PLAYER_SPEED = 4.5, BALL_FRICTION = 0.965
+const PLAYER_SPEED = 3.0, BALL_FRICTION = 0.965
 const SHOOT_POWER = 22, AI_SHOOT_POWER = 17
 const CARRY_OFFSET = PLAYER_R + BALL_R + 1
 const GAME_DURATION = 90
