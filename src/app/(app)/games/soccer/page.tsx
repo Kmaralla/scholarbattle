@@ -180,14 +180,30 @@ function moveAI(gs: GS) {
       }
     } else if (p.id === chaser[p.team]) {
       tx = bx + (Math.random()-0.5)*20; ty = by + (Math.random()-0.5)*20
+      // Chase slower vs AI possessor so possession isn't immediately stolen
+      const oppPossessor = gs.possessorId !== null
+        ? gs.players.find(pl => pl.id === gs.possessorId)
+        : null
+      if (oppPossessor && oppPossessor.team !== p.team) {
+        spd = oppPossessor.isUser ? PLAYER_SPEED * 0.88 : PLAYER_SPEED * 0.65
+      }
     } else {
-      // Hold home position; actively move away if ball is too close
-      const distToBall = Math.hypot(p.x-bx, p.y-by)
-      if (distToBall < 95) {
-        const awayX = p.x-bx, awayY = p.y-by
-        const al = Math.hypot(awayX,awayY)||1
-        tx = p.x + (awayX/al) * (95-distToBall+15)
-        ty = p.y + (awayY/al) * (95-distToBall+15)
+      // LW/RW retreat to deep defense when opponent has ball or ball is free
+      const oppHasBall = gs.possessorId !== null &&
+        gs.players.some(pl => pl.id === gs.possessorId && pl.team !== p.team)
+      const ballFree = gs.possessorId === null
+      if ((p.role === 'LW' || p.role === 'RW') && (oppHasBall || ballFree)) {
+        tx = isBlue ? FX + FW * 0.15 : FX + FW * 0.85
+        ty = home[1]
+      } else {
+        // Hold home position; actively move away if ball is too close
+        const distToBall = Math.hypot(p.x-bx, p.y-by)
+        if (distToBall < 95) {
+          const awayX = p.x-bx, awayY = p.y-by
+          const al = Math.hypot(awayX,awayY)||1
+          tx = p.x + (awayX/al) * (95-distToBall+15)
+          ty = p.y + (awayY/al) * (95-distToBall+15)
+        }
       }
     }
 
@@ -225,7 +241,7 @@ function moveBall(gs: GS) {
         if (opp.stealLock > 0) continue
         if (Math.hypot(opp.x-p.x, opp.y-p.y) < PLAYER_R * 2 + 2) {
           for (const loser of gs.players) {
-            if (loser.team === p.team) loser.stealLock = 80
+            if (loser.team === p.team) loser.stealLock = 120
           }
           p.carryFrames = 0
           opp.carryFrames = 0
@@ -246,12 +262,18 @@ function moveBall(gs: GS) {
   if (b.y-BALL_R < FY)    { b.y=FY+BALL_R;    b.vy= Math.max(5, Math.abs(b.vy)) }
   if (b.y+BALL_R > FY+FH) { b.y=FY+FH-BALL_R; b.vy=-Math.max(5, Math.abs(b.vy)) }
 
-  // First player to touch free ball gains possession (respect pickup cooldown)
+  // First player to touch free ball gains possession (respect pickup cooldown + stealLock)
   if (gs.pickupCooldown <= 0) {
     for (const p of gs.players) {
+      if (p.stealLock > 0) continue
       if (Math.hypot(b.x-p.x, b.y-p.y) < PLAYER_R+BALL_R) {
         p.carryFrames = 0
-        gs.possessorId = p.id; return
+        gs.possessorId = p.id
+        // Lock the other team so they can't immediately steal it back
+        for (const opp of gs.players) {
+          if (opp.team !== p.team) opp.stealLock = 120
+        }
+        return
       }
     }
   }
