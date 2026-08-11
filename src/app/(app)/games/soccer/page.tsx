@@ -29,7 +29,7 @@ interface GS {
   score: { blue: number; red: number }; timeLeft: number; lastGoalTime: number
   animFrame: number | null; timerInterval: ReturnType<typeof setInterval> | null
   stuckFrames: number; possessorId: number | null
-  shootTrigger: boolean; sprintHeld: boolean
+  shootTrigger: boolean; dribbleFrames: number
   pickupCooldown: number  // frames ball can't be picked up after a kick
 }
 
@@ -95,10 +95,10 @@ function doShoot(gs: GS, shooter: Player, power: number, aimX?: number, aimY?: n
 function moveUser(gs: GS) {
   const u = gs.players.find(p => p.isUser)!
   let dx=0, dy=0
-  if (gs.keys.has('ArrowLeft') || gs.keys.has('a'))  dx -= 1
-  if (gs.keys.has('ArrowRight')|| gs.keys.has('d'))  dx += 1
-  if (gs.keys.has('ArrowUp')   || gs.keys.has('w'))  dy -= 1
-  if (gs.keys.has('ArrowDown') || gs.keys.has('s'))  dy += 1
+  if (gs.keys.has('ArrowLeft'))  dx -= 1
+  if (gs.keys.has('ArrowRight')) dx += 1
+  if (gs.keys.has('ArrowUp'))    dy -= 1
+  if (gs.keys.has('ArrowDown'))  dy += 1
   if (gs.touch.active) {
     const MAX = 40
     dx += Math.max(-1, Math.min(1, gs.touch.dx / MAX))
@@ -106,7 +106,9 @@ function moveUser(gs: GS) {
   }
   const len = Math.hypot(dx, dy)
   const hasBall = gs.possessorId === u.id
-  const spd = (gs.sprintHeld && hasBall) ? PLAYER_SPEED * 1.45 : PLAYER_SPEED
+  // Dribble: burst of speed when triggered
+  if (gs.dribbleFrames > 0) gs.dribbleFrames--
+  const spd = (gs.dribbleFrames > 0 && hasBall) ? PLAYER_SPEED * 1.6 : PLAYER_SPEED
   if (len > 0) {
     u.vx = dx/len*spd; u.vy = dy/len*spd
     u.facingX = dx/len; u.facingY = dy/len
@@ -454,9 +456,8 @@ export default function SoccerPage() {
     if (!document.fullscreenElement) wrapperRef.current?.requestFullscreen()
     else document.exitFullscreen()
   }
-  function triggerShoot() { if (gsRef.current) gsRef.current.shootTrigger = true }
-  function startSprint()  { if (gsRef.current) gsRef.current.sprintHeld = true  }
-  function stopSprint()   { if (gsRef.current) gsRef.current.sprintHeld = false }
+  function triggerShoot()  { if (gsRef.current) gsRef.current.shootTrigger = true }
+  function triggerDribble() { if (gsRef.current) gsRef.current.dribbleFrames = 35 }
 
   useEffect(() => {
     if (phase !== 'play') return
@@ -478,21 +479,18 @@ export default function SoccerPage() {
       stuckFrames: 0,
       possessorId: null,
       shootTrigger: false,
-      sprintHeld: false,
+      dribbleFrames: 0,
       pickupCooldown: 0,
     }
     gsRef.current = gs
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d',' '].includes(e.key)) e.preventDefault()
+      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault()
       gs.keys.add(e.key)
-      if (e.key === ' ')     gs.shootTrigger = true
-      if (e.key === 'Shift') gs.sprintHeld   = true
+      if (e.key === ' ') gs.shootTrigger = true
+      if (e.key === 'x' || e.key === 'X') gs.dribbleFrames = 35
     }
-    const onKeyUp = (e: KeyboardEvent) => {
-      gs.keys.delete(e.key)
-      if (e.key === 'Shift') gs.sprintHeld = false
-    }
+    const onKeyUp = (e: KeyboardEvent) => { gs.keys.delete(e.key) }
     window.addEventListener('keydown', onKeyDown)
     window.addEventListener('keyup',   onKeyUp)
 
@@ -633,7 +631,7 @@ export default function SoccerPage() {
           {/* Action buttons */}
           <div className="flex gap-3 px-1 pb-2">
             <button
-              onPointerDown={startSprint} onPointerUp={stopSprint} onPointerLeave={stopSprint}
+              onPointerDown={triggerDribble}
               className="flex-1 py-5 rounded-2xl font-black text-white text-lg bg-indigo-600/70 hover:bg-indigo-500/80 border border-indigo-400/30 active:scale-95 transition-all select-none touch-none"
             >
               💨 Dribble
@@ -650,7 +648,7 @@ export default function SoccerPage() {
             </button>
           </div>
 
-          <p className="text-white/25 text-xs text-center pb-1">WASD/arrows to move · Space = shoot · Shift = sprint</p>
+          <p className="text-white/25 text-xs text-center pb-1">Arrow keys to move · Space = shoot · X = dribble</p>
         </div>
       )}
 
