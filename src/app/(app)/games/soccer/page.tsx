@@ -82,8 +82,7 @@ function doShoot(gs: GS, shooter: Player, power: number, aimX?: number, aimY?: n
   gs.ball.x  = shooter.x + dx/len * (CARRY_OFFSET + 4)
   gs.ball.y  = shooter.y + dy/len * (CARRY_OFFSET + 4)
   gs.possessorId = null
-  gs.pickupCooldown = 30  // 0.5s before anyone can pick up
-  // stealLock per player intentionally NOT reset — shooter earned a cooldown-free ball
+  gs.pickupCooldown = 50  // ~0.83s so ball travels far from the cluster before pickup
 }
 
 // ── Move user ──────────────────────────────────────────────────────────────
@@ -147,10 +146,18 @@ function moveAI(gs: GS) {
 
     if (p.role === 'GK') {
       if (hasBall) {
-        // Clear immediately toward midfield — avoids oscillation bug
-        const midX = FX + FW/2 + (isBlue ? 60 : -60)
-        const midY = FY + FH/2 + (Math.random()-0.5)*100
-        doShoot(gs, p, AI_SHOOT_POWER * 0.75, midX, midY)
+        p.carryFrames++
+        // Dribble toward own penalty-area exit for 25 frames before clearing —
+        // prevents the instant-clear-then-immediate-pickup loop near goal
+        if (p.carryFrames >= 25) {
+          const midX = FX + FW/2 + (isBlue ? 80 : -80)
+          const midY = FY + FH/2 + (Math.random()-0.5)*80
+          doShoot(gs, p, AI_SHOOT_POWER, midX, midY)
+          p.carryFrames = 0
+        } else {
+          tx = isBlue ? FX+90 : FX+FW-90
+          ty = FY + FH/2
+        }
       } else {
         tx = isBlue ? FX+40 : FX+FW-40
         ty = Math.max(FY+GOAL_H/2, Math.min(FY+FH-GOAL_H/2, by))
@@ -166,7 +173,7 @@ function moveAI(gs: GS) {
         doShoot(gs, p, AI_SHOOT_POWER)
         p.carryFrames = 0
       } else {
-        tx = goalX; ty = FY+FH/2; spd = PLAYER_SPEED * 0.95
+        tx = goalX; ty = FY+FH/2; spd = PLAYER_SPEED * 1.2  // faster than chaser so possessor can escape
       }
     } else if (p.id === chaser[p.team]) {
       tx = bx; ty = by
