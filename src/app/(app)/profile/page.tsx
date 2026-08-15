@@ -6,6 +6,7 @@ import { AvatarPicker } from '@/components/profile/AvatarPicker'
 import { ColorsSidePanel } from '@/components/profile/ColorsSidePanel'
 import { BadgesSection } from '@/components/profile/BadgesSection'
 import { ReportCardsButton } from '@/components/profile/ReportCardsButton'
+import { GradePicker } from '@/components/profile/GradePicker'
 import type { PrestigeMap } from '@/lib/badges'
 
 const TIER_COLORS: Record<string, string> = {
@@ -86,13 +87,13 @@ export default async function ProfilePage() {
         {[
           { label: 'ELO Rating', value: profile.elo_rating },
           { label: 'Rank',       value: tier.charAt(0).toUpperCase() + tier.slice(1) },
-          { label: 'Grade',      value: `Grade ${profile.grade_level}` },
         ].map(({ label, value }) => (
           <div key={label} className="bg-white/5 border border-white/10 rounded-xl p-3">
             <p className="text-sm font-black text-white">{value}</p>
             <p className="text-[10px] text-white/40 mt-0.5">{label}</p>
           </div>
         ))}
+        <GradePicker userId={user.id} currentGrade={profile.grade_level} />
       </div>
 
       {/* Interactive badges section with prestige support */}
