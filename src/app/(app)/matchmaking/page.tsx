@@ -304,45 +304,50 @@ export default function MatchmakingPage() {
   // ── Bot flow ──────────────────────────────────────────────────
   if (mode === 'bot') {
     return (
-      <div className="max-w-lg mx-auto p-4 space-y-4">
+      <div className="max-w-lg mx-auto p-4 space-y-3">
         <div className="flex items-center gap-3">
           <button onClick={() => setMode('hub')} className="text-white/40 hover:text-white text-sm font-semibold transition">← Back</button>
           <h1 className="text-xl font-black text-white">🤖 vs Scholar Bot</h1>
         </div>
 
-        {/* Difficulty + Time pickers */}
         <Card>
-          <CardContent className="p-5 space-y-4">
+          <CardContent className="p-4 space-y-3">
+            {/* Difficulty — compact row */}
             <div>
-              <p className="text-sm font-bold text-white/60 uppercase tracking-wider text-xs mb-2">Difficulty</p>
-              <div className="grid grid-cols-3 gap-2">
+              <p className="text-xs font-bold text-white/50 uppercase tracking-wider mb-1.5">Difficulty</p>
+              <div className="flex gap-2">
                 {BOT_OPTIONS.map(opt => (
                   <button
                     key={opt.difficulty}
                     onClick={() => setBotDiff(opt.difficulty)}
                     className={cn(
-                      'rounded-2xl p-3 border text-center transition-all',
+                      'flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all',
                       botDiff === opt.difficulty
-                        ? 'bg-white/15 border-white/30'
-                        : 'bg-white/5 border-white/10 hover:bg-white/10'
+                        ? 'bg-white/15 border-white/35 text-white'
+                        : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
                     )}
                   >
-                    <p className="text-2xl mb-1">{opt.emoji}</p>
-                    <p className="text-xs font-black text-white">{opt.label}</p>
-                    <p className="text-[10px] text-white/40 mt-0.5 leading-tight">{opt.desc}</p>
+                    <span className="text-lg leading-none">{opt.emoji}</span>
+                    <span className="text-xs font-black">{opt.label}</span>
                   </button>
                 ))}
               </div>
+              {/* Description for selected difficulty */}
+              <p className="text-[11px] text-white/40 mt-1.5 pl-1">
+                {BOT_OPTIONS.find(o => o.difficulty === botDiff)?.desc}
+              </p>
             </div>
+
+            {/* Time per question */}
             <div>
-              <p className="text-sm font-bold text-white/60 uppercase tracking-wider text-xs mb-2">Time per Question</p>
+              <p className="text-xs font-bold text-white/50 uppercase tracking-wider mb-1.5">Time per Question</p>
               <div className="flex gap-2">
                 {[10, 15, 20, 30].map(t => (
                   <button
                     key={t}
                     onClick={() => setTimeoutSec(t)}
                     className={cn(
-                      'flex-1 py-2.5 rounded-xl border-2 text-sm font-black transition-all',
+                      'flex-1 py-2 rounded-xl border-2 text-sm font-black transition-all',
                       timeoutSec === t
                         ? 'border-indigo-400 bg-indigo-500/20 text-white'
                         : 'border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white'
@@ -353,13 +358,12 @@ export default function MatchmakingPage() {
                 ))}
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardContent className="p-5 space-y-2">
-            <p className="text-sm text-white/50">Pick a subject and grade, then battle the bot.</p>
-            <TopicPicker onSelect={startBotBattle} />
+            {/* Divider + topic picker */}
+            <div className="border-t border-white/8 pt-3">
+              <p className="text-xs text-white/40 mb-3">Pick a subject and grade, then battle the bot.</p>
+              <TopicPicker onSelect={startBotBattle} />
+            </div>
           </CardContent>
         </Card>
       </div>
