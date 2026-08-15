@@ -2,8 +2,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Question, User, Subject } from '@/types'
-import { cn } from '@/lib/utils'
-import { gradeLabel } from '@/lib/utils'
+import { cn, gradeLabel, clipOptionDisplay } from '@/lib/utils'
 import { sounds } from '@/lib/sounds'
 
 const TOTAL_QUESTIONS = 10
@@ -370,34 +369,37 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
 
         {q.type === 'multiple_choice' && shuffledOptions.length > 0 && (
           <div className="grid gap-2.5">
-            {shuffledOptions.map((opt, i) => {
-              const isSelected = selectedAnswer === opt
-              const correct = showResult && opt === q.correct_answer
-              const wrong   = showResult && isSelected && opt !== q.correct_answer
-              const labels = ['A', 'B', 'C', 'D']
-              return (
-                <button
-                  key={opt}
-                  disabled={answered}
-                  onClick={() => handleChoice(opt)}
-                  className={cn(
-                    'w-full text-left px-4 py-3 rounded-2xl border text-sm font-semibold transition-all flex items-center gap-3',
-                    !answered && !isSelected && 'border-white/10 bg-white/5 text-white/90 hover:border-white/30 hover:bg-white/10',
-                    !showResult && isSelected && 'border-white/40 bg-white/15 text-white',
-                    correct && 'border-green-700/50 bg-green-900/30 text-green-300',
-                    wrong   && 'border-red-700/50 bg-red-900/30 text-red-300',
-                    !correct && !wrong && !isSelected && answered && 'border-slate-600 bg-slate-600/30 text-slate-400'
-                  )}
-                >
-                  <span className={cn('w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0',
-                    correct ? 'bg-green-700/60 text-green-200' : wrong ? 'bg-red-700/60 text-red-200' : isSelected ? 'bg-white/20 text-white' : 'bg-white/10 text-white/60'
-                  )}>{labels[i]}</span>
-                  <span>{opt}</span>
-                  {correct && <span className="ml-auto text-green-400 font-black">✓</span>}
-                  {wrong   && <span className="ml-auto text-red-400 font-black">✗</span>}
-                </button>
-              )
-            })}
+            {(() => {
+              const displayOpts = clipOptionDisplay(shuffledOptions)
+              return shuffledOptions.map((opt, i) => {
+                const isSelected = selectedAnswer === opt
+                const correct = showResult && opt === q.correct_answer
+                const wrong   = showResult && isSelected && opt !== q.correct_answer
+                const labels = ['A', 'B', 'C', 'D']
+                return (
+                  <button
+                    key={opt}
+                    disabled={answered}
+                    onClick={() => handleChoice(opt)}
+                    className={cn(
+                      'w-full text-left px-4 py-3 rounded-2xl border text-sm font-semibold transition-all flex items-center gap-3 min-h-[52px]',
+                      !answered && !isSelected && 'border-white/10 bg-white/5 text-white/90 hover:border-white/30 hover:bg-white/10',
+                      !showResult && isSelected && 'border-white/40 bg-white/15 text-white',
+                      correct && 'border-green-700/50 bg-green-900/30 text-green-300',
+                      wrong   && 'border-red-700/50 bg-red-900/30 text-red-300',
+                      !correct && !wrong && !isSelected && answered && 'border-slate-600 bg-slate-600/30 text-slate-400'
+                    )}
+                  >
+                    <span className={cn('w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0',
+                      correct ? 'bg-green-700/60 text-green-200' : wrong ? 'bg-red-700/60 text-red-200' : isSelected ? 'bg-white/20 text-white' : 'bg-white/10 text-white/60'
+                    )}>{labels[i]}</span>
+                    <span>{displayOpts[i]}</span>
+                    {correct && <span className="ml-auto text-green-400 font-black">✓</span>}
+                    {wrong   && <span className="ml-auto text-red-400 font-black">✗</span>}
+                  </button>
+                )
+              })
+            })()}
           </div>
         )}
 

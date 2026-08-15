@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { getQuestionsForBattle } from '@/lib/questions'
 import { Subject } from '@/types'
+import { clipOptionDisplay } from '@/lib/utils'
 
 const TIME_PER_Q = 8
 
@@ -148,21 +149,24 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
       {/* Answers */}
       {opts ? (
         <div className="grid grid-cols-2 gap-2">
-          {opts.map(opt => (
-            <button
-              key={opt}
-              onClick={() => select(opt)}
-              disabled={selected !== null && selected !== opt}
-              className={`py-4 px-3 rounded-2xl text-sm font-bold text-left transition-all ${
-                selected === opt
-                  ? opt === q.correct_answer ? 'bg-green-500 text-white border-2 border-green-400' : 'bg-red-500 text-white border-2 border-red-400'
-                  : selected !== null && opt === q.correct_answer ? 'bg-green-500/20 text-green-300 border-2 border-green-400/40'
-                  : 'bg-white/8 border-2 border-white/10 hover:border-rose-400/60 hover:bg-rose-500/10 text-white'
-              } disabled:cursor-not-allowed`}
-            >
-              {opt}
-            </button>
-          ))}
+          {(() => {
+            const displayOpts = clipOptionDisplay(opts)
+            return opts.map((opt, i) => (
+              <button
+                key={opt}
+                onClick={() => select(opt)}
+                disabled={selected !== null && selected !== opt}
+                className={`min-h-[60px] py-3 px-3 rounded-2xl text-sm font-bold text-left transition-all ${
+                  selected === opt
+                    ? opt === q.correct_answer ? 'bg-green-500 text-white border-2 border-green-400' : 'bg-red-500 text-white border-2 border-red-400'
+                    : selected !== null && opt === q.correct_answer ? 'bg-green-500/20 text-green-300 border-2 border-green-400/40'
+                    : 'bg-white/8 border-2 border-white/10 hover:border-rose-400/60 hover:bg-rose-500/10 text-white'
+                } disabled:cursor-not-allowed`}
+              >
+                {displayOpts[i]}
+              </button>
+            ))
+          })()}
         </div>
       ) : (
         <form onSubmit={e => { e.preventDefault(); submitSelected() }} className="space-y-2">

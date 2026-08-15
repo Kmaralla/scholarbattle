@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { cn } from '@/lib/utils'
+import { cn, clipOptionDisplay } from '@/lib/utils'
 import { getQuestionsForBattle } from '@/lib/questions'
 import { Subject } from '@/types'
 import { createClient } from '@/lib/supabase/client'
@@ -465,40 +465,43 @@ export function TrainingSession({
           {/* Multiple choice (non-flashcard) */}
           {!isFlashcard && q.type === 'multiple_choice' && opts.length > 0 && (
             <div className="grid gap-2.5">
-              {opts.map((opt, i) => {
-                const isSelected = selectedAnswer === opt
-                const correct = showResult && opt === q.correct_answer
-                const wrong = showResult && isSelected && opt !== q.correct_answer
-                const eliminated = eliminatedOptions.includes(opt)
-                const labels = ['A', 'B', 'C', 'D']
-                const labelColors = ['bg-indigo-500/40 text-indigo-200', 'bg-violet-500/40 text-violet-200', 'bg-sky-500/40 text-sky-200', 'bg-pink-500/40 text-pink-200']
-                return (
-                  <button
-                    key={opt}
-                    disabled={answered || eliminated}
-                    onClick={() => handleChoice(opt)}
-                    className={cn(
-                      'w-full text-left px-4 py-3 rounded-2xl border text-sm font-semibold transition-all flex items-center gap-3',
-                      eliminated && 'border-slate-700 bg-slate-700/30 text-slate-600 line-through cursor-not-allowed opacity-50',
-                      !eliminated && !answered && !isSelected && 'border-slate-500 bg-slate-500/50 text-slate-100 hover:border-indigo-400 hover:bg-indigo-900/30',
-                      !eliminated && !showResult && isSelected && 'border-indigo-400 bg-indigo-800/50 text-indigo-100',
-                      !eliminated && correct && 'border-green-500 bg-green-900/50 text-green-200',
-                      !eliminated && wrong && 'border-red-400 bg-red-900/40 text-red-200',
-                      !eliminated && !correct && !wrong && !isSelected && answered && 'border-slate-600 bg-slate-600/30 text-slate-400'
-                    )}
-                  >
-                    <span className={cn('w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0',
-                      eliminated ? 'bg-slate-600 text-slate-500' :
-                      correct ? 'bg-green-500 text-white' : wrong ? 'bg-red-500 text-white' : isSelected ? 'bg-indigo-500 text-white' : labelColors[i]
-                    )}>{labels[i]}</span>
-                    <span>{opt}</span>
-                    {correct && <span className="ml-auto text-green-400 font-black">✓</span>}
-                    {wrong && <span className="ml-auto text-red-400 font-black">✗</span>}
-                    {eliminated && <span className="ml-auto text-xs text-slate-500">💡 hint</span>}
-                  </button>
-                )
-              })}
-                </div>
+              {(() => {
+                const displayOpts = clipOptionDisplay(opts)
+                return opts.map((opt, i) => {
+                  const isSelected = selectedAnswer === opt
+                  const correct = showResult && opt === q.correct_answer
+                  const wrong = showResult && isSelected && opt !== q.correct_answer
+                  const eliminated = eliminatedOptions.includes(opt)
+                  const labels = ['A', 'B', 'C', 'D']
+                  const labelColors = ['bg-indigo-500/40 text-indigo-200', 'bg-violet-500/40 text-violet-200', 'bg-sky-500/40 text-sky-200', 'bg-pink-500/40 text-pink-200']
+                  return (
+                    <button
+                      key={opt}
+                      disabled={answered || eliminated}
+                      onClick={() => handleChoice(opt)}
+                      className={cn(
+                        'w-full text-left px-4 py-3 rounded-2xl border text-sm font-semibold transition-all flex items-center gap-3 min-h-[52px]',
+                        eliminated && 'border-slate-700 bg-slate-700/30 text-slate-600 line-through cursor-not-allowed opacity-50',
+                        !eliminated && !answered && !isSelected && 'border-slate-500 bg-slate-500/50 text-slate-100 hover:border-indigo-400 hover:bg-indigo-900/30',
+                        !eliminated && !showResult && isSelected && 'border-indigo-400 bg-indigo-800/50 text-indigo-100',
+                        !eliminated && correct && 'border-green-500 bg-green-900/50 text-green-200',
+                        !eliminated && wrong && 'border-red-400 bg-red-900/40 text-red-200',
+                        !eliminated && !correct && !wrong && !isSelected && answered && 'border-slate-600 bg-slate-600/30 text-slate-400'
+                      )}
+                    >
+                      <span className={cn('w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0',
+                        eliminated ? 'bg-slate-600 text-slate-500' :
+                        correct ? 'bg-green-500 text-white' : wrong ? 'bg-red-500 text-white' : isSelected ? 'bg-indigo-500 text-white' : labelColors[i]
+                      )}>{labels[i]}</span>
+                      <span>{displayOpts[i]}</span>
+                      {correct && <span className="ml-auto text-green-400 font-black">✓</span>}
+                      {wrong && <span className="ml-auto text-red-400 font-black">✗</span>}
+                      {eliminated && <span className="ml-auto text-xs text-slate-500">💡 hint</span>}
+                    </button>
+                  )
+                })
+              })()}
+            </div>
           )}
 
           {/* Submit button for multiple choice */}
