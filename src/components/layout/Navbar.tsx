@@ -142,46 +142,43 @@ export function Navbar() {
       {/* Desktop sidebar */}
       <nav className="hidden md:flex flex-col w-64 h-screen bg-[var(--bg-nav)] border-r border-white/10 flex-shrink-0 overflow-visible">
         {/* Logo */}
-        <div className="px-6 py-6 border-b border-white/10">
+        <div className="px-5 py-4 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
-              <Swords className="w-5 h-5 text-white/70" />
+            <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
+              <Swords className="w-4 h-4 text-white/70" />
             </div>
             <div className="flex-1">
-              <p className="font-black text-white text-lg leading-tight">Scholar</p>
-              <p className="font-black text-white/40 text-lg leading-tight -mt-1">Battle</p>
+              <p className="font-black text-white text-sm leading-tight">Scholar</p>
+              <p className="font-black text-white/40 text-sm leading-tight -mt-0.5">Battle</p>
             </div>
             <button
               onClick={toggle}
               title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              className="w-9 h-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center hover:bg-white/20 transition-all"
+              className="w-8 h-8 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center hover:bg-white/20 transition-all"
             >
               {theme === 'dark'
-                ? <Sun className="w-4 h-4 text-yellow-300" />
-                : <Moon className="w-4 h-4 text-indigo-600" />}
+                ? <Sun className="w-3.5 h-3.5 text-yellow-300" />
+                : <Moon className="w-3.5 h-3.5 text-indigo-600" />}
             </button>
           </div>
           {coins !== null && (
-            <div className="mt-4 flex items-center gap-2 bg-yellow-400/10 border border-yellow-400/20 rounded-2xl px-4 py-2">
-              <span className="text-xl">🪙</span>
-              <div>
-                <p className="text-xs text-yellow-400/60 font-medium">Your Coins</p>
-                <p className="text-lg font-black text-yellow-300">{coins}</p>
-              </div>
+            <div className="mt-2.5 flex items-center justify-between gap-2 bg-yellow-400/10 border border-yellow-400/20 rounded-xl px-3 py-1.5">
+              <span className="text-xs text-yellow-400/60 font-medium">🪙 Coins</span>
+              <span className="text-sm font-black text-yellow-300">{coins}</span>
             </div>
           )}
         </div>
 
         {/* Nav sections */}
-        <div className="flex-1 overflow-visible p-3 pt-4 space-y-5">
+        <div className="flex-1 overflow-visible p-2.5 pt-2.5 space-y-2.5">
           {SECTIONS.map((section, si) => (
             <div key={si}>
               {section.label && (
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/25 px-4 mb-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/25 px-4 mb-1">
                   {section.label}
                 </p>
               )}
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {section.items.map(({ href, label, emoji, desc }) => {
                   const active = path.startsWith(href)
                   const isFriends = href === '/friends'
@@ -190,13 +187,13 @@ export function Navbar() {
                       <Link
                         href={href}
                         className={cn(
-                          'flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-bold text-sm',
+                          'flex items-center gap-3 px-4 py-2 rounded-xl transition-all font-bold text-sm',
                           active
                             ? 'bg-white/10 border border-white/15 text-white'
                             : 'text-white/50 hover:text-white hover:bg-white/5'
                         )}
                       >
-                        <span className="text-xl">{emoji}</span>
+                        <span className="text-lg">{emoji}</span>
                         <span>{label}</span>
                         {isFriends && pendingInvites > 0 && (
                           <span className="ml-1 min-w-[20px] h-5 rounded-full bg-red-500 text-white text-xs font-black flex items-center justify-center px-1.5">
@@ -217,13 +214,13 @@ export function Navbar() {
                   )
                 })}
               </div>
-              {si < SECTIONS.length - 1 && <div className="mt-4 border-t border-white/5" />}
+              {si < SECTIONS.length - 1 && <div className="mt-2.5 border-t border-white/5" />}
             </div>
           ))}
         </div>
 
-        <div className="p-4 border-t border-white/10">
-          <p className="text-white/20 text-xs text-center">ScholarBattle v1.0</p>
+        <div className="px-4 py-2 border-t border-white/10">
+          <p className="text-white/20 text-[10px] text-center">ScholarBattle v1.0</p>
         </div>
       </nav>
     </>
