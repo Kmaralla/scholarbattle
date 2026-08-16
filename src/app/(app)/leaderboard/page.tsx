@@ -113,7 +113,7 @@ export default async function LeaderboardPage({
           <CardContent className="p-0">
             {players.map((player, i) => {
               const isMe = player.id === user?.id
-              const tier = getDisplayTier(player.elo_rating, (player as any).rank_tier)
+              const tier = getDisplayTier(player.elo_rating)
               const winRate = player.total_battles > 0
                 ? Math.round((player.total_wins / player.total_battles) * 100)
                 : 0

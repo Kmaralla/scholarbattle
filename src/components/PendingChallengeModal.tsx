@@ -19,7 +19,6 @@ const TIER_META: Record<string, { color: string; emoji: string }> = {
   gold:     { color: '#d97706', emoji: '🥇' },
   platinum: { color: '#06b6d4', emoji: '💎' },
   diamond:  { color: '#3b82f6', emoji: '💠' },
-  legend:   { color: '#fbbf24', emoji: '🌟' },
 }
 
 export function PendingChallengeModal({ myUsername }: { myUsername: string }) {
@@ -49,7 +48,8 @@ export function PendingChallengeModal({ myUsername }: { myUsername: string }) {
 
   if (!challenger || dismissed) return null
 
-  const tier = challenger.rank_tier ?? (challenger.elo_rating >= 1800 ? 'diamond' : challenger.elo_rating >= 1600 ? 'platinum' : challenger.elo_rating >= 1400 ? 'gold' : challenger.elo_rating >= 1200 ? 'silver' : 'bronze')
+  const rawTier = challenger.rank_tier === 'legend' ? null : challenger.rank_tier
+  const tier = rawTier ?? (challenger.elo_rating >= 1800 ? 'diamond' : challenger.elo_rating >= 1600 ? 'platinum' : challenger.elo_rating >= 1400 ? 'gold' : challenger.elo_rating >= 1200 ? 'silver' : 'bronze')
   const meta = TIER_META[tier] ?? TIER_META['bronze']
   const winRate = challenger.total_battles > 0
     ? Math.round((challenger.total_wins / challenger.total_battles) * 100)

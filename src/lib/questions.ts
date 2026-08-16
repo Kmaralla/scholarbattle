@@ -989,27 +989,3 @@ export function pickQuestionIndices(subject: Subject, gradeLevel: number, count 
 export function getQuestionsByIndices(indices: number[]): Omit<Question, 'id'>[] {
   return indices.map(i => SEED_QUESTIONS[i]).filter(Boolean)
 }
-
-// Hard questions for badge prestige challenges (difficulty 3-4, grades 9-12).
-// Pass null subject to pull from all subjects.
-export function getPrestigeQuestions(subject: Subject | null, count: number): Omit<Question, 'id'>[] {
-  const HARD_GRADES = [9, 10, 11, 12]
-  let pool = SEED_QUESTIONS.filter(
-    q => (subject === null || q.subject === subject) &&
-         HARD_GRADES.includes(q.grade_level) &&
-         q.type === 'multiple_choice' &&
-         (q.difficulty ?? 2) >= 3
-  )
-  // Shouldn't happen, but fall back to all difficulty if pool too small
-  if (pool.length < count) {
-    pool = SEED_QUESTIONS.filter(
-      q => (subject === null || q.subject === subject) && HARD_GRADES.includes(q.grade_level)
-    )
-  }
-  const arr = [...pool]
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]]
-  }
-  return arr.slice(0, count)
-}

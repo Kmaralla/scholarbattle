@@ -5,7 +5,6 @@ import { getDisplayTier, RANK_THRESHOLDS, type RankTier } from '@/types'
 import { Swords, Trophy, Users, Gamepad2, Target } from 'lucide-react'
 import Link from 'next/link'
 import { TierBanner } from '@/components/dashboard/TierBanner'
-import { DiamondUnlockModal } from '@/components/dashboard/DiamondUnlockModal'
 import { StreakBadge } from '@/components/StreakBadge'
 import { PendingChallengeModal } from '@/components/PendingChallengeModal'
 
@@ -17,9 +16,8 @@ export default async function DashboardPage() {
   const { data: profile } = await supabase.from('users').select('*').eq('id', user.id).single()
   if (!profile) redirect('/onboarding')
 
-  const tier = getDisplayTier(profile.elo_rating, profile.rank_tier) as RankTier
-  const baseTier = tier === 'legend' ? 'diamond' : tier
-  const [minElo, maxElo] = RANK_THRESHOLDS[baseTier]
+  const tier = getDisplayTier(profile.elo_rating) as RankTier
+  const [minElo, maxElo] = RANK_THRESHOLDS[tier]
   const progress = maxElo === 9999 ? 100 : Math.round(((profile.elo_rating - minElo) / (maxElo - minElo)) * 100)
   const winRate = profile.total_battles > 0 ? Math.round((profile.total_wins / profile.total_battles) * 100) : 0
 
@@ -36,7 +34,6 @@ export default async function DashboardPage() {
     <div className="max-w-2xl mx-auto p-4 space-y-5 pb-24 md:pb-6">
 
       <PendingChallengeModal myUsername={profile.username} />
-      <DiamondUnlockModal tier={tier} />
 
       {/* Hero banner */}
       <TierBanner
@@ -45,7 +42,6 @@ export default async function DashboardPage() {
         eloRating={profile.elo_rating}
         coins={(profile as any).coins}
         progress={progress}
-        diamondWins={(profile as any).diamond_wins ?? 0}
       />
 
       {/* Streak */}

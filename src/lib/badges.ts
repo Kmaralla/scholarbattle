@@ -1,48 +1,5 @@
 export type BadgeRarity = 'common' | 'rare' | 'epic' | 'legendary'
 
-// 0 = just earned (bronze), 1 = silver prestige, 2 = gold prestige
-export type PrestigeLevel = 0 | 1 | 2
-
-export type PrestigeMap = Record<string, PrestigeLevel>
-
-export function getPrestigeLevel(badgeId: string, prestigeMap: PrestigeMap): PrestigeLevel {
-  return prestigeMap[badgeId] ?? 0
-}
-
-// Which subject to draw hard questions from for each badge's prestige challenge
-// null = mixed (all subjects)
-export const BADGE_PRESTIGE_SUBJECT: Record<string, string | null> = {
-  first_battle:     null,
-  first_win:        null,
-  math_warrior:     'math',
-  science_warrior:  'science',
-  history_warrior:  'history',
-  english_warrior:  'english',
-  sharp_shooter:    null,
-  perfect:          null,
-  veteran:          null,
-  ten_wins:         null,
-  bot_slayer:       null,
-  silver_rank:      null,
-  gold_rank:        null,
-  twenty_five_wins: null,
-  platinum_rank:    null,
-  diamond_rank:     null,
-  fifty_wins:       null,
-}
-
-export const PRESTIGE_RULES = {
-  silver: { questions: 5, seconds: 12, need: 4, label: '4 of 5 correct • 12 s each' },
-  gold:   { questions: 5, seconds:  8, need: 5, label: '5 of 5 correct • 8 s each'  },
-} as const
-
-// Ring / glow overlaid on top of the rarity card for prestige level
-export const PRESTIGE_STYLES: Record<PrestigeLevel, { ring: string; glow: string; label: string; emoji: string }> = {
-  0: { ring: '',                              glow: '',                        label: 'Bronze', emoji: '🥉' },
-  1: { ring: 'ring-2 ring-slate-300/80',      glow: 'shadow-slate-300/30',     label: 'Silver', emoji: '🥈' },
-  2: { ring: 'ring-2 ring-yellow-400/90',     glow: 'shadow-yellow-400/50',    label: 'Gold',   emoji: '🥇' },
-}
-
 export type Badge = {
   id: string
   name: string

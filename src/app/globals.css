@@ -63,42 +63,6 @@ body {
 }
 .btn-pop:active { animation: pop 0.2s ease; }
 
-/* ── Legend rank ─────────────────────────────────────────────── */
-@keyframes legend-hue {
-  0%   { filter: hue-rotate(0deg)   brightness(1.1); }
-  50%  { filter: hue-rotate(180deg) brightness(1.2); }
-  100% { filter: hue-rotate(360deg) brightness(1.1); }
-}
-@keyframes legend-glow-pulse {
-  0%, 100% { box-shadow: 0 0 12px 2px rgba(251,191,36,0.6), 0 0 30px 4px rgba(139,92,246,0.4); }
-  33%       { box-shadow: 0 0 12px 2px rgba(236,72,153,0.6), 0 0 30px 4px rgba(6,182,212,0.4); }
-  66%       { box-shadow: 0 0 12px 2px rgba(16,185,129,0.6), 0 0 30px 4px rgba(251,191,36,0.4); }
-}
-
-/* Animated rainbow text for Legend rank labels */
-.legend-text {
-  background: linear-gradient(90deg, #fbbf24, #ec4899, #8b5cf6, #06b6d4, #10b981, #fbbf24);
-  background-size: 300% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 2.5s linear infinite;
-}
-
-/* Badge pill used in RankBadge for Legend */
-.legend-rank-badge {
-  background: linear-gradient(90deg, #fbbf24, #ec4899, #8b5cf6, #06b6d4, #10b981, #fbbf24);
-  background-size: 300% auto;
-  animation: shimmer 2.5s linear infinite;
-  color: #fff !important;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-}
-
-/* Animated border glow on card elements for Legend */
-.legend-card-glow {
-  animation: legend-glow-pulse 3s ease-in-out infinite;
-}
-
 /* ── Light mode overrides ───────────────────────────────────── */
 html.light body { background: #f0eeff !important; color: #1e1b4b !important; }
 

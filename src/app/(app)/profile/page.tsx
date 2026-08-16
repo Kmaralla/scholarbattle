@@ -7,7 +7,6 @@ import { ColorsSidePanel } from '@/components/profile/ColorsSidePanel'
 import { BadgesSection } from '@/components/profile/BadgesSection'
 import { ReportCardsButton } from '@/components/profile/ReportCardsButton'
 import { GradePicker } from '@/components/profile/GradePicker'
-import type { PrestigeMap } from '@/lib/badges'
 
 const TIER_COLORS: Record<string, string> = {
   bronze:   'from-orange-900/70 to-amber-800/50',
@@ -15,11 +14,10 @@ const TIER_COLORS: Record<string, string> = {
   gold:     'from-yellow-900/70 to-amber-800/50',
   platinum: 'from-cyan-900/70 to-teal-800/50',
   diamond:  'from-violet-900/70 to-indigo-800/50',
-  legend:   'from-yellow-800/60 to-purple-900/60',
 }
 
 const TIER_EMOJI: Record<string, string> = {
-  bronze: '🥉', silver: '🥈', gold: '🥇', platinum: '💎', diamond: '👑', legend: '🌟',
+  bronze: '🥉', silver: '🥈', gold: '🥇', platinum: '💎', diamond: '👑',
 }
 
 export default async function ProfilePage() {
@@ -30,12 +28,11 @@ export default async function ProfilePage() {
   const { data: profile } = await supabase.from('users').select('*').eq('id', user.id).single()
   if (!profile) redirect('/onboarding')
 
-  const tier = getDisplayTier(profile.elo_rating, profile.rank_tier)
+  const tier = getDisplayTier(profile.elo_rating)
   const winRate = profile.total_battles > 0
     ? Math.round((profile.total_wins / profile.total_battles) * 100)
     : 0
   const earnedBadges: string[] = (profile as any).badges ?? []
-  const prestigeMap: PrestigeMap = (profile as any).badge_prestige ?? {}
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-3 pb-24">
@@ -96,12 +93,7 @@ export default async function ProfilePage() {
         <GradePicker userId={user.id} currentGrade={profile.grade_level} />
       </div>
 
-      {/* Interactive badges section with prestige support */}
-      <BadgesSection
-        earnedBadges={earnedBadges}
-        prestigeMap={prestigeMap}
-        userId={user.id}
-      />
+      <BadgesSection earnedBadges={earnedBadges} />
 
       <ColorsSidePanel />
     </div>

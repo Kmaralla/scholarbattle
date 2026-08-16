@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { BattleRoom, type BotDifficulty, type QuestionResult } from '@/components/battle/BattleRoom'
 import { User, Question, Battle, Subject } from '@/types'
 import { getQuestionsForBattle, pickQuestionIndices, getQuestionsByIndices } from '@/lib/questions'
-import { calculateElo, getRankTier, LEGEND_DAYS_AT_DIAMOND, LEGEND_WINS_AT_DIAMOND } from '@/types'
+import { calculateElo, getRankTier } from '@/types'
 import { COIN_REWARDS } from '@/lib/games'
 import { checkNewBadges, BADGE_MAP } from '@/lib/badges'
 import { BadgeCard } from '@/components/BadgeCard'
@@ -157,57 +157,17 @@ export default function BattlePage() {
 
     const { data: myProfile, error: profileErr } = await supabase
       .from('users')
-      .select('elo_rating, rank_tier, total_wins, total_battles, diamond_since, diamond_wins')
+      .select('elo_rating, rank_tier, total_wins, total_battles')
       .eq('id', currentUser.id)
       .single()
     if (profileErr) console.error('[Battle] profile fetch failed:', profileErr.message)
     const currentElo = myProfile?.elo_rating ?? currentUser.elo_rating ?? 1000
-    const isAlreadyLegend = (myProfile as any)?.rank_tier === 'legend'
 
     // Fetch coins separately so a missing column doesn't break ELO updates
     const { data: coinsRow } = await supabase.from('users').select('coins, unlocked_games').eq('id', currentUser.id).single()
     const currentCoins = (coinsRow as any)?.coins ?? 0
     let eloDelta = 0
     let coinsEarned = 0
-
-    // Helper: build Legend-tracking fields to merge into any update
-    function buildLegendFields(newElo: number, won: boolean): Record<string, unknown> {
-      const fields: Record<string, unknown> = {}
-      const atDiamond = newElo >= 1800 || isAlreadyLegend
-      if (!atDiamond) return fields
-
-      // Reset diamond_since if they dropped below Diamond and just came back
-      const wasAtDiamond = (myProfile as any)?.rank_tier === 'diamond' || isAlreadyLegend
-      const currentDiamondSince = (myProfile as any)?.diamond_since ?? null
-      if (!wasAtDiamond) {
-        // Re-entering diamond — reset timer and wins
-        fields.diamond_since = new Date().toISOString()
-        fields.diamond_wins = 0
-      } else if (!currentDiamondSince) {
-        // First time ever reaching diamond
-        fields.diamond_since = new Date().toISOString()
-      }
-
-      // Increment diamond_wins on a win at Diamond
-      if (won) {
-        const prev = (myProfile as any)?.diamond_wins ?? 0
-        fields.diamond_wins = prev + 1
-      }
-
-      // Check if Legend conditions are now met (skip if already Legend)
-      if (!isAlreadyLegend) {
-        const diamondSince = fields.diamond_since as string ?? (myProfile as any)?.diamond_since
-        const diamondWinsNow = (fields.diamond_wins as number) ?? ((myProfile as any)?.diamond_wins ?? 0)
-        const daysSince = diamondSince
-          ? (Date.now() - new Date(diamondSince).getTime()) / (1000 * 60 * 60 * 24)
-          : 0
-        if (diamondWinsNow >= LEGEND_WINS_AT_DIAMOND || daysSince >= LEGEND_DAYS_AT_DIAMOND) {
-          fields.rank_tier = 'legend'
-        }
-      }
-
-      return fields
-    }
 
     if (isSolo) {
       const difficultyBonus: Record<string, number> = { easy: 6, medium: 10, hard: 16 }
@@ -220,14 +180,11 @@ export default function BattlePage() {
       coinsEarned = iWon ? baseReward : tied ? 0 : -Math.floor(baseReward / 2)
 
       const newElo = Math.max(100, currentElo + eloDelta)
-      const legendFields = buildLegendFields(newElo, iWon)
       const soloUpdate: Record<string, unknown> = {
         elo_rating: newElo,
-        // preserve 'legend' if already earned; otherwise compute from ELO
-        rank_tier: isAlreadyLegend ? 'legend' : (legendFields.rank_tier ?? getRankTier(newElo)),
+        rank_tier: getRankTier(newElo),
         total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
         total_battles: (myProfile?.total_battles ?? 0) + 1,
-        ...legendFields,
       }
       if ((coinsRow as any)?.coins !== undefined) soloUpdate.coins = Math.max(0, currentCoins + coinsEarned)
       const { error: updateErr } = await supabase.from('users').update(soloUpdate).eq('id', currentUser.id)
@@ -246,13 +203,11 @@ export default function BattlePage() {
         const myNewElo = iWon ? newWinnerElo : newLoserElo
         eloDelta = myNewElo - currentElo
 
-        const legendFields = buildLegendFields(myNewElo, iWon)
         const pvpUpdate: Record<string, unknown> = {
           elo_rating: myNewElo,
-          rank_tier: isAlreadyLegend ? 'legend' : (legendFields.rank_tier ?? getRankTier(myNewElo)),
+          rank_tier: getRankTier(myNewElo),
           total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
           total_battles: (myProfile?.total_battles ?? 0) + 1,
-          ...legendFields,
         }
         if ((coinsRow as any)?.coins !== undefined) pvpUpdate.coins = Math.max(0, currentCoins + coinsEarned)
         const { error: pvpErr } = await supabase.from('users').update(pvpUpdate).eq('id', currentUser.id)

@@ -2,10 +2,6 @@
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
 import { FlashcardsGame } from '@/components/games/FlashcardsGame'
-import { WordScrambleGame } from '@/components/games/WordScrambleGame'
-import { MathSprintGame } from '@/components/games/MathSprintGame'
-import { HangmanGame } from '@/components/games/HangmanGame'
-import { MemoryMatchGame } from '@/components/games/MemoryMatchGame'
 import { SpeedQuizGame } from '@/components/games/SpeedQuizGame'
 import { Subject } from '@/types'
 
@@ -19,13 +15,9 @@ function GameRouter() {
   const props = { subject, grade, onExit: () => router.push('/games') }
 
   switch (gameId) {
-    case 'flashcards':    return <FlashcardsGame {...props} />
-    case 'word-scramble': return <WordScrambleGame {...props} />
-    case 'math-sprint':   return <MathSprintGame {...props} />
-    case 'hangman':       return <HangmanGame {...props} />
-    case 'memory-match':  return <MemoryMatchGame {...props} />
-    case 'speed-quiz':    return <SpeedQuizGame {...props} />
-    default:              return <FlashcardsGame {...props} />
+    case 'flashcards': return <FlashcardsGame {...props} />
+    case 'speed-quiz': return <SpeedQuizGame {...props} />
+    default:            return <FlashcardsGame {...props} />
   }
 }
 
