@@ -66,12 +66,12 @@ export function FramesSection({
   }
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
-      <h2 className="font-black text-white text-sm flex items-center gap-2 mb-3">
+    <div className="bg-white/5 border border-white/10 rounded-2xl p-3">
+      <h2 className="font-black text-white text-sm flex items-center gap-2 mb-2">
         🖼️ Avatar Frames
         <span className="text-white/30 font-normal text-xs ml-auto">🪙 {localCoins}</span>
       </h2>
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-6 gap-1.5">
         {FRAMES.map(frame => {
           const owned = frame.id === 'none' || localUnlocked.includes(frame.id)
           const equipped = frame.id === 'none' ? localEquipped === null : localEquipped === frame.id
@@ -83,28 +83,28 @@ export function FramesSection({
               onClick={() => handleFrame(frame)}
               disabled={busy !== null || (!owned && !canAfford)}
               className={cn(
-                'flex flex-col items-center gap-1.5 rounded-xl border p-2.5 transition-all',
+                'flex flex-col items-center gap-1 rounded-lg border p-1.5 transition-all',
                 equipped ? 'border-indigo-400/50 bg-indigo-500/15' : 'border-white/10 bg-white/5 hover:bg-white/10',
                 !owned && !canAfford && 'opacity-40 cursor-not-allowed',
               )}
             >
-              <div className={cn('relative', frame.special === 'rainbow' && 'rounded-full p-[3px] frame-prism')}>
+              <div className={cn('relative', frame.special === 'rainbow' && 'rounded-full p-[2px] frame-prism')}>
                 <div className={cn(
-                  'w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-xl',
+                  'w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm',
                   frame.id !== 'none' && !frame.special ? frame.border : 'border-2 border-white/15',
                   frame.glow,
                 )}>
                   {avatar ? avatar.emoji : username[0]?.toUpperCase()}
                 </div>
                 {equipped && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                    <Check className="w-2.5 h-2.5 text-white" />
+                  <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-500 rounded-full flex items-center justify-center">
+                    <Check className="w-2 h-2 text-white" />
                   </div>
                 )}
               </div>
-              <p className="text-[10px] font-bold text-white/80">{frame.name}</p>
+              <p className="text-[8px] font-bold text-white/80 leading-tight">{frame.name}</p>
               {!owned && (
-                <span className="text-[9px] font-bold text-yellow-300">🪙 {frame.coinCost}</span>
+                <span className="text-[7px] font-bold text-yellow-300 leading-tight">🪙{frame.coinCost}</span>
               )}
             </button>
           )

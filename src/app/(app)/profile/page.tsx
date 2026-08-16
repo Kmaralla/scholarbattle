@@ -39,7 +39,7 @@ export default async function ProfilePage() {
   const equippedFrame: string | null = (profile as any).equipped_frame ?? null
 
   return (
-    <div className="max-w-lg mx-auto p-4 space-y-3 pb-24">
+    <div className="max-w-lg mx-auto p-4 space-y-2.5 pb-20">
       <h1 className="text-xl font-black text-white">👤 Profile</h1>
 
       {/* Compact profile header */}
@@ -69,8 +69,8 @@ export default async function ProfilePage() {
         </form>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-4 gap-2">
+      {/* Stats — ELO/Rank already shown in the header pill above, so this row skips them */}
+      <div className="grid grid-cols-5 gap-2">
         {[
           { label: 'Battles', value: profile.total_battles, emoji: '⚔️' },
           { label: 'Wins',    value: profile.total_wins,    emoji: '🏆' },
@@ -81,18 +81,6 @@ export default async function ProfilePage() {
             <div className="text-lg mb-0.5">{emoji}</div>
             <p className="text-base font-black text-white leading-none">{value}</p>
             <p className="text-white/40 text-[10px] font-medium mt-0.5">{label}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-3 gap-2">
-        {[
-          { label: 'ELO Rating', value: profile.elo_rating },
-          { label: 'Rank',       value: tier.charAt(0).toUpperCase() + tier.slice(1) },
-        ].map(({ label, value }) => (
-          <div key={label} className="bg-white/5 border border-white/10 rounded-xl p-3">
-            <p className="text-sm font-black text-white">{value}</p>
-            <p className="text-[10px] text-white/40 mt-0.5">{label}</p>
           </div>
         ))}
         <GradePicker userId={user.id} currentGrade={profile.grade_level} />

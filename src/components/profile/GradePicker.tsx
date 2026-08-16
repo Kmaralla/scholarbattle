@@ -24,13 +24,11 @@ export function GradePicker({ userId, currentGrade }: { userId: string; currentG
     <div className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-left hover:border-indigo-400/50 hover:bg-white/8 transition-all group"
+        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-center hover:border-indigo-400/50 hover:bg-white/8 transition-all"
       >
-        <p className="text-sm font-black text-white">Grade {currentGrade}</p>
-        <p className="text-[10px] text-white/40 mt-0.5">
-          Grade
-          <span className="ml-1 text-indigo-400/50 group-hover:text-indigo-400 transition">✏️</span>
-        </p>
+        <div className="text-lg mb-0.5">🎓</div>
+        <p className="text-base font-black text-white leading-none">{currentGrade}</p>
+        <p className="text-white/40 text-[10px] font-medium mt-0.5">Grade</p>
       </button>
 
       {open && (
