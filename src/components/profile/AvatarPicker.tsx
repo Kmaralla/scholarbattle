@@ -5,16 +5,19 @@ import { cn } from '@/lib/utils'
 import { Check, X } from 'lucide-react'
 
 import { AVATARS } from './avatars'
+import { FRAME_MAP } from '@/lib/frames'
 export { AVATARS } from './avatars'
 
 export function AvatarPicker({
   userId,
   username,
   currentAvatar,
+  equippedFrame,
 }: {
   userId: string
   username: string
   currentAvatar: string | null
+  equippedFrame?: string | null
 }) {
   const [selected, setSelected] = useState<string | null>(currentAvatar)
   const [open, setOpen] = useState(false)
@@ -22,6 +25,7 @@ export function AvatarPicker({
   const supabase = createClient()
 
   const current = AVATARS.find(a => a.id === selected)
+  const frame = equippedFrame ? FRAME_MAP[equippedFrame] : undefined
 
   async function handlePick(id: string) {
     setSaving(true)
@@ -34,19 +38,25 @@ export function AvatarPicker({
   return (
     <div className="flex flex-col items-center gap-2">
       {/* Current avatar display */}
-      <button
-        onClick={() => setOpen(true)}
-        className="relative group w-20 h-20 rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center hover:border-white/40 transition-all"
-      >
-        {current ? (
-          <span className="text-4xl">{current.emoji}</span>
-        ) : (
-          <span className="text-3xl font-black text-white/60">{username[0].toUpperCase()}</span>
-        )}
-        <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
-          <span className="text-xs text-white opacity-0 group-hover:opacity-100 font-bold">Change</span>
-        </div>
-      </button>
+      <div className={cn(frame?.special === 'rainbow' && 'rounded-full p-[3px] frame-prism')}>
+        <button
+          onClick={() => setOpen(true)}
+          className={cn(
+            'relative group w-20 h-20 rounded-full bg-white/10 flex items-center justify-center hover:border-white/40 transition-all',
+            frame && frame.id !== 'none' && !frame.special ? frame.border : 'border-2 border-white/20',
+            frame?.glow,
+          )}
+        >
+          {current ? (
+            <span className="text-4xl">{current.emoji}</span>
+          ) : (
+            <span className="text-3xl font-black text-white/60">{username[0].toUpperCase()}</span>
+          )}
+          <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+            <span className="text-xs text-white opacity-0 group-hover:opacity-100 font-bold">Change</span>
+          </div>
+        </button>
+      </div>
       <p className="text-xs text-white/30">{current ? current.label : 'Pick an avatar'}</p>
 
       {/* Picker modal */}

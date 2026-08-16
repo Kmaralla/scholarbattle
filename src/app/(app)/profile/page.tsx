@@ -5,6 +5,7 @@ import { LogOut } from 'lucide-react'
 import { AvatarPicker } from '@/components/profile/AvatarPicker'
 import { ColorsSidePanel } from '@/components/profile/ColorsSidePanel'
 import { BadgesSection } from '@/components/profile/BadgesSection'
+import { FramesSection } from '@/components/profile/FramesSection'
 import { ReportCardsButton } from '@/components/profile/ReportCardsButton'
 import { GradePicker } from '@/components/profile/GradePicker'
 
@@ -33,6 +34,9 @@ export default async function ProfilePage() {
     ? Math.round((profile.total_wins / profile.total_battles) * 100)
     : 0
   const earnedBadges: string[] = (profile as any).badges ?? []
+  const coins: number = (profile as any).coins ?? 0
+  const unlockedFrames: string[] = (profile as any).unlocked_frames ?? []
+  const equippedFrame: string | null = (profile as any).equipped_frame ?? null
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-3 pb-24">
@@ -44,6 +48,7 @@ export default async function ProfilePage() {
           userId={user.id}
           username={profile.username}
           currentAvatar={(profile as any).avatar_url ?? null}
+          equippedFrame={equippedFrame}
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -94,6 +99,15 @@ export default async function ProfilePage() {
       </div>
 
       <BadgesSection earnedBadges={earnedBadges} />
+
+      <FramesSection
+        userId={user.id}
+        username={profile.username}
+        avatarUrl={(profile as any).avatar_url ?? null}
+        coins={coins}
+        unlockedFrames={unlockedFrames}
+        equippedFrame={equippedFrame}
+      />
 
       <ColorsSidePanel />
     </div>

@@ -63,6 +63,13 @@ body {
 }
 .btn-pop:active { animation: pop 0.2s ease; }
 
+/* Prism avatar frame — animated rainbow ring */
+.frame-prism {
+  background: linear-gradient(90deg, #fbbf24, #ec4899, #8b5cf6, #06b6d4, #10b981, #fbbf24);
+  background-size: 300% auto;
+  animation: shimmer 2.5s linear infinite;
+}
+
 /* ── Light mode overrides ───────────────────────────────────── */
 html.light body { background: #f0eeff !important; color: #1e1b4b !important; }
 

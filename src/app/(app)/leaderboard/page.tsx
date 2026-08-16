@@ -22,7 +22,7 @@ export default async function LeaderboardPage({
 
   let query = supabase
     .from('users')
-    .select('id, username, elo_rating, total_wins, total_battles, rank_tier, avatar_url, grade_level')
+    .select('id, username, elo_rating, total_wins, total_battles, rank_tier, avatar_url, equipped_frame, grade_level')
     .order('elo_rating', { ascending: false })
     .limit(50)
 
@@ -81,7 +81,7 @@ export default async function LeaderboardPage({
         <div className="flex items-end justify-center gap-3 py-4">
           {/* 2nd */}
           <div className="flex flex-col items-center gap-1">
-            <UserAvatar username={players[1].username} avatarUrl={(players[1] as any).avatar_url} size="md" />
+            <UserAvatar username={players[1].username} avatarUrl={(players[1] as any).avatar_url} frameId={(players[1] as any).equipped_frame} size="md" />
             <p className="text-xs font-bold text-white max-w-[70px] truncate text-center">{players[1].username}</p>
             <div className="bg-white/15 w-16 h-12 rounded-t-lg flex items-center justify-center">
               <span className="text-lg">🥈</span>
@@ -90,7 +90,7 @@ export default async function LeaderboardPage({
           {/* 1st */}
           <div className="flex flex-col items-center gap-1">
             <span className="text-xl">👑</span>
-            <UserAvatar username={players[0].username} avatarUrl={(players[0] as any).avatar_url} size="lg" />
+            <UserAvatar username={players[0].username} avatarUrl={(players[0] as any).avatar_url} frameId={(players[0] as any).equipped_frame} size="lg" />
             <p className="text-xs font-bold text-white max-w-[70px] truncate text-center">{players[0].username}</p>
             <div className="bg-yellow-400/30 w-16 h-16 rounded-t-lg flex items-center justify-center">
               <span className="text-lg">🥇</span>
@@ -98,7 +98,7 @@ export default async function LeaderboardPage({
           </div>
           {/* 3rd */}
           <div className="flex flex-col items-center gap-1">
-            <UserAvatar username={players[2].username} avatarUrl={(players[2] as any).avatar_url} size="md" />
+            <UserAvatar username={players[2].username} avatarUrl={(players[2] as any).avatar_url} frameId={(players[2] as any).equipped_frame} size="md" />
             <p className="text-xs font-bold text-white max-w-[70px] truncate text-center">{players[2].username}</p>
             <div className="bg-amber-400/20 w-16 h-8 rounded-t-lg flex items-center justify-center">
               <span className="text-lg">🥉</span>
@@ -125,7 +125,7 @@ export default async function LeaderboardPage({
                   <span className={`w-7 text-center text-sm font-black ${i < 3 ? 'text-yellow-500' : 'text-white/40'}`}>
                     {i + 1}
                   </span>
-                  <UserAvatar username={player.username} avatarUrl={(player as any).avatar_url} size="sm" />
+                  <UserAvatar username={player.username} avatarUrl={(player as any).avatar_url} frameId={(player as any).equipped_frame} size="sm" />
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-bold truncate ${isMe ? 'text-indigo-300' : 'text-white'}`}>
                       {player.username} {isMe && <span className="text-xs">(you)</span>}
