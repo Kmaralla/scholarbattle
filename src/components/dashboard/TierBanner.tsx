@@ -39,9 +39,11 @@ interface Props {
   eloRating: number
   coins?: number
   progress: number
+  globalRank?: number
+  totalPlayers?: number
 }
 
-export function TierBanner({ tier, username, eloRating, coins, progress }: Props) {
+export function TierBanner({ tier, username, eloRating, coins, progress, globalRank, totalPlayers }: Props) {
   const { theme } = useTheme()
 
   const entry = TIER_CONFIG[tier]
@@ -70,7 +72,7 @@ export function TierBanner({ tier, username, eloRating, coins, progress }: Props
         </div>
       </div>
 
-      {tier !== 'diamond' && (
+      {tier !== 'diamond' ? (
         <div className="relative mt-5">
           <div className={`flex justify-between ${s.muted} text-xs mb-1.5`}>
             <span className="font-semibold capitalize">{tier}</span>
@@ -79,6 +81,13 @@ export function TierBanner({ tier, username, eloRating, coins, progress }: Props
           <div className="h-3 bg-black/15 rounded-full overflow-hidden">
             <div className={`h-full ${s.bar} rounded-full transition-all duration-700`} style={{ width: `${progress}%` }} />
           </div>
+        </div>
+      ) : globalRank !== undefined && (
+        <div className={`relative mt-5 flex items-center justify-between ${s.badge} rounded-2xl px-4 py-2.5`}>
+          <span className="text-xs font-semibold">🌍 Global Rank</span>
+          <span className="text-sm font-black">
+            #{globalRank}{totalPlayers !== undefined && <span className="font-medium opacity-70"> of {totalPlayers} players</span>}
+          </span>
         </div>
       )}
     </div>

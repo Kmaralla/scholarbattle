@@ -21,6 +21,18 @@ export default async function DashboardPage() {
   const progress = maxElo === 9999 ? 100 : Math.round(((profile.elo_rating - minElo) / (maxElo - minElo)) * 100)
   const winRate = profile.total_battles > 0 ? Math.round((profile.total_wins / profile.total_battles) * 100) : 0
 
+  // Past Diamond there's no higher tier to progress toward, so show global standing instead
+  let globalRank: number | undefined
+  let totalPlayers: number | undefined
+  if (tier === 'diamond') {
+    const [{ count: higherCount }, { count: total }] = await Promise.all([
+      supabase.from('users').select('id', { count: 'exact', head: true }).gt('elo_rating', profile.elo_rating),
+      supabase.from('users').select('id', { count: 'exact', head: true }),
+    ])
+    globalRank = (higherCount ?? 0) + 1
+    totalPlayers = total ?? undefined
+  }
+
   const { data: recentBattles } = await supabase
     .from('battles').select('*')
     .or(`challenger_id.eq.${user.id},opponent_id.eq.${user.id}`)
@@ -42,6 +54,8 @@ export default async function DashboardPage() {
         eloRating={profile.elo_rating}
         coins={(profile as any).coins}
         progress={progress}
+        globalRank={globalRank}
+        totalPlayers={totalPlayers}
       />
 
       {/* Streak */}
