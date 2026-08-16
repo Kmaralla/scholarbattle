@@ -68,7 +68,7 @@ export function FriendsList({ currentUserId, onChallenge }: {
       {sorted.map(friend => (
         <div key={friend.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors group">
           <div className="relative">
-            <UserAvatar username={friend.username} avatarUrl={(friend as any).avatar_url} size="md" />
+            <UserAvatar username={friend.username} avatarUrl={(friend as any).avatar_url} frameId={(friend as any).equipped_frame} size="md" />
             <span className={cn(
               'absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-800',
               friend.online ? 'bg-green-400' : 'bg-gray-600'

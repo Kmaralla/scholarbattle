@@ -174,6 +174,7 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
         battle_id: battle.id,
         challenger_username: currentUser.username,
         challenger_avatar_url: (currentUser as any).avatar_url ?? null,
+        challenger_equipped_frame: (currentUser as any).equipped_frame ?? null,
         subject, grade_level: grade,
         timeout: timeoutSec,
       },
@@ -196,7 +197,7 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
     <div className="flex flex-col h-full">
       {/* Chat header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10 flex-shrink-0">
-        <UserAvatar username={friend.username} avatarUrl={(friend as any).avatar_url} size="md" />
+        <UserAvatar username={friend.username} avatarUrl={(friend as any).avatar_url} frameId={(friend as any).equipped_frame} size="md" />
         <div>
           <p className="font-black text-white text-sm">{friend.username}</p>
           <p className="text-xs text-white/40 capitalize">{friend.rank_tier} · {friend.elo_rating} ELO</p>
@@ -221,10 +222,10 @@ export function FriendChat({ currentUser, friend }: { currentUser: User; friend:
             <div key={msg.id} className={cn('flex items-end gap-2', isMe ? 'flex-row-reverse' : 'flex-row')}>
               <div className="w-7 flex-shrink-0">
                 {showAvatar && !isMe && (
-                  <UserAvatar username={friend.username} avatarUrl={(friend as any).avatar_url} size="sm" />
+                  <UserAvatar username={friend.username} avatarUrl={(friend as any).avatar_url} frameId={(friend as any).equipped_frame} size="sm" />
                 )}
                 {showAvatar && isMe && (
-                  <UserAvatar username={currentUser.username} avatarUrl={(currentUser as any).avatar_url} size="sm" />
+                  <UserAvatar username={currentUser.username} avatarUrl={(currentUser as any).avatar_url} frameId={(currentUser as any).equipped_frame} size="sm" />
                 )}
               </div>
 

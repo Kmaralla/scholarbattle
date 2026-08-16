@@ -18,7 +18,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ user
 
   const { data: profile } = await supabase
     .from('users')
-    .select('username, elo_rating, total_wins, total_battles, avatar_url')
+    .select('username, elo_rating, total_wins, total_battles, avatar_url, equipped_frame')
     .eq('username', username)
     .single()
 
@@ -52,7 +52,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ user
           {/* Avatar / rank ring */}
           <div className="flex flex-col items-center gap-2">
             <div style={{ border: `4px solid ${meta.color}` }} className="rounded-full">
-              <UserAvatar username={profile.username} avatarUrl={(profile as any).avatar_url ?? null} size="lg" />
+              <UserAvatar username={profile.username} avatarUrl={(profile as any).avatar_url ?? null} frameId={(profile as any).equipped_frame ?? null} size="lg" />
             </div>
             <div>
               <p className="font-black text-xl" style={{ color: '#fff' }}>@{profile.username}</p>

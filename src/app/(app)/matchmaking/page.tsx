@@ -168,7 +168,7 @@ export default function MatchmakingPage() {
     await notifChannel.subscribe()
     await notifChannel.send({
       type: 'broadcast', event: 'incoming_challenge',
-      payload: { battle_id: battle.id, challenger_username: currentUser.username, challenger_avatar_url: (currentUser as any).avatar_url ?? null, subject: s, grade_level: g, timeout },
+      payload: { battle_id: battle.id, challenger_username: currentUser.username, challenger_avatar_url: (currentUser as any).avatar_url ?? null, challenger_equipped_frame: (currentUser as any).equipped_frame ?? null, subject: s, grade_level: g, timeout },
     })
     supabase.removeChannel(notifChannel)
     router.push(`/battle/${battle.id}?timeout=${timeout}`)
@@ -421,7 +421,7 @@ function FriendChallengeFlow({
                     onClick={() => setSelected(friend)}
                     className="w-full flex items-center gap-3 p-3 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all"
                   >
-                    <UserAvatar username={friend.username} avatarUrl={(friend as any).avatar_url} size="md" />
+                    <UserAvatar username={friend.username} avatarUrl={(friend as any).avatar_url} frameId={(friend as any).equipped_frame} size="md" />
                     <div className="flex-1 text-left">
                       <p className="font-bold text-white text-sm">{friend.username}</p>
                       <p className="text-xs text-white/40 capitalize">{friend.rank_tier} · {friend.elo_rating} ELO</p>
@@ -436,7 +436,7 @@ function FriendChallengeFlow({
       ) : (
         <div className="space-y-3">
           <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
-            <UserAvatar username={selected.username} avatarUrl={(selected as any).avatar_url} size="md" />
+            <UserAvatar username={selected.username} avatarUrl={(selected as any).avatar_url} frameId={(selected as any).equipped_frame} size="md" />
             <div className="flex-1">
               <p className="font-black text-white">{selected.username}</p>
               <p className="text-xs text-white/40 capitalize">{selected.rank_tier} · {selected.elo_rating} ELO</p>

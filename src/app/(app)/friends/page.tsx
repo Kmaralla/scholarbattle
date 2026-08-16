@@ -138,7 +138,7 @@ export default function FriendsPage() {
     if (!battle) return
     const notifChannel = supabase.channel(`challenge:${challenging.id}`)
     await notifChannel.subscribe()
-    await notifChannel.send({ type: 'broadcast', event: 'incoming_challenge', payload: { battle_id: battle.id, challenger_username: currentUser.username, challenger_avatar_url: (currentUser as any).avatar_url ?? null, subject, grade_level: grade, timeout: challengeTimeout } })
+    await notifChannel.send({ type: 'broadcast', event: 'incoming_challenge', payload: { battle_id: battle.id, challenger_username: currentUser.username, challenger_avatar_url: (currentUser as any).avatar_url ?? null, challenger_equipped_frame: (currentUser as any).equipped_frame ?? null, subject, grade_level: grade, timeout: challengeTimeout } })
     supabase.removeChannel(notifChannel)
     setChallenging(null)
     router.push(`/battle/${battle.id}?timeout=${challengeTimeout}`)
@@ -210,7 +210,7 @@ export default function FriendsPage() {
                   )}
                 >
                   <div className="relative flex-shrink-0">
-                    <UserAvatar username={friend.username} avatarUrl={(friend as any).avatar_url} size="md" />
+                    <UserAvatar username={friend.username} avatarUrl={(friend as any).avatar_url} frameId={(friend as any).equipped_frame} size="md" />
                     <span className={cn('absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[var(--bg-nav)]', friend.online ? 'bg-green-400' : 'bg-gray-600')} />
                   </div>
                   <div className="flex-1 min-w-0">

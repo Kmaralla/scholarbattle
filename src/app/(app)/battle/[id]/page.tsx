@@ -304,6 +304,7 @@ export default function BattlePage() {
         await ch.send({ type: 'broadcast', event: 'incoming_challenge', payload: {
           battle_id: newBattle.id, challenger_username: currentUser.username,
           challenger_avatar_url: (currentUser as any).avatar_url ?? null,
+          challenger_equipped_frame: (currentUser as any).equipped_frame ?? null,
           subject: battle.subject, grade_level: battle.grade_level,
         }})
         supabase.removeChannel(ch)

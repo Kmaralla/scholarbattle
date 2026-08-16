@@ -11,6 +11,7 @@ interface ChallengePayload {
   battle_id: string
   challenger_username: string
   challenger_avatar_url: string | null
+  challenger_equipped_frame?: string | null
   subject: Subject
   grade_level: number
   timeout?: number
@@ -75,7 +76,7 @@ export function ChallengeNotification({ userId }: { userId: string }) {
       {/* Body */}
       <div className="p-4 space-y-3">
         <div className="flex items-center gap-3">
-          <UserAvatar username={challenge.challenger_username} avatarUrl={challenge.challenger_avatar_url} size="md" />
+          <UserAvatar username={challenge.challenger_username} avatarUrl={challenge.challenger_avatar_url} frameId={challenge.challenger_equipped_frame} size="md" />
           <p className="text-sm text-white/70">
             <span className="font-bold text-white">{challenge.challenger_username}</span> challenged you to a battle!
           </p>
