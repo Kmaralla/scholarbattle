@@ -157,7 +157,7 @@ export default function BattlePage() {
 
     const { data: myProfile, error: profileErr } = await supabase
       .from('users')
-      .select('elo_rating, rank_tier, total_wins, total_battles')
+      .select('elo_rating, rank_tier, total_wins, total_battles, season_wins')
       .eq('id', currentUser.id)
       .single()
     if (profileErr) console.error('[Battle] profile fetch failed:', profileErr.message)
@@ -185,6 +185,7 @@ export default function BattlePage() {
         rank_tier: getRankTier(newElo),
         total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
         total_battles: (myProfile?.total_battles ?? 0) + 1,
+        season_wins: iWon ? ((myProfile as any)?.season_wins ?? 0) + 1 : (myProfile as any)?.season_wins ?? 0,
       }
       if ((coinsRow as any)?.coins !== undefined) soloUpdate.coins = Math.max(0, currentCoins + coinsEarned)
       const { error: updateErr } = await supabase.from('users').update(soloUpdate).eq('id', currentUser.id)
@@ -208,6 +209,7 @@ export default function BattlePage() {
           rank_tier: getRankTier(myNewElo),
           total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
           total_battles: (myProfile?.total_battles ?? 0) + 1,
+          season_wins: iWon ? ((myProfile as any)?.season_wins ?? 0) + 1 : (myProfile as any)?.season_wins ?? 0,
         }
         if ((coinsRow as any)?.coins !== undefined) pvpUpdate.coins = Math.max(0, currentCoins + coinsEarned)
         const { error: pvpErr } = await supabase.from('users').update(pvpUpdate).eq('id', currentUser.id)

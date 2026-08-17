@@ -6,24 +6,40 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Crown } from 'lucide-react'
 import { UserAvatar } from '@/components/profile/UserAvatar'
 import Link from 'next/link'
+import { formatTimeRemaining } from '@/lib/seasons'
 
 const GRADES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
+function hrefFor(grade: number | null, season: boolean) {
+  const params = new URLSearchParams()
+  if (grade) params.set('grade', String(grade))
+  if (season) params.set('view', 'season')
+  const qs = params.toString()
+  return `/leaderboard${qs ? `?${qs}` : ''}`
+}
 
 export default async function LeaderboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ grade?: string }>
+  searchParams: Promise<{ grade?: string; view?: string }>
 }) {
-  const { grade } = await searchParams
+  const { grade, view } = await searchParams
   const selectedGrade = grade ? parseInt(grade) : null
+  const isSeason = view === 'season'
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  const { data: season } = await supabase
+    .from('seasons')
+    .select('season_number, ends_at')
+    .eq('status', 'active')
+    .maybeSingle()
+
   let query = supabase
     .from('users')
-    .select('id, username, elo_rating, total_wins, total_battles, rank_tier, avatar_url, equipped_frame, grade_level')
-    .order('elo_rating', { ascending: false })
+    .select('id, username, elo_rating, total_wins, total_battles, rank_tier, avatar_url, equipped_frame, grade_level, season_wins')
+    .order(isSeason ? 'season_wins' : 'elo_rating', { ascending: false })
     .limit(50)
 
   if (selectedGrade) {
@@ -38,14 +54,47 @@ export default async function LeaderboardPage({
       <div className="flex items-center gap-2">
         <Crown className="w-6 h-6 text-yellow-500" />
         <h1 className="text-xl font-black text-white">
-          {selectedGrade ? `Grade ${selectedGrade} Rankings` : 'Overall Rankings'}
+          {isSeason ? 'Season Rankings' : selectedGrade ? `Grade ${selectedGrade} Rankings` : 'Overall Rankings'}
         </h1>
       </div>
+
+      {/* All-Time / This Season tabs */}
+      <div className="flex gap-2">
+        <Link
+          href={hrefFor(selectedGrade, false)}
+          className={`flex-1 text-center py-2 rounded-xl text-xs font-black transition-all ${
+            !isSeason ? 'bg-indigo-500 text-white' : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
+          }`}
+        >
+          All-Time
+        </Link>
+        <Link
+          href={hrefFor(selectedGrade, true)}
+          className={`flex-1 text-center py-2 rounded-xl text-xs font-black transition-all ${
+            isSeason ? 'bg-indigo-500 text-white' : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
+          }`}
+        >
+          🏆 This Season
+        </Link>
+      </div>
+
+      {/* Season banner */}
+      {isSeason && season && (
+        <div className="rounded-2xl bg-gradient-to-r from-violet-600/20 to-indigo-600/20 border border-violet-400/20 px-4 py-3 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-black text-white">Season {season.season_number}</p>
+            <p className="text-xs text-white/50 mt-0.5">Top 10 win coins when it ends</p>
+          </div>
+          <span className="text-xs font-bold text-violet-300 bg-violet-500/15 px-3 py-1 rounded-full whitespace-nowrap">
+            {formatTimeRemaining(season.ends_at)}
+          </span>
+        </div>
+      )}
 
       {/* Grade filter buttons */}
       <div className="flex flex-wrap gap-2">
         <Link
-          href="/leaderboard"
+          href={hrefFor(null, isSeason)}
           className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
             !selectedGrade
               ? 'bg-indigo-500 text-white'
@@ -57,7 +106,7 @@ export default async function LeaderboardPage({
         {GRADES.map(g => (
           <Link
             key={g}
-            href={`/leaderboard?grade=${g}`}
+            href={hrefFor(g, isSeason)}
             className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
               selectedGrade === g
                 ? 'bg-indigo-500 text-white'
@@ -73,7 +122,7 @@ export default async function LeaderboardPage({
       {(!players || players.length === 0) && (
         <div className="text-center py-16 text-white/30">
           <p className="text-4xl mb-3">🏆</p>
-          <p className="font-semibold">No players in Grade {selectedGrade} yet</p>
+          <p className="font-semibold">{selectedGrade ? `No players in Grade ${selectedGrade} yet` : 'No players yet'}</p>
         </div>
       )}
 
@@ -136,8 +185,14 @@ export default async function LeaderboardPage({
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <RankBadge tier={tier} />
-                    <span className="text-xs font-bold text-white/60">{player.elo_rating}</span>
+                    {isSeason ? (
+                      <span className="text-xs font-bold text-violet-300">🔥 {(player as any).season_wins ?? 0} wins</span>
+                    ) : (
+                      <>
+                        <RankBadge tier={tier} />
+                        <span className="text-xs font-bold text-white/60">{player.elo_rating}</span>
+                      </>
+                    )}
                   </div>
                 </div>
               )
