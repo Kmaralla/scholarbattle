@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { TierBanner } from '@/components/dashboard/TierBanner'
 import { StreakBadge } from '@/components/StreakBadge'
 import { PendingChallengeModal } from '@/components/PendingChallengeModal'
+import { WhatsNewModal } from '@/components/WhatsNewModal'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -46,6 +47,7 @@ export default async function DashboardPage() {
     <div className="max-w-2xl mx-auto p-4 space-y-5 pb-24 md:pb-6">
 
       <PendingChallengeModal myUsername={profile.username} />
+      <WhatsNewModal />
 
       {/* Hero banner */}
       <TierBanner
