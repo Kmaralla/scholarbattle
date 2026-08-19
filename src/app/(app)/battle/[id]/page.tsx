@@ -4,9 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { BattleRoom, type BotDifficulty, type QuestionResult } from '@/components/battle/BattleRoom'
 import { User, Question, Battle, Subject } from '@/types'
 import { getQuestionsForBattle, pickQuestionIndices, getQuestionsByIndices } from '@/lib/questions'
-import { calculateElo, getRankTier } from '@/types'
-import { COIN_REWARDS } from '@/lib/games'
-import { checkNewBadges, BADGE_MAP } from '@/lib/badges'
+import { BADGE_MAP } from '@/lib/badges'
 import { BadgeCard } from '@/components/BadgeCard'
 import { ReportCard } from '@/components/battle/ReportCard'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
@@ -155,94 +153,28 @@ export default function BattlePage() {
     }
     await supabase.from('battles').update(battleUpdate).eq('id', battle.id)
 
-    const { data: myProfile, error: profileErr } = await supabase
-      .from('users')
-      .select('elo_rating, rank_tier, total_wins, total_battles, season_wins')
-      .eq('id', currentUser.id)
-      .single()
-    if (profileErr) console.error('[Battle] profile fetch failed:', profileErr.message)
-    const currentElo = myProfile?.elo_rating ?? currentUser.elo_rating ?? 1000
-
-    // Fetch coins separately so a missing column doesn't break ELO updates
-    const { data: coinsRow } = await supabase.from('users').select('coins, unlocked_games').eq('id', currentUser.id).single()
-    const currentCoins = (coinsRow as any)?.coins ?? 0
+    // ELO/coins/badges are computed and applied server-side — this call
+    // can only claim the reward this reported score actually earns, it
+    // can't be used to set arbitrary values directly.
     let eloDelta = 0
     let coinsEarned = 0
-
-    if (isSolo) {
-      const difficultyBonus: Record<string, number> = { easy: 6, medium: 10, hard: 16 }
-      const base = difficultyBonus[botDifficulty] ?? 10
-      if (iWon) eloDelta = base
-      else if (!tied) eloDelta = -Math.floor(base / 2)
-
-      const coinKey = `bot_${botDifficulty}` as keyof typeof COIN_REWARDS
-      const baseReward = COIN_REWARDS[coinKey] ?? 10
-      coinsEarned = iWon ? baseReward : tied ? 0 : -Math.floor(baseReward / 2)
-
-      const newElo = Math.max(100, currentElo + eloDelta)
-      const soloUpdate: Record<string, unknown> = {
-        elo_rating: newElo,
-        rank_tier: getRankTier(newElo),
-        total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
-        total_battles: (myProfile?.total_battles ?? 0) + 1,
+    let newBadges: string[] = []
+    try {
+      const res = await fetch('/api/battle/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ battleId: battle.id, myScore, theirScore, botDifficulty }),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        eloDelta = json.eloDelta ?? 0
+        coinsEarned = json.coinsEarned ?? 0
+        newBadges = json.newBadges ?? []
+      } else {
+        console.error('[Battle] reward claim failed:', await res.text())
       }
-      if ((coinsRow as any)?.coins !== undefined) soloUpdate.coins = Math.max(0, currentCoins + coinsEarned)
-      const { error: updateErr } = await supabase.from('users').update(soloUpdate).eq('id', currentUser.id)
-      if (updateErr) console.error('[Battle] ELO update failed:', updateErr.message)
-    } else {
-      coinsEarned = iWon ? COIN_REWARDS.pvp_win : tied ? COIN_REWARDS.pvp_tie : -COIN_REWARDS.pvp_loss
-
-      // Each player only updates THEIR OWN stats — opponent updates themselves in their own handleComplete
-      const opponentUserId = iAmChallenger ? battle.opponent_id : battle.challenger_id
-      const { data: opponentProfile } = await supabase.from('users').select('elo_rating').eq('id', opponentUserId).single()
-
-      if (opponentProfile && !tied) {
-        const winnerElo = iWon ? currentElo : opponentProfile.elo_rating
-        const loserElo  = iWon ? opponentProfile.elo_rating : currentElo
-        const [newWinnerElo, newLoserElo] = calculateElo(winnerElo, loserElo)
-        const myNewElo = iWon ? newWinnerElo : newLoserElo
-        eloDelta = myNewElo - currentElo
-
-        const pvpUpdate: Record<string, unknown> = {
-          elo_rating: myNewElo,
-          rank_tier: getRankTier(myNewElo),
-          total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
-          total_battles: (myProfile?.total_battles ?? 0) + 1,
-          season_wins: iWon ? ((myProfile as any)?.season_wins ?? 0) + 1 : (myProfile as any)?.season_wins ?? 0,
-        }
-        if ((coinsRow as any)?.coins !== undefined) pvpUpdate.coins = Math.max(0, currentCoins + coinsEarned)
-        const { error: pvpErr } = await supabase.from('users').update(pvpUpdate).eq('id', currentUser.id)
-        if (pvpErr) console.error('[Battle] PvP ELO update failed:', pvpErr.message)
-      } else if (tied) {
-        await supabase.from('users').update({
-          total_battles: (myProfile?.total_battles ?? 0) + 1,
-          coins: Math.max(0, currentCoins + coinsEarned),
-        }).eq('id', currentUser.id)
-      }
-    }
-
-    // Badge checking
-    const { data: badgeRow } = await supabase.from('users').select('badges, elo_rating, total_wins, total_battles').eq('id', currentUser.id).single()
-    const currentBadges: string[] = (badgeRow as any)?.badges ?? []
-    const newEloForBadge = (badgeRow as any)?.elo_rating ?? currentElo
-    const newTotalWins = (badgeRow as any)?.total_wins ?? 0
-    const newTotalBattles = (badgeRow as any)?.total_battles ?? 0
-
-    const newBadges = checkNewBadges({
-      iWon, tied,
-      myScore,
-      totalQuestions: questions.length,
-      subject: battle.subject,
-      isSolo,
-      botDifficulty,
-      newElo: newEloForBadge,
-      newTotalBattles,
-      newTotalWins,
-      currentBadges,
-    })
-
-    if (newBadges.length > 0) {
-      await supabase.from('users').update({ badges: [...currentBadges, ...newBadges] }).eq('id', currentUser.id)
+    } catch (err) {
+      console.error('[Battle] reward claim request failed:', err)
     }
 
     const iWonFinal = myScore > theirScore

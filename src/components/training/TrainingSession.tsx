@@ -201,19 +201,11 @@ export function TrainingSession({
 
   async function advance() {
     if (qIndex + 1 >= questions.length) {
-      // Award puzzle coins — guarded update only succeeds if the reward
-      // hasn't already been claimed today, per the database (not localStorage)
+      // Award puzzle coins — the reward amount and "already claimed today"
+      // check both live server-side, not in this client code
       if (isPuzzle && puzzleStatus === 'available' && userId) {
-        const today = todayDate()
-        const { data: row } = await supabase.from('users').select('coins').eq('id', userId).single()
-        const cur = (row as any)?.coins ?? 0
-        const { data: updated } = await supabase
-          .from('users')
-          .update({ coins: cur + PUZZLE_COINS, last_puzzle_reward_date: today })
-          .eq('id', userId)
-          .or(`last_puzzle_reward_date.is.null,last_puzzle_reward_date.lt.${today}`)
-          .select()
-        if (updated && updated.length > 0) {
+        const { data: awarded } = await supabase.rpc('claim_daily_puzzle_reward')
+        if (awarded) {
           setPuzzleCoinsAwarded(true)
           setPuzzleStatus('done')
         }

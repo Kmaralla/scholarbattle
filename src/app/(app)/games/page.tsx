@@ -43,13 +43,11 @@ export default function GamesPage() {
     if (!isUnlocked) {
       if (profile.coins < game.coinCost) return
       setUnlocking(game.id)
-      const newUnlocked = [...(profile.unlocked_games ?? []), game.id]
-      await supabase.from('users').update({
-        coins: profile.coins - game.coinCost,
-        unlocked_games: newUnlocked,
-      }).eq('id', profile.id)
-      setProfile(p => p ? { ...p, coins: p.coins - game.coinCost, unlocked_games: newUnlocked } : p)
+      const { error } = await supabase.rpc('unlock_game', { p_game_id: game.id })
       setUnlocking(null)
+      if (error) return
+      const newUnlocked = [...(profile.unlocked_games ?? []), game.id]
+      setProfile(p => p ? { ...p, coins: p.coins - game.coinCost, unlocked_games: newUnlocked } : p)
     }
 
     router.push(`/games/play?game=${game.id}&subject=${subject}&grade=${grade}`)

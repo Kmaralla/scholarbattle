@@ -8,14 +8,12 @@ import { AVATARS } from './avatars'
 import { Check } from 'lucide-react'
 
 export function FramesSection({
-  userId,
   username,
   avatarUrl,
   coins,
   unlockedFrames,
   equippedFrame,
 }: {
-  userId: string
   username: string
   avatarUrl: string | null
   coins: number
@@ -35,7 +33,7 @@ export function FramesSection({
   async function equip(frameId: string | null) {
     setBusy(frameId ?? 'none')
     setError(null)
-    const { error: dbError } = await supabase.from('users').update({ equipped_frame: frameId }).eq('id', userId)
+    const { error: dbError } = await supabase.rpc('equip_frame', { p_frame_id: frameId })
     if (dbError) {
       setError('Could not save — try again.')
       setBusy(null)
@@ -72,22 +70,16 @@ export function FramesSection({
     setBusy(frame.id)
     setError(null)
 
-    const newUnlocked = [...localUnlocked, frame.id]
-    const newCoins = localCoins - frame.coinCost
-    const { error: dbError } = await supabase.from('users').update({
-      coins: newCoins,
-      unlocked_frames: newUnlocked,
-      equipped_frame: frame.id,
-    }).eq('id', userId)
+    const { error: dbError } = await supabase.rpc('purchase_frame', { p_frame_id: frame.id })
 
     if (dbError) {
-      setError('Could not complete purchase — try again.')
+      setError(dbError.message.includes('insufficient coins') ? "You don't have enough coins." : 'Could not complete purchase — try again.')
       setBusy(null)
       return
     }
 
-    setLocalUnlocked(newUnlocked)
-    setLocalCoins(newCoins)
+    setLocalUnlocked(prev => [...prev, frame.id])
+    setLocalCoins(c => c - frame.coinCost)
     setLocalEquipped(frame.id)
     setBusy(null)
     router.refresh()

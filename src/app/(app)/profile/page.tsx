@@ -89,7 +89,6 @@ export default async function ProfilePage() {
       <BadgesSection earnedBadges={earnedBadges} />
 
       <FramesSection
-        userId={user.id}
         username={profile.username}
         avatarUrl={(profile as any).avatar_url ?? null}
         coins={coins}

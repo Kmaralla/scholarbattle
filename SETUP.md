@@ -24,6 +24,11 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
+# Required for battle rewards (ELO/coins/badges) — Project Settings → API →
+# service_role (secret, NOT the anon key). Server-only, never exposed to
+# the browser.
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
 # Optional — powers the AI post-battle report card. Set one of these two;
 # OpenAI is tried first, falls back to Anthropic if unset.
 OPENAI_API_KEY=
