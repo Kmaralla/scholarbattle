@@ -1,21 +1,31 @@
 -- ScholarBattle Database Schema
--- Run this in your Supabase SQL Editor
+-- Run this once in your Supabase SQL Editor for a fresh project.
+-- This is the consolidated, current-state schema — it replaces the old
+-- fragmented migration files (fix_missing_schema.sql, add_coins.sql, etc.)
+-- that used to live in this directory.
 
--- Users (extends Supabase auth.users)
-create table public.users (
+-- ── Users (extends Supabase auth.users) ─────────────────────────
+create table if not exists public.users (
   id uuid references auth.users(id) on delete cascade primary key,
   username text unique not null,
   avatar_url text,
+  equipped_frame text,
+  unlocked_frames text[] not null default '{}',
   elo_rating integer not null default 1000,
   rank_tier text not null default 'bronze',
   grade_level integer not null default 5,
   total_wins integer not null default 0,
   total_battles integer not null default 0,
+  season_wins integer not null default 0,
+  coins integer not null default 0,
+  badges text[] not null default '{}',
+  unlocked_games text[] not null default '{}',
   created_at timestamptz default now()
 );
 
--- Questions
-create table public.questions (
+-- ── Questions (reserved for future AI-generated question banks —
+-- the app currently serves questions from a static bank in code) ──
+create table if not exists public.questions (
   id uuid primary key default gen_random_uuid(),
   subject text not null check (subject in ('math','science','history','english')),
   grade_level integer not null,
@@ -28,8 +38,10 @@ create table public.questions (
   created_at timestamptz default now()
 );
 
--- Battles
-create table public.battles (
+-- ── Battles ──────────────────────────────────────────────────────
+-- question_ids stores integer indices into the static question bank in code,
+-- not references to the (currently unused) questions table above.
+create table if not exists public.battles (
   id uuid primary key default gen_random_uuid(),
   challenger_id uuid references public.users(id) not null,
   opponent_id uuid references public.users(id) not null,
@@ -39,13 +51,13 @@ create table public.battles (
   winner_id uuid references public.users(id),
   challenger_score integer default 0,
   opponent_score integer default 0,
-  question_ids uuid[] default '{}',
+  question_ids integer[] default '{}',
   created_at timestamptz default now(),
   completed_at timestamptz
 );
 
--- Friendships
-create table public.friendships (
+-- ── Friendships ──────────────────────────────────────────────────
+create table if not exists public.friendships (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references public.users(id) on delete cascade not null,
   friend_id uuid references public.users(id) on delete cascade not null,
@@ -54,8 +66,8 @@ create table public.friendships (
   unique(user_id, friend_id)
 );
 
--- Battle answers
-create table public.battle_answers (
+-- ── Battle answers ───────────────────────────────────────────────
+create table if not exists public.battle_answers (
   id uuid primary key default gen_random_uuid(),
   battle_id uuid references public.battles(id) on delete cascade not null,
   user_id uuid references public.users(id) on delete cascade not null,
@@ -66,8 +78,9 @@ create table public.battle_answers (
   created_at timestamptz default now()
 );
 
--- ELO history
-create table public.elo_history (
+-- ── ELO history (reserved for a future rating-over-time graph —
+-- nothing currently writes to this table) ───────────────────────
+create table if not exists public.elo_history (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references public.users(id) on delete cascade not null,
   battle_id uuid references public.battles(id) on delete cascade,
@@ -77,43 +90,222 @@ create table public.elo_history (
   created_at timestamptz default now()
 );
 
--- Row Level Security
+-- ── Friend chat messages ─────────────────────────────────────────
+create table if not exists public.messages (
+  id uuid primary key default gen_random_uuid(),
+  sender_id uuid references public.users(id) on delete cascade not null,
+  receiver_id uuid references public.users(id) on delete cascade not null,
+  content text not null,
+  created_at timestamptz default now()
+);
+
+-- ── AI report cards ──────────────────────────────────────────────
+create table if not exists public.report_cards (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.users(id) on delete cascade,
+  subject text not null,
+  grade integer not null,
+  my_score integer not null,
+  total_questions integer not null,
+  card_data jsonb not null,
+  created_at timestamptz default now()
+);
+
+-- ── Seasons (monthly leaderboard resets) ────────────────────────
+create table if not exists public.seasons (
+  id uuid primary key default gen_random_uuid(),
+  season_number integer not null,
+  starts_at timestamptz not null default now(),
+  ends_at timestamptz not null,
+  status text not null default 'active' check (status in ('active','completed')),
+  created_at timestamptz not null default now()
+);
+
+-- Only one season can be active at a time
+create unique index if not exists seasons_one_active_idx on public.seasons (status) where status = 'active';
+
+create table if not exists public.season_results (
+  id uuid primary key default gen_random_uuid(),
+  season_id uuid references public.seasons(id) on delete cascade not null,
+  user_id uuid references public.users(id) on delete cascade not null,
+  rank integer not null,
+  season_wins integer not null,
+  coins_awarded integer not null,
+  created_at timestamptz not null default now()
+);
+
+-- ── Row Level Security ───────────────────────────────────────────
 alter table public.users enable row level security;
 alter table public.questions enable row level security;
 alter table public.battles enable row level security;
 alter table public.friendships enable row level security;
 alter table public.battle_answers enable row level security;
 alter table public.elo_history enable row level security;
+alter table public.messages enable row level security;
+alter table public.report_cards enable row level security;
+alter table public.seasons enable row level security;
+alter table public.season_results enable row level security;
 
--- RLS Policies
+-- Users
 create policy "Users are viewable by everyone" on public.users for select using (true);
 create policy "Users can update own profile" on public.users for update using (auth.uid() = id);
 create policy "Users can insert own profile" on public.users for insert with check (auth.uid() = id);
 
+-- Questions
 create policy "Questions are viewable by authenticated users" on public.questions for select using (auth.role() = 'authenticated');
 
+-- Battles
 create policy "Battles viewable by participants" on public.battles for select using (auth.uid() = challenger_id or auth.uid() = opponent_id);
 create policy "Authenticated users can create battles" on public.battles for insert with check (auth.uid() = challenger_id);
 create policy "Participants can update battles" on public.battles for update using (auth.uid() = challenger_id or auth.uid() = opponent_id);
 
+-- Friendships
 create policy "Friendships viewable by owner" on public.friendships for select using (auth.uid() = user_id or auth.uid() = friend_id);
 create policy "Users can create friendships" on public.friendships for insert with check (auth.uid() = user_id);
+create policy "Users can delete their own friendships" on public.friendships for delete using (auth.uid() = user_id or auth.uid() = friend_id);
+create policy "Users can update friendships they are part of" on public.friendships for update using (auth.uid() = user_id or auth.uid() = friend_id);
 
+-- Battle answers
 create policy "Battle answers viewable by participants" on public.battle_answers for select using (true);
 create policy "Users can insert own answers" on public.battle_answers for insert with check (auth.uid() = user_id);
 
+-- ELO history
 create policy "ELO history viewable by owner" on public.elo_history for select using (auth.uid() = user_id);
 create policy "ELO history insertable by authenticated" on public.elo_history for insert with check (auth.role() = 'authenticated');
 
--- Indexes
-create index on public.users (elo_rating desc);
-create index on public.battles (challenger_id, status);
-create index on public.battles (opponent_id, status);
-create index on public.friendships (user_id, status);
-create index on public.questions (subject, grade_level);
+-- Messages
+create policy "Users can view their own messages" on public.messages for select using (auth.uid() = sender_id or auth.uid() = receiver_id);
+create policy "Users can send messages" on public.messages for insert with check (auth.uid() = sender_id);
 
--- Helper: increment function for wins/battles
+-- Report cards — public read (shareable links), owner-only insert
+create policy "Public read report cards" on public.report_cards for select using (true);
+create policy "Users insert own report cards" on public.report_cards for insert with check (auth.uid() = user_id);
+
+-- Seasons — public read only; all writes happen via rollover_season_if_due()
+create policy "Seasons are viewable by everyone" on public.seasons for select using (true);
+create policy "Season results are viewable by everyone" on public.season_results for select using (true);
+
+-- ── Indexes ──────────────────────────────────────────────────────
+create index if not exists users_elo_rating_idx on public.users (elo_rating desc);
+create index if not exists battles_challenger_status_idx on public.battles (challenger_id, status);
+create index if not exists battles_opponent_status_idx on public.battles (opponent_id, status);
+create index if not exists friendships_user_status_idx on public.friendships (user_id, status);
+create index if not exists questions_subject_grade_idx on public.questions (subject, grade_level);
+create index if not exists messages_conversation_idx on public.messages (sender_id, receiver_id, created_at);
+
+-- ── Helper functions ─────────────────────────────────────────────
+
+-- Increment helper for wins/battles
 create or replace function increment(x integer)
 returns integer language sql as $$
   select x + 1;
 $$;
+
+-- Called when a user accepts a friend request — marks the original request
+-- accepted and creates the reverse-direction row so both users can query
+-- "where user_id = me".
+create or replace function public.accept_friend(
+  request_id uuid,
+  requester uuid,
+  accepter uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.friendships
+  set status = 'accepted'
+  where id = request_id
+    and user_id = requester
+    and friend_id = accepter;
+
+  insert into public.friendships (user_id, friend_id, status)
+  values (accepter, requester, 'accepted')
+  on conflict (user_id, friend_id) do update set status = 'accepted';
+end;
+$$;
+
+-- Called when a user removes a friend — deletes both directions.
+create or replace function public.remove_friend(
+  user_a uuid,
+  user_b uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  delete from public.friendships
+  where (user_id = user_a and friend_id = user_b)
+     or (user_id = user_b and friend_id = user_a);
+end;
+$$;
+
+-- Closes out the active season once it's past its end date: snapshots the
+-- top 10 by season_wins into season_results, pays out coins, resets everyone's
+-- season_wins to 0, and starts the next season. Safe to call repeatedly —
+-- it only acts when an active season exists and is actually overdue, and the
+-- row lock below means concurrent cron invocations can't double-fire it.
+-- Invoked on a schedule by src/app/api/cron/season-rollover.
+create or replace function public.rollover_season_if_due()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  cur record;
+  r record;
+  rnk integer := 0;
+  reward integer;
+begin
+  select * into cur from public.seasons where status = 'active' order by starts_at desc limit 1 for update;
+
+  if cur is null then
+    insert into public.seasons (season_number, starts_at, ends_at, status)
+    values (1, now(), now() + interval '1 month', 'active');
+    return;
+  end if;
+
+  if now() < cur.ends_at then
+    return;
+  end if;
+
+  for r in
+    select id, season_wins
+    from public.users
+    where season_wins > 0
+    order by season_wins desc, elo_rating desc
+    limit 10
+  loop
+    rnk := rnk + 1;
+    reward := case
+      when rnk = 1 then 200
+      when rnk = 2 then 150
+      when rnk = 3 then 100
+      else 50
+    end;
+
+    insert into public.season_results (season_id, user_id, rank, season_wins, coins_awarded)
+    values (cur.id, r.id, rnk, r.season_wins, reward);
+
+    update public.users set coins = coins + reward where id = r.id;
+  end loop;
+
+  update public.seasons set status = 'completed' where id = cur.id;
+  update public.users set season_wins = 0;
+
+  insert into public.seasons (season_number, starts_at, ends_at, status)
+  values (cur.season_number + 1, now(), now() + interval '1 month', 'active');
+end;
+$$;
+
+-- ── Seed data ────────────────────────────────────────────────────
+
+-- Start the first season
+insert into public.seasons (season_number, starts_at, ends_at, status)
+select 1, now(), now() + interval '1 month', 'active'
+where not exists (select 1 from public.seasons);

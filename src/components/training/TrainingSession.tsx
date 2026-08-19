@@ -42,9 +42,6 @@ export function TrainingSession({
   onBack: () => void
 }) {
   const isPuzzle = mode.id === 'puzzles'
-  const isFlashcard = mode.id === 'flashcards'
-  const isStreak = mode.id === 'streak'
-  const isSpeed = mode.id === 'speed'
   const supabase = createClient()
 
   // Daily puzzle gate
@@ -64,16 +61,9 @@ export function TrainingSession({
   const [typedAnswer, setTypedAnswer] = useState('')
   const [answered, setAnswered] = useState(false)
   const [showResult, setShowResult] = useState(false)
-  const [flashRevealed, setFlashRevealed] = useState(false)
   const [score, setScore] = useState(0)
   const [streak, setStreak] = useState(0)
-  const [bestStreak, setBestStreak] = useState(0)
-  const [lives, setLives] = useState(3)
   const [timeLeft, setTimeLeft] = useState(mode.seconds)
-  const [speedHighScore, setSpeedHighScore] = useState(() =>
-    isSpeed ? parseInt(localStorage.getItem('speed_high_score') ?? '0', 10) : 0
-  )
-  const [newHighScore, setNewHighScore] = useState(false)
   const [coachMessage, setCoachMessage] = useState(coach.introLine)
   const [showCoachMessage, setShowCoachMessage] = useState(true)
   const [phase, setPhase] = useState<'intro' | 'question' | 'done'>('intro')
@@ -87,7 +77,7 @@ export function TrainingSession({
 
   const q = questions[qIndex]
   const opts = optionSets[qIndex] ?? []
-  const totalQ = isStreak ? questions.length : mode.questions
+  const totalQ = mode.questions
 
   useEffect(() => {
     if (phase === 'intro') {
@@ -97,20 +87,8 @@ export function TrainingSession({
   }, [phase])
 
   useEffect(() => {
-    if (isSpeed && phase === 'done') {
-      if (score > speedHighScore) {
-        localStorage.setItem('speed_high_score', String(score))
-        setSpeedHighScore(score)
-        setNewHighScore(true)
-      }
-    }
-  }, [phase])
-
-  useEffect(() => {
-    if (phase !== 'question' || answered || mode.seconds === 99) return
-    const questionSeconds = isPuzzle
-      ? qIndex === mode.questions - 1 ? 5 : Math.max(10, mode.seconds - qIndex * 10)
-      : mode.seconds
+    if (phase !== 'question' || answered) return
+    const questionSeconds = qIndex === mode.questions - 1 ? 5 : Math.max(10, mode.seconds - qIndex * 10)
     setTimeLeft(questionSeconds)
     timerRef.current = setInterval(() => {
       setTimeLeft(t => {
@@ -140,13 +118,7 @@ export function TrainingSession({
       return `${praise} ${pick(reinforcements)}`
     } else {
       const empathy = pick(coach.wrongLines)
-      const intros: Record<string, string> = {
-        max:  `The answer was "${answer}". Here's how: ${explanation}`,
-        owl:  `The correct answer is "${answer}". Here's the reasoning: ${explanation}`,
-        luna: `The answer was "${answer}" 💛 Here's how to remember it: ${explanation}`,
-      }
-      const fallback = `The correct answer is "${answer}".${explanation ? ` Here's how: ${explanation}` : ''}`
-      return `${empathy} ${intros[coach.id] ?? fallback}`
+      return `${empathy} The correct answer is "${answer}". Here's the reasoning: ${explanation}`
     }
   }
 
@@ -155,21 +127,9 @@ export function TrainingSession({
     setShowResult(true)
     if (correct) {
       setScore(s => s + 1)
-      const ns = streak + 1
-      setStreak(ns)
-      if (ns > bestStreak) setBestStreak(ns)
+      setStreak(s => s + 1)
     } else {
       setStreak(0)
-      if (isStreak) {
-        const nl = lives - 1
-        setLives(nl)
-        if (nl <= 0) {
-          setCoachMessage(buildFeedback(false))
-          setShowCoachMessage(true)
-          setTimeout(() => setPhase('done'), 2500)
-          return
-        }
-      }
     }
     setCoachMessage(buildFeedback(correct))
     setShowCoachMessage(true)
@@ -245,15 +205,14 @@ export function TrainingSession({
     setTypedAnswer('')
     setAnswered(false)
     setShowResult(false)
-    setFlashRevealed(false)
     setShowCoachMessage(false)
     setEliminatedOptions([])
     setHintsLeft(MAX_HINTS)
     setTypedHintLevel(0)
   }
 
-  const questionSeconds = isPuzzle ? qIndex === mode.questions - 1 ? 5 : Math.max(10, mode.seconds - qIndex * 10) : mode.seconds
-  const timerPct = mode.seconds === 99 ? 100 : (timeLeft / questionSeconds) * 100
+  const questionSeconds = qIndex === mode.questions - 1 ? 5 : Math.max(10, mode.seconds - qIndex * 10)
+  const timerPct = (timeLeft / questionSeconds) * 100
   const myAnswerCorrect = selectedAnswer
     ? selectedAnswer.toLowerCase() === q?.correct_answer?.toLowerCase()
     : typedAnswer.toLowerCase() === q?.correct_answer?.toLowerCase()
@@ -287,8 +246,7 @@ export function TrainingSession({
 
   // Done screen
   if (phase === 'done') {
-    const finalTotal = isStreak ? qIndex + 1 : totalQ
-    const pct = Math.round((score / finalTotal) * 100)
+    const pct = Math.round((score / totalQ) * 100)
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
         <div className="max-w-sm w-full space-y-5 text-center">
@@ -297,17 +255,11 @@ export function TrainingSession({
           </div>
           <div>
             <p className="text-white/50 text-sm font-semibold">{coach.name} says:</p>
-            <p className="text-white font-bold text-base mt-1 leading-relaxed">"{coach.endLine(score, finalTotal)}"</p>
+            <p className="text-white font-bold text-base mt-1 leading-relaxed">"{coach.endLine(score, totalQ)}"</p>
           </div>
           <div className={cn('rounded-3xl p-5 bg-gradient-to-br', coach.gradient)}>
             <p className="text-white/70 text-sm font-semibold">{mode.emoji} {mode.name}</p>
-            <p className="text-6xl font-black text-white mt-1">{score}<span className="text-2xl text-white/60">/{finalTotal}</span></p>
-            {isStreak && <p className="text-white/80 font-bold text-sm mt-1">🔥 Best streak: {bestStreak}</p>}
-            {isSpeed && (
-              <p className="text-white/80 font-bold text-sm mt-1">
-                {newHighScore ? '🏆 New High Score!' : `🏆 High Score: ${speedHighScore}/${totalQ}`}
-              </p>
-            )}
+            <p className="text-6xl font-black text-white mt-1">{score}<span className="text-2xl text-white/60">/{totalQ}</span></p>
             <div className="mt-3 h-3 bg-black/20 rounded-full overflow-hidden">
               <div className="h-full bg-white/70 rounded-full" style={{ width: `${pct}%` }} />
             </div>
@@ -328,25 +280,9 @@ export function TrainingSession({
             <p className="text-xs text-white/40 font-semibold mb-1">{coach.name}'s tip:</p>
             <p className="text-sm text-white/80 italic">"{coach.tips[coachTipIdx]}"</p>
           </div>
-          <div className="flex gap-3">
-            <button onClick={onBack} className="flex-1 border border-white/20 rounded-2xl py-3 text-sm font-bold text-white/70 hover:bg-white/10 transition">
-              Change Mode
-            </button>
-            {!isPuzzle && (
-              <button
-                onClick={() => {
-                  setQIndex(0); setScore(0); setStreak(0); setBestStreak(0); setLives(3); setNewHighScore(false)
-                  setSelectedAnswer(null); setTypedAnswer(''); setAnswered(false)
-                  setShowResult(false); setFlashRevealed(false); setEliminatedOptions([]); setHintsLeft(MAX_HINTS)
-                  setCoachMessage(coach.introLine); setShowCoachMessage(true)
-                  setPhase('intro')
-                }}
-                className={cn('flex-1 py-3 rounded-2xl text-sm font-black text-white shadow-lg transition hover:opacity-90 bg-gradient-to-r', coach.gradient)}
-              >
-                Train Again {mode.emoji}
-              </button>
-            )}
-          </div>
+          <button onClick={onBack} className="w-full border border-white/20 rounded-2xl py-3 text-sm font-bold text-white/70 hover:bg-white/10 transition">
+            ← Back to Training
+          </button>
         </div>
       </div>
     )
@@ -359,22 +295,11 @@ export function TrainingSession({
         <button onClick={onBack} className="text-slate-400 hover:text-white text-sm font-semibold transition">← Back</button>
         <div className="text-center">
           <p className="text-xs text-slate-400">{mode.emoji} {mode.name} · {subject} Gr.{grade}</p>
-          <p className="text-sm font-black text-slate-100">
-            {isStreak ? `Q ${qIndex + 1}` : `Q ${qIndex + 1} of ${totalQ}`}
-          </p>
+          <p className="text-sm font-black text-slate-100">Q {qIndex + 1} of {totalQ}</p>
         </div>
         <div className="text-right">
-          {isStreak ? (
-            <div>
-              <p className="text-xs text-slate-400">Lives</p>
-              <p className="text-base font-black text-red-400">{'❤️'.repeat(lives)}</p>
-            </div>
-          ) : (
-            <div>
-              <p className="text-xs text-slate-400">Score</p>
-              <p className={cn('text-lg font-black', coach.color)}>{score}</p>
-            </div>
-          )}
+          <p className="text-xs text-slate-400">Score</p>
+          <p className={cn('text-lg font-black', coach.color)}>{score}</p>
         </div>
       </div>
 
@@ -410,7 +335,7 @@ export function TrainingSession({
       )}
 
       {/* Timer bar */}
-      {phase === 'question' && mode.seconds !== 99 && (
+      {phase === 'question' && (
         <div className="h-2 bg-slate-600 rounded-full overflow-hidden">
           <div
             className={cn('h-full rounded-full transition-all duration-1000', timeLeft <= 5 ? 'bg-red-400' : `bg-gradient-to-r ${coach.gradient}`)}
@@ -437,33 +362,11 @@ export function TrainingSession({
         <div className="rounded-3xl bg-slate-600 p-5 flex-1">
           <div className="flex items-start justify-between mb-4 gap-3">
             <p className="text-slate-50 font-bold text-base leading-relaxed">{q.question_text}</p>
-            {mode.seconds !== 99 && (
-              <span className={cn('text-2xl font-black flex-shrink-0', timeLeft <= 5 ? 'text-red-400 animate-pulse' : 'text-slate-300')}>{timeLeft}s</span>
-            )}
+            <span className={cn('text-2xl font-black flex-shrink-0', timeLeft <= 5 ? 'text-red-400 animate-pulse' : 'text-slate-300')}>{timeLeft}s</span>
           </div>
 
-          {/* Flashcard */}
-          {isFlashcard && !flashRevealed && (
-            <button onClick={() => setFlashRevealed(true)} className={cn('w-full py-4 rounded-2xl font-black text-white text-sm transition hover:opacity-90 bg-gradient-to-r', coach.gradient)}>
-              Reveal Answer 👁️
-            </button>
-          )}
-          {isFlashcard && flashRevealed && !answered && (
-            <div className="space-y-3">
-              <div className="bg-green-900/40 border border-green-500/50 rounded-2xl p-4 text-center">
-                <p className="text-xs text-green-400 font-bold mb-1">Answer</p>
-                <p className="text-lg font-black text-green-300">{q.correct_answer}</p>
-              </div>
-              <p className="text-sm text-center text-slate-300 font-semibold">Did you know it?</p>
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => { setSelectedAnswer(q.correct_answer); registerAnswer(true) }} className="py-3 rounded-2xl font-black text-white bg-green-600 hover:bg-green-500 transition">✓ Got it!</button>
-                <button onClick={() => { setSelectedAnswer(''); registerAnswer(false) }} className="py-3 rounded-2xl font-black text-white bg-red-600/80 hover:bg-red-600 transition">✗ Missed it</button>
-              </div>
-            </div>
-          )}
-
-          {/* Multiple choice (non-flashcard) */}
-          {!isFlashcard && q.type === 'multiple_choice' && opts.length > 0 && (
+          {/* Multiple choice */}
+          {q.type === 'multiple_choice' && opts.length > 0 && (
             <div className="grid gap-2.5">
               {(() => {
                 const displayOpts = clipOptionDisplay(opts)
@@ -505,7 +408,7 @@ export function TrainingSession({
           )}
 
           {/* Submit button for multiple choice */}
-          {!isFlashcard && q.type === 'multiple_choice' && selectedAnswer && !answered && (
+          {q.type === 'multiple_choice' && selectedAnswer && !answered && (
             <button
               onClick={handleChoiceSubmit}
               className={cn('w-full mt-3 py-3.5 rounded-2xl font-black text-white transition-all text-sm bg-gradient-to-r', coach.gradient)}
@@ -515,7 +418,7 @@ export function TrainingSession({
           )}
 
           {/* Typed */}
-          {!isFlashcard && q.type === 'typed' && (
+          {q.type === 'typed' && (
             <form onSubmit={handleTypedSubmit} className="space-y-3">
               {typedHintLevel > 0 && !answered && (
                 <div className="bg-amber-900/30 border border-amber-500/30 rounded-xl px-4 py-2.5 text-center">
@@ -542,7 +445,7 @@ export function TrainingSession({
             </form>
           )}
 
-          {/* Universal Next button — shown after any answer in any mode */}
+          {/* Universal Next button — shown after any answer */}
           {answered && (
             <button
               onClick={advance}

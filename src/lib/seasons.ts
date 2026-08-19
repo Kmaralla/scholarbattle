@@ -1,12 +1,3 @@
-const TOP_REWARDS: Record<number, number> = { 1: 200, 2: 150, 3: 100 }
-const OTHER_REWARD = 50
-const REWARDED_RANKS = 10
-
-export function getSeasonReward(rank: number): number {
-  if (TOP_REWARDS[rank]) return TOP_REWARDS[rank]
-  return rank <= REWARDED_RANKS ? OTHER_REWARD : 0
-}
-
 export function formatTimeRemaining(endsAt: string): string {
   const ms = new Date(endsAt).getTime() - Date.now()
   if (ms <= 0) return 'Ending soon'

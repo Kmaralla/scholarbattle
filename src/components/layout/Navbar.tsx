@@ -20,7 +20,7 @@ const SECTIONS = [
   {
     label: 'Not ready for battle?',
     items: [
-      { href: '/training',  label: 'Training',  icon: Dumbbell, emoji: '💪', desc: 'Practice with a coach using Puzzles, Speed Drills, Flashcards and more.' },
+      { href: '/training',  label: 'Training',  icon: Dumbbell, emoji: '💪', desc: 'A daily brain-teaser puzzle with Prof. Owl — plus bonus coins for finishing.' },
       { href: '/games',     label: 'Games',     icon: Gamepad2, emoji: '🎮', desc: 'Spend your coins on fun mini-games to sharpen your skills.' },
       { href: '/tutorial',  label: 'Tutorial',  icon: Dumbbell, emoji: '📚', desc: 'Pick your grade and subject to get curated tutorials with videos.' },
     ],

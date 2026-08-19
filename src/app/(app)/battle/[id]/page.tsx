@@ -185,7 +185,6 @@ export default function BattlePage() {
         rank_tier: getRankTier(newElo),
         total_wins: iWon ? (myProfile?.total_wins ?? 0) + 1 : (myProfile?.total_wins ?? 0),
         total_battles: (myProfile?.total_battles ?? 0) + 1,
-        season_wins: iWon ? ((myProfile as any)?.season_wins ?? 0) + 1 : (myProfile as any)?.season_wins ?? 0,
       }
       if ((coinsRow as any)?.coins !== undefined) soloUpdate.coins = Math.max(0, currentCoins + coinsEarned)
       const { error: updateErr } = await supabase.from('users').update(soloUpdate).eq('id', currentUser.id)

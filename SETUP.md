@@ -11,9 +11,11 @@ In Supabase → SQL Editor, paste and run the contents of `supabase/schema.sql`
 
 ## 3. Configure Auth
 
+The app signs in with **Google OAuth** (no magic link / password). In Supabase → Authentication → Providers, enable Google and fill in your OAuth client ID/secret.
+
 In Supabase → Authentication → URL Configuration:
 - **Site URL**: `http://localhost:3000` (dev) or your Vercel URL (prod)
-- **Redirect URLs**: Add `http://localhost:3000/auth/callback` and your Vercel domain
+- **Redirect URLs**: Add `http://localhost:3000/auth/callback` and your Vercel domain's `/auth/callback`
 
 ## 4. Fill in .env.local
 
@@ -21,12 +23,23 @@ In Supabase → Authentication → URL Configuration:
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Optional — powers the AI post-battle report card. Set one of these two;
+# OpenAI is tried first, falls back to Anthropic if unset.
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+
+# Optional — protects the season-rollover cron endpoint from being called
+# by anyone who finds the URL. Any random string; Vercel Cron sends it
+# automatically as a Bearer token once set in your Vercel project's env vars.
+CRON_SECRET=
 ```
+
+See `.env.example` for a copy-pasteable template.
 
 ## 5. Run Locally
 
 ```bash
-nvm use 20       # requires Node 20+
 npm install
 npm run dev
 ```
@@ -39,16 +52,13 @@ Open http://localhost:3000 — you'll be redirected to /login
 npx vercel        # follow prompts, links to your Vercel account
 ```
 
-Then in Vercel Dashboard → your project → Settings → Environment Variables, add:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`  
-- `NEXT_PUBLIC_APP_URL` = your Vercel URL (e.g. https://scholarbattle.vercel.app)
+Then in Vercel Dashboard → your project → Settings → Environment Variables, add the same variables listed above (`NEXT_PUBLIC_APP_URL` should be your Vercel domain, e.g. `https://your-app.vercel.app`).
 
-Redeploy after adding env vars.
+Redeploy after adding env vars. The `vercel.json` cron schedule (daily season-rollover check) is picked up automatically on deploy — no extra setup needed beyond optionally setting `CRON_SECRET`.
 
 ## Flow After Setup
 
 1. Visit app → redirected to /login
-2. Enter email → get magic link → click link → land on /onboarding
+2. Continue with Google → land on /onboarding
 3. Pick username + grade → land on /dashboard
 4. Battle solo via /battle, challenge friends via /friends

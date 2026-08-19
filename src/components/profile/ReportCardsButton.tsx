@@ -10,7 +10,7 @@ interface ReportCardRow {
   grade: number
   my_score: number
   total_questions: number
-  card_data: { grade: string; strengths: string[]; improvements: string[]; encouragement: string }
+  card_data: { grade: string; headline: string; crushed: string[]; awesome: string; workOn: string[]; tip: string }
   created_at: string
 }
 
