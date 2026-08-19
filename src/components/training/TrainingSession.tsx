@@ -22,8 +22,8 @@ function shuffle<T>(arr: T[]): T[] {
   return a
 }
 
-function todayKey() {
-  return `puzzle_done_${new Date().toISOString().slice(0, 10)}`
+function todayDate(): string {
+  return new Date().toISOString().slice(0, 10)
 }
 
 export function TrainingSession({
@@ -44,9 +44,24 @@ export function TrainingSession({
   const isPuzzle = mode.id === 'puzzles'
   const supabase = createClient()
 
-  // Daily puzzle gate
-  const [puzzleAlreadyDone] = useState(() => isPuzzle && !!localStorage.getItem(todayKey()))
+  // Daily puzzle gate — server-verified via users.last_puzzle_reward_date,
+  // not client storage, so it can't be bypassed by clearing browser data.
+  const [puzzleStatus, setPuzzleStatus] = useState<'checking' | 'available' | 'done'>(isPuzzle ? 'checking' : 'available')
+  const [userId, setUserId] = useState<string | null>(null)
   const [puzzleCoinsAwarded, setPuzzleCoinsAwarded] = useState(false)
+
+  useEffect(() => {
+    if (!isPuzzle) return
+    let cancelled = false
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) { if (!cancelled) setPuzzleStatus('available'); return }
+      setUserId(user.id)
+      const { data } = await supabase.from('users').select('last_puzzle_reward_date').eq('id', user.id).single()
+      const last = (data as any)?.last_puzzle_reward_date as string | null
+      if (!cancelled) setPuzzleStatus(last === todayDate() ? 'done' : 'available')
+    })
+    return () => { cancelled = true }
+  }, [])
 
   const [questions] = useState(() =>
     getQuestionsForBattle(subject, grade, mode.questions, topic).map((q, i) => ({ ...q, id: `q-${i}` }))
@@ -186,15 +201,21 @@ export function TrainingSession({
 
   async function advance() {
     if (qIndex + 1 >= questions.length) {
-      // Award puzzle coins
-      if (isPuzzle && !puzzleAlreadyDone) {
-        localStorage.setItem(todayKey(), '1')
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          const { data } = await supabase.from('users').select('coins').eq('id', user.id).single()
-          const cur = (data as any)?.coins ?? 0
-          await supabase.from('users').update({ coins: cur + PUZZLE_COINS }).eq('id', user.id)
+      // Award puzzle coins — guarded update only succeeds if the reward
+      // hasn't already been claimed today, per the database (not localStorage)
+      if (isPuzzle && puzzleStatus === 'available' && userId) {
+        const today = todayDate()
+        const { data: row } = await supabase.from('users').select('coins').eq('id', userId).single()
+        const cur = (row as any)?.coins ?? 0
+        const { data: updated } = await supabase
+          .from('users')
+          .update({ coins: cur + PUZZLE_COINS, last_puzzle_reward_date: today })
+          .eq('id', userId)
+          .or(`last_puzzle_reward_date.is.null,last_puzzle_reward_date.lt.${today}`)
+          .select()
+        if (updated && updated.length > 0) {
           setPuzzleCoinsAwarded(true)
+          setPuzzleStatus('done')
         }
       }
       setPhase('done')
@@ -217,8 +238,20 @@ export function TrainingSession({
     ? selectedAnswer.toLowerCase() === q?.correct_answer?.toLowerCase()
     : typedAnswer.toLowerCase() === q?.correct_answer?.toLowerCase()
 
+  // Checking today's puzzle status with the server
+  if (isPuzzle && puzzleStatus === 'checking') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
+        <div className="text-center space-y-3">
+          <div className="text-6xl animate-pulse">🧩</div>
+          <p className="text-slate-400 text-sm font-semibold">Checking today's puzzle...</p>
+        </div>
+      </div>
+    )
+  }
+
   // Already done today — puzzle gate
-  if (isPuzzle && puzzleAlreadyDone) {
+  if (isPuzzle && puzzleStatus === 'done') {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-base)]">
         <div className="max-w-sm w-full space-y-5 text-center">

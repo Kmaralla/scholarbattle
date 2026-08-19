@@ -18,6 +18,7 @@ create table if not exists public.users (
   total_battles integer not null default 0,
   season_wins integer not null default 0,
   coins integer not null default 0,
+  last_puzzle_reward_date date,
   badges text[] not null default '{}',
   unlocked_games text[] not null default '{}',
   created_at timestamptz default now()
