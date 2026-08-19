@@ -41,23 +41,23 @@ export function TopicPicker({ onSelect, onCancel, startLabel = 'Start Battle ⚔
   const topics = subject && grade ? getTopicsForGrade(subject, grade) : []
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2.5">
       {/* Subject */}
       <div>
-        <p className="text-sm font-semibold text-white/70 mb-2">Pick a Subject</p>
-        <div className="grid grid-cols-2 gap-2">
+        <p className="text-xs font-bold text-white/50 uppercase tracking-wider mb-1.5">Pick a Subject</p>
+        <div className="grid grid-cols-2 gap-1.5">
           {SUBJECTS.map(s => (
             <button
               key={s.value}
               onClick={() => handleSubject(s.value)}
               className={cn(
-                'flex items-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all',
+                'flex items-center gap-1.5 p-2 rounded-xl border-2 text-xs font-semibold transition-all',
                 subject === s.value
                   ? 'border-indigo-400 bg-indigo-500/20 text-white'
                   : 'border-white/10 hover:border-white/20 bg-white/5 text-white/70',
               )}
             >
-              <span className="text-lg">{s.emoji}</span>
+              <span className="text-base">{s.emoji}</span>
               {s.label}
             </button>
           ))}
@@ -67,14 +67,14 @@ export function TopicPicker({ onSelect, onCancel, startLabel = 'Start Battle ⚔
       {/* Grade */}
       {subject && (
         <div>
-          <p className="text-sm font-semibold text-white/70 mb-2">Pick a Grade Level</p>
-          <div className="grid grid-cols-4 gap-1.5">
+          <p className="text-xs font-bold text-white/50 uppercase tracking-wider mb-1.5">Pick a Grade Level</p>
+          <div className="grid grid-cols-6 gap-1">
             {GRADES.map(g => (
               <button
                 key={g}
                 onClick={() => handleGrade(g)}
                 className={cn(
-                  'py-2 rounded-lg text-xs font-bold border-2 transition-all',
+                  'py-1.5 rounded-lg text-[11px] font-bold border-2 transition-all',
                   grade === g
                     ? 'border-indigo-400 bg-indigo-600 text-white'
                     : 'border-white/10 hover:border-indigo-400/50 bg-white/5 text-white/70'
@@ -90,20 +90,20 @@ export function TopicPicker({ onSelect, onCancel, startLabel = 'Start Battle ⚔
       {/* Topic */}
       {subject && grade && (
         <div>
-          <p className="text-sm font-semibold text-white/70 mb-2">Pick a Topic</p>
-          <div className="grid grid-cols-2 gap-2">
+          <p className="text-xs font-bold text-white/50 uppercase tracking-wider mb-1.5">Pick a Topic</p>
+          <div className="grid grid-cols-2 gap-1.5">
             {topics.map(t => (
               <button
                 key={t.label}
                 onClick={() => setTopic(t.label)}
                 className={cn(
-                  'flex items-center gap-2 p-2.5 rounded-xl border-2 text-xs font-semibold transition-all text-left',
+                  'flex items-center gap-1.5 p-1.5 rounded-lg border-2 text-[11px] font-semibold transition-all text-left',
                   topic === t.label
                     ? 'border-indigo-400 bg-indigo-500/20 text-white'
                     : 'border-white/10 hover:border-white/20 bg-white/5 text-white/70',
                 )}
               >
-                <span className="text-base flex-shrink-0">{t.emoji}</span>
+                <span className="text-sm flex-shrink-0">{t.emoji}</span>
                 <span className="leading-tight">{t.label}</span>
               </button>
             ))}
@@ -113,11 +113,11 @@ export function TopicPicker({ onSelect, onCancel, startLabel = 'Start Battle ⚔
 
       {/* Summary + CTA */}
       {subject && grade && topic && (
-        <div className="pt-1 space-y-2">
-          <div className="flex items-center gap-2 p-3 bg-indigo-500/10 border border-indigo-400/20 rounded-xl">
-            <span className="text-2xl">{subjectMeta?.emoji}</span>
+        <div className="pt-1 space-y-1.5">
+          <div className="flex items-center gap-2 p-2 bg-indigo-500/10 border border-indigo-400/20 rounded-xl">
+            <span className="text-xl">{subjectMeta?.emoji}</span>
             <div className="min-w-0">
-              <p className="font-bold text-white">{subjectMeta?.label} · {gradeLabel(grade)}</p>
+              <p className="font-bold text-white text-sm">{subjectMeta?.label} · {gradeLabel(grade)}</p>
               <p className="text-xs text-indigo-300 truncate">{topics.find(t => t.label === topic)?.emoji} {topic}</p>
             </div>
           </div>

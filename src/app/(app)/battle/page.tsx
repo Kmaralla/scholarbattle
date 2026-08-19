@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { TopicPicker } from '@/components/battle/TopicPicker'
 import { Subject } from '@/types'
 import { type BotDifficulty } from '@/components/battle/BattleRoom'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Swords } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -49,51 +49,47 @@ export default function BattlePage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto p-4 space-y-4">
+    <div className="max-w-lg mx-auto p-3 space-y-2.5">
       <div className="flex items-center gap-2">
-        <Swords className="w-6 h-6 text-indigo-600" />
-        <h1 className="text-xl font-black text-white">Practice Battle</h1>
+        <Swords className="w-5 h-5 text-indigo-600" />
+        <h1 className="text-lg font-black text-white">Practice Battle</h1>
+        <span className="text-xs text-white/40">vs <span className="text-indigo-400 font-semibold">Scholar Bot 🎓</span></span>
       </div>
 
       <Card>
-        <CardHeader>
-          <p className="text-sm text-white/60">
-            Battle <span className="font-semibold text-indigo-400">Scholar Bot 🎓</span> — first to answer correctly wins the point!
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Difficulty picker */}
+        <CardContent className="p-3 space-y-2.5">
+          {/* Difficulty picker — compact row */}
           <div>
-            <p className="text-sm font-semibold text-white/70 mb-2">Bot Difficulty</p>
-            <div className="grid grid-cols-3 gap-2">
+            <p className="text-xs font-bold text-white/50 uppercase tracking-wider mb-1.5">Bot Difficulty</p>
+            <div className="flex gap-2">
               {DIFFICULTIES.map(d => (
                 <button
                   key={d.value}
                   onClick={() => setDifficulty(d.value)}
                   className={cn(
-                    'flex flex-col items-center gap-1 py-3 px-2 rounded-xl border-2 text-center transition-all',
+                    'flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border-2 text-xs font-black transition-all',
                     difficulty === d.value
-                      ? 'border-indigo-400 bg-indigo-500/20'
-                      : 'border-white/10 hover:border-white/20 bg-white/5'
+                      ? 'border-indigo-400 bg-indigo-500/20 text-white'
+                      : 'border-white/10 hover:border-white/20 bg-white/5 text-white/70'
                   )}
                 >
-                  <span className="text-base font-bold text-white">{d.label}</span>
-                  <span className="text-xs text-white/50 leading-tight">{d.desc}</span>
+                  {d.label}
                 </button>
               ))}
             </div>
+            <p className="text-[11px] text-white/40 mt-1 pl-1">{DIFFICULTIES.find(d => d.value === difficulty)?.desc}</p>
           </div>
 
           {/* Time per question */}
           <div>
-            <p className="text-sm font-semibold text-white/70 mb-2">Time per Question</p>
+            <p className="text-xs font-bold text-white/50 uppercase tracking-wider mb-1.5">Time per Question</p>
             <div className="flex gap-2">
               {TIME_OPTIONS.map(t => (
                 <button
                   key={t}
                   onClick={() => setTimeout_(t)}
                   className={cn(
-                    'flex-1 py-2.5 rounded-xl border-2 text-sm font-black transition-all',
+                    'flex-1 py-2 rounded-xl border-2 text-sm font-black transition-all',
                     timeout === t
                       ? 'border-indigo-400 bg-indigo-500/20 text-white'
                       : 'border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white'
