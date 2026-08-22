@@ -31,15 +31,46 @@ export interface TeamBattleAnswer {
   question_index: number
   is_correct: boolean
   time_ms: number
+  created_at: string
 }
 
-// Which question index should be showing right now, purely from elapsed
-// wall-clock time since start_at — every client computes this
-// independently, so nothing needs to broadcast "next question" live.
-export function currentQuestionIndex(battle: TeamBattle): number {
-  const elapsedMs = Date.now() - new Date(battle.start_at).getTime()
-  if (elapsedMs < 0) return -1 // countdown hasn't finished yet
-  return Math.floor(elapsedMs / (battle.seconds_per_question * 1000))
+const ADVANCE_BUFFER_MS = 1000
+
+// Each question is open until either its full time allowance elapses, or
+// someone answers it (plus a short buffer so everyone sees it was
+// answered) — whichever comes first. Every client derives this purely
+// from team_battles.start_at + the polled team_battle_answers rows, so
+// nothing needs to broadcast "next question" live; as soon as a client's
+// poll picks up an answer, it reaches the same conclusion every other
+// client will reach once their poll catches up.
+export function questionEndTime(
+  battle: TeamBattle,
+  answers: TeamBattleAnswer[],
+  questionIndex: number
+): number {
+  const perQMs = battle.seconds_per_question * 1000
+  const scheduledStart = new Date(battle.start_at).getTime() + questionIndex * perQMs
+  const scheduledEnd = scheduledStart + perQMs
+  const qAnswers = answers.filter(a => a.question_index === questionIndex)
+  if (qAnswers.length === 0) return scheduledEnd
+  const earliestAnswer = Math.min(...qAnswers.map(a => new Date(a.created_at).getTime()))
+  return Math.min(scheduledEnd, Math.max(scheduledStart, earliestAnswer + ADVANCE_BUFFER_MS))
+}
+
+// Which question index should be showing right now — walks the schedule
+// forward from start_at, letting each question end early the moment
+// someone answers it (see questionEndTime).
+export function currentQuestionIndex(
+  battle: TeamBattle,
+  answers: TeamBattleAnswer[],
+  numQuestions: number
+): number {
+  if (msUntilStart(battle) > 0) return -1
+  const now = Date.now()
+  for (let q = 0; q < numQuestions; q++) {
+    if (now < questionEndTime(battle, answers, q)) return q
+  }
+  return numQuestions
 }
 
 export function msUntilStart(battle: TeamBattle): number {

@@ -35,6 +35,8 @@ export default function FriendsPage() {
   const [chattingWith, setChattingWith] = useState<User | null>(null)
   const [view, setView] = useState<'friends' | 'add' | 'invites'>('friends')
   const [removingId, setRemovingId] = useState<string | null>(null)
+  const [allUsers, setAllUsers] = useState<User[]>([])
+  const [sendingToId, setSendingToId] = useState<string | null>(null)
   const onlineIds = useOnlineUsers()
   const supabase = createClient()
   const router = useRouter()
@@ -60,6 +62,12 @@ export default function FriendsPage() {
   useEffect(() => {
     if (currentUser) loadFriends()
   }, [currentUser, friendsKey])
+
+  useEffect(() => {
+    if (view !== 'add' || !currentUser) return
+    supabase.from('users').select('*').neq('id', currentUser.id).order('username', { ascending: true })
+      .then(({ data }) => { if (data) setAllUsers(data) })
+  }, [view, currentUser])
 
   // Real-time: listen for incoming friend requests while on this page
   useEffect(() => {
@@ -117,6 +125,19 @@ export default function FriendsPage() {
     if (error) { setAddStatus('Could not send request'); return }
     setAddStatus(`✅ Friend request sent to ${found.username}!`)
     setAddUsername('')
+  }
+
+  async function sendRequestTo(target: User) {
+    setSendingToId(target.id)
+    const { data: existing } = await supabase.from('friendships').select('id, status').eq('user_id', currentUser!.id).eq('friend_id', target.id).maybeSingle()
+    if (existing) {
+      setAddStatus(existing.status === 'accepted' ? 'Already friends!' : 'Request already sent!')
+      setSendingToId(null)
+      return
+    }
+    const { error } = await supabase.from('friendships').insert({ user_id: currentUser!.id, friend_id: target.id, status: 'pending' })
+    setAddStatus(error ? 'Could not send request' : `✅ Friend request sent to ${target.username}!`)
+    setSendingToId(null)
   }
 
   async function handleAccept(invite: PendingInvite) {
@@ -325,6 +346,30 @@ export default function FriendsPage() {
                 </button>
               </form>
               {addStatus && <p className="text-sm text-white/70 text-center">{addStatus}</p>}
+
+              <div className="pt-2 border-t border-white/10">
+                <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-2">All Players</p>
+                {allUsers.length === 0 ? (
+                  <p className="text-xs text-white/30 text-center py-6">No other players yet</p>
+                ) : (
+                  <div className="space-y-1">
+                    {allUsers.map(u => (
+                      <div key={u.id} className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/5 transition">
+                        <UserAvatar username={u.username} avatarUrl={(u as any).avatar_url} frameId={(u as any).equipped_frame} size="sm" />
+                        <span className="flex-1 min-w-0 text-sm font-semibold text-white truncate">{u.username}</span>
+                        <button
+                          onClick={() => sendRequestTo(u)}
+                          disabled={sendingToId === u.id}
+                          className="p-1.5 rounded-lg text-indigo-300 hover:bg-indigo-500/20 transition disabled:opacity-40"
+                          title="Send friend request"
+                        >
+                          <UserPlus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
