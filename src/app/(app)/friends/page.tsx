@@ -11,6 +11,7 @@ import { UserPlus, X, Check, Bell, Swords, MessageCircle, UserMinus, Users } fro
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { pickQuestionIndices } from '@/lib/questions'
+import { Users2 } from 'lucide-react'
 
 interface PendingInvite {
   id: string
@@ -37,6 +38,16 @@ export default function FriendsPage() {
   const onlineIds = useOnlineUsers()
   const supabase = createClient()
   const router = useRouter()
+
+  // Team Battle flow
+  const [teamBattleStep, setTeamBattleStep] = useState<'closed' | 'select' | 'customize'>('closed')
+  const [selectedFriendIds, setSelectedFriendIds] = useState<string[]>([])
+  const [tbTeamsEnabled, setTbTeamsEnabled] = useState(true)
+  const [tbSubject, setTbSubject] = useState<Subject>('math')
+  const [tbGrade, setTbGrade] = useState(5)
+  const [tbSeconds, setTbSeconds] = useState(15)
+  const [tbCreating, setTbCreating] = useState(false)
+  const [tbError, setTbError] = useState<string | null>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -144,9 +155,61 @@ export default function FriendsPage() {
     router.push(`/battle/${battle.id}?timeout=${challengeTimeout}`)
   }
 
+  function toggleFriendSelected(id: string) {
+    setSelectedFriendIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
+
+  function closeTeamBattle() {
+    setTeamBattleStep('closed')
+    setSelectedFriendIds([])
+    setTbError(null)
+  }
+
+  async function createTeamBattle() {
+    if (!currentUser || selectedFriendIds.length === 0) return
+    setTbCreating(true)
+    setTbError(null)
+    try {
+      const questionIds = pickQuestionIndices(tbSubject, tbGrade, 30)
+      const { data: battleId, error } = await supabase.rpc('create_team_battle', {
+        p_subject: tbSubject,
+        p_grade_level: tbGrade,
+        p_seconds_per_question: tbSeconds,
+        p_teams_enabled: tbTeamsEnabled,
+        p_friend_ids: selectedFriendIds,
+        p_question_ids: questionIds,
+      })
+      if (error) throw error
+
+      for (const friendId of selectedFriendIds) {
+        const ch = supabase.channel(`team_challenge:${friendId}`)
+        await ch.subscribe()
+        await ch.send({
+          type: 'broadcast', event: 'incoming_team_challenge',
+          payload: {
+            team_battle_id: battleId,
+            host_username: currentUser.username,
+            host_avatar_url: (currentUser as any).avatar_url ?? null,
+            host_equipped_frame: (currentUser as any).equipped_frame ?? null,
+            subject: tbSubject, grade_level: tbGrade, teams_enabled: tbTeamsEnabled,
+          },
+        })
+        supabase.removeChannel(ch)
+      }
+
+      router.push(`/team-battle/${battleId}`)
+    } catch (err: any) {
+      console.error('[TeamBattle] create failed:', err)
+      setTbError(err?.message ?? 'Could not create the battle — try again.')
+    } finally {
+      setTbCreating(false)
+    }
+  }
+
   const sorted = friends
     .map(f => ({ ...f, online: onlineIds.has(f.id) }))
     .sort((a, b) => Number(b.online) - Number(a.online))
+  const onlineFriends = sorted.filter(f => f.online)
 
   if (!currentUser) return <div className="p-4 text-center text-white/60">Loading...</div>
 
@@ -161,7 +224,13 @@ export default function FriendsPage() {
         {/* Sidebar header */}
         <div className="px-4 py-4 border-b border-white/10">
           <h1 className="font-black text-white text-lg">Friends</h1>
-          <div className="flex gap-2 mt-3">
+          <button
+            onClick={() => setTeamBattleStep('select')}
+            className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 text-white text-sm font-black transition"
+          >
+            <Users2 className="w-4 h-4" /> Battle with Teams
+          </button>
+          <div className="flex gap-2 mt-2">
             <button
               onClick={() => setView('friends')}
               className={cn('flex-1 py-1.5 rounded-xl text-xs font-bold transition', view === 'friends' ? 'bg-indigo-500 text-white' : 'bg-white/5 text-white/50 hover:bg-white/10')}
@@ -341,6 +410,151 @@ export default function FriendsPage() {
               </div>
             </div>
             <TopicPicker onSelect={handleStartBattle} onCancel={() => setChallenging(null)} />
+          </div>
+        </div>
+      )}
+
+      {/* Team Battle: step 1 — select friends */}
+      {teamBattleStep === 'select' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[var(--bg-nav)] border border-white/15 rounded-3xl p-5 w-full max-w-sm shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-1">
+              <p className="font-black text-white">⚔️ Battle with Teams</p>
+              <button onClick={closeTeamBattle}><X className="w-5 h-5 text-white/40" /></button>
+            </div>
+            <p className="text-xs text-white/40 mb-4">Pick who to invite. Only online friends can join in time.</p>
+
+            {onlineFriends.length === 0 ? (
+              <p className="text-sm text-white/40 text-center py-8">No friends online right now.</p>
+            ) : (
+              <div className="space-y-1.5 mb-4">
+                {onlineFriends.map(friend => {
+                  const selected = selectedFriendIds.includes(friend.id)
+                  return (
+                    <button
+                      key={friend.id}
+                      onClick={() => toggleFriendSelected(friend.id)}
+                      className={cn(
+                        'w-full flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all text-left',
+                        selected ? 'border-violet-400 bg-violet-500/15' : 'border-white/10 bg-white/5 hover:border-white/20'
+                      )}
+                    >
+                      <UserAvatar username={friend.username} avatarUrl={(friend as any).avatar_url} frameId={(friend as any).equipped_frame} size="sm" />
+                      <span className="flex-1 text-sm font-semibold text-white">{friend.username}</span>
+                      <div className={cn(
+                        'w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0',
+                        selected ? 'border-violet-400 bg-violet-500' : 'border-white/20'
+                      )}>
+                        {selected && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            <button
+              onClick={() => setTeamBattleStep('customize')}
+              disabled={selectedFriendIds.length === 0}
+              className="w-full py-3 rounded-2xl font-black text-white text-sm bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 transition disabled:opacity-40"
+            >
+              Next ({selectedFriendIds.length} selected) →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Team Battle: step 2 — customize */}
+      {teamBattleStep === 'customize' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[var(--bg-nav)] border border-white/15 rounded-3xl p-5 w-full max-w-sm shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+            <div className="flex items-center justify-between">
+              <button onClick={() => setTeamBattleStep('select')} className="text-white/40 hover:text-white text-sm font-semibold transition">← Back</button>
+              <p className="font-black text-white">Customize</p>
+              <button onClick={closeTeamBattle}><X className="w-5 h-5 text-white/40" /></button>
+            </div>
+
+            {tbError && <p className="text-sm text-red-400 bg-red-500/10 border border-red-400/20 rounded-xl px-3 py-2">{tbError}</p>}
+
+            {/* Teams toggle */}
+            <div>
+              <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-2">Format</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setTbTeamsEnabled(true)}
+                  className={cn('flex-1 py-2.5 rounded-xl border-2 text-sm font-black transition-all', tbTeamsEnabled ? 'border-violet-400 bg-violet-500/20 text-white' : 'border-white/10 bg-white/5 text-white/50')}
+                >
+                  👥 Teams
+                </button>
+                <button
+                  onClick={() => setTbTeamsEnabled(false)}
+                  className={cn('flex-1 py-2.5 rounded-xl border-2 text-sm font-black transition-all', !tbTeamsEnabled ? 'border-violet-400 bg-violet-500/20 text-white' : 'border-white/10 bg-white/5 text-white/50')}
+                >
+                  🆓 Free-for-all
+                </button>
+              </div>
+              <p className="text-[11px] text-white/40 mt-1.5 pl-1">
+                {tbTeamsEnabled ? 'Everyone splits evenly into 2 teams.' : 'Everyone plays for themselves.'}
+              </p>
+            </div>
+
+            {/* Subject */}
+            <div>
+              <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-2">Subject</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {(['math', 'science', 'history', 'english'] as Subject[]).map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setTbSubject(s)}
+                    className={cn('py-2 rounded-xl border-2 text-xs font-semibold capitalize transition-all', tbSubject === s ? 'border-violet-400 bg-violet-500/20 text-white' : 'border-white/10 bg-white/5 text-white/70')}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Grade */}
+            <div>
+              <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-2">Grade Level</p>
+              <div className="grid grid-cols-6 gap-1">
+                {Array.from({ length: 12 }, (_, i) => i + 1).map(g => (
+                  <button
+                    key={g}
+                    onClick={() => setTbGrade(g)}
+                    className={cn('py-1.5 rounded-lg text-[11px] font-bold border-2 transition-all', tbGrade === g ? 'border-violet-400 bg-violet-600 text-white' : 'border-white/10 bg-white/5 text-white/70')}
+                  >
+                    Gr.{g}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Time per question */}
+            <div>
+              <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-2">Time per Question</p>
+              <div className="flex gap-2">
+                {[10, 15, 20, 30].map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setTbSeconds(t)}
+                    className={cn('flex-1 py-2 rounded-xl border-2 text-sm font-black transition-all', tbSeconds === t ? 'border-violet-400 bg-violet-500/20 text-white' : 'border-white/10 bg-white/5 text-white/40')}
+                  >
+                    {t}s
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <p className="text-xs text-center text-white/30">First to 5 points wins</p>
+
+            <button
+              onClick={createTeamBattle}
+              disabled={tbCreating}
+              className="w-full py-3.5 rounded-2xl font-black text-white text-sm bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 transition disabled:opacity-50"
+            >
+              {tbCreating ? 'Starting...' : 'Start Battle ⚔️'}
+            </button>
           </div>
         </div>
       )}

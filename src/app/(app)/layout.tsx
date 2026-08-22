@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/layout/Navbar'
 import { ChallengeNotification } from '@/components/ChallengeNotification'
+import { TeamBattleNotification } from '@/components/TeamBattleNotification'
 import { PresenceTracker } from '@/components/PresenceTracker'
 import { headers } from 'next/headers'
 
@@ -39,6 +40,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <Navbar />
         <main className="flex-1 overflow-y-auto pb-24 md:pb-0 min-h-screen">{children}</main>
         <ChallengeNotification userId={user.id} />
+        <TeamBattleNotification userId={user.id} />
       </div>
     </PresenceTracker>
   )
