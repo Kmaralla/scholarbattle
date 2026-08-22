@@ -36,39 +36,54 @@ export interface TeamBattleAnswer {
 
 const ADVANCE_BUFFER_MS = 1000
 
-// Each question is open until either its full time allowance elapses, or
-// someone answers it (plus a short buffer so everyone sees it was
-// answered) — whichever comes first. Every client derives this purely
-// from team_battles.start_at + the polled team_battle_answers rows, so
-// nothing needs to broadcast "next question" live; as soon as a client's
-// poll picks up an answer, it reaches the same conclusion every other
-// client will reach once their poll catches up.
-export function questionEndTime(
+// Builds the actual (not just nominally-scheduled) end time for every
+// question in order. A question ends at its full time allowance UNLESS
+// every currently-accepted participant has answered it, in which case it
+// ends shortly after the last of them answers. Each question's start is
+// the PREVIOUS question's actual end — never a fixed multiple of
+// start_at — so an early finish on question N doesn't leave question
+// N+1's clock quietly inflated by the time that was saved. Every client
+// derives this purely from team_battles.start_at + the polled
+// team_battle_answers rows, so nothing needs to broadcast "next
+// question" live.
+export function computeQuestionSchedule(
   battle: TeamBattle,
   answers: TeamBattleAnswer[],
-  questionIndex: number
-): number {
+  participants: TeamBattleParticipant[],
+  numQuestions: number
+): number[] {
   const perQMs = battle.seconds_per_question * 1000
-  const scheduledStart = new Date(battle.start_at).getTime() + questionIndex * perQMs
-  const scheduledEnd = scheduledStart + perQMs
-  const qAnswers = answers.filter(a => a.question_index === questionIndex)
-  if (qAnswers.length === 0) return scheduledEnd
-  const earliestAnswer = Math.min(...qAnswers.map(a => new Date(a.created_at).getTime()))
-  return Math.min(scheduledEnd, Math.max(scheduledStart, earliestAnswer + ADVANCE_BUFFER_MS))
+  const accepted = participants.filter(p => p.status === 'accepted')
+  let t = new Date(battle.start_at).getTime()
+  const ends: number[] = []
+  for (let q = 0; q < numQuestions; q++) {
+    const scheduledEnd = t + perQMs
+    const qAnswers = answers.filter(a => a.question_index === q)
+    const answeredIds = new Set(qAnswers.map(a => a.user_id))
+    const everyoneAnswered = accepted.length > 0 && accepted.every(p => answeredIds.has(p.user_id))
+    let end = scheduledEnd
+    if (everyoneAnswered) {
+      const latestAnswer = Math.max(...qAnswers.map(a => new Date(a.created_at).getTime()))
+      end = Math.min(scheduledEnd, Math.max(t, latestAnswer + ADVANCE_BUFFER_MS))
+    }
+    ends.push(end)
+    t = end
+  }
+  return ends
 }
 
-// Which question index should be showing right now — walks the schedule
-// forward from start_at, letting each question end early the moment
-// someone answers it (see questionEndTime).
+// Which question index should be showing right now, from the schedule above.
 export function currentQuestionIndex(
   battle: TeamBattle,
   answers: TeamBattleAnswer[],
+  participants: TeamBattleParticipant[],
   numQuestions: number
 ): number {
   if (msUntilStart(battle) > 0) return -1
   const now = Date.now()
+  const ends = computeQuestionSchedule(battle, answers, participants, numQuestions)
   for (let q = 0; q < numQuestions; q++) {
-    if (now < questionEndTime(battle, answers, q)) return q
+    if (now < ends[q]) return q
   }
   return numQuestions
 }

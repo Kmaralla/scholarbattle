@@ -11,7 +11,7 @@ import {
   TeamBattleParticipant,
   TeamBattleAnswer,
   currentQuestionIndex,
-  questionEndTime,
+  computeQuestionSchedule,
   msUntilStart,
   computeTeamScores,
 } from '@/lib/teamBattle'
@@ -86,7 +86,7 @@ export default function TeamBattlePage() {
     return () => { clearInterval(clockInterval); clearInterval(pollInterval) }
   }, [battle, loadAll])
 
-  const qIndex = battle ? currentQuestionIndex(battle, answers, questions.length) : -1
+  const qIndex = battle ? currentQuestionIndex(battle, answers, participants, questions.length) : -1
   const startsInMs = battle ? msUntilStart(battle) : 0
   const me = participants.find(p => p.user_id === userId)
   const scores = battle ? computeTeamScores(answers, participants, Math.min(qIndex + 1, questions.length)) : {}
@@ -213,7 +213,8 @@ export default function TeamBattlePage() {
 
   const q = questions[qIndex]
   const questionSeconds = battle.seconds_per_question
-  const endTime = questionEndTime(battle, answers, qIndex)
+  const schedule = computeQuestionSchedule(battle, answers, participants, questions.length)
+  const endTime = schedule[qIndex] ?? Date.now()
   const timeLeft = Math.max(0, Math.ceil((endTime - Date.now()) / 1000))
   const alreadyAnswered = answeredIndex === qIndex
 
