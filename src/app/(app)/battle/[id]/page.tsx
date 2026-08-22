@@ -153,6 +153,20 @@ export default function BattlePage() {
     }
     await supabase.from('battles').update(battleUpdate).eq('id', battle.id)
 
+    // If this battle is a Party Mode tournament match, sync the winner back
+    // so the bracket can advance. A tie has no single winner — the bracket
+    // just won't auto-advance for that match; not handled beyond that here.
+    if (winnerId) {
+      const { data: tourneyMatch } = await supabase
+        .from('party_tournament_matches')
+        .select('id')
+        .eq('battle_id', battle.id)
+        .maybeSingle()
+      if (tourneyMatch) {
+        await supabase.from('party_tournament_matches').update({ winner_id: winnerId }).eq('id', tourneyMatch.id)
+      }
+    }
+
     // ELO/coins/badges are computed and applied server-side — this call
     // can only claim the reward this reported score actually earns, it
     // can't be used to set arbitrary values directly.

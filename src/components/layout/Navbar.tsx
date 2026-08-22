@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Swords, Users, Trophy, User, Home, Gamepad2, Dumbbell, Sun, Moon } from 'lucide-react'
+import { Swords, Users, Trophy, User, Home, Gamepad2, Dumbbell, Sun, Moon, PartyPopper } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -13,6 +13,7 @@ const SECTIONS = [
     items: [
       { href: '/dashboard',   label: 'Home',     icon: Home,     emoji: '🏠', desc: 'Your overview — stats, rank, quick actions, and recent battles.' },
       { href: '/matchmaking', label: 'Battle',   icon: Swords,   emoji: '⚔️', desc: 'Jump into a ranked match against a real player right now.' },
+      { href: '/party',       label: 'Party',    icon: PartyPopper, emoji: '🎉', desc: 'Host or join a team room with a shareable code — group play.' },
       { href: '/friends',     label: 'Friends',  icon: Users,    emoji: '👥', desc: 'Add friends, accept invites, and challenge them to a battle.' },
       { href: '/leaderboard', label: 'Rankings', icon: Trophy,   emoji: '🏆', desc: 'See where you stand against all scholars on the global leaderboard.' },
     ],
