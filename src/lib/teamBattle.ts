@@ -38,14 +38,14 @@ const ADVANCE_BUFFER_MS = 1000
 
 // Builds the actual (not just nominally-scheduled) end time for every
 // question in order. A question ends at its full time allowance UNLESS
-// every currently-accepted participant has answered it, in which case it
-// ends shortly after the last of them answers. Each question's start is
-// the PREVIOUS question's actual end — never a fixed multiple of
-// start_at — so an early finish on question N doesn't leave question
-// N+1's clock quietly inflated by the time that was saved. Every client
-// derives this purely from team_battles.start_at + the polled
-// team_battle_answers rows, so nothing needs to broadcast "next
-// question" live.
+// someone answers it, in which case it ends shortly after that first
+// answer — everyone moves to the next question together. Each
+// question's start is the PREVIOUS question's actual end — never a
+// fixed multiple of start_at — so an early finish on question N doesn't
+// leave question N+1's clock quietly inflated by the time that was
+// saved. Every client derives this purely from team_battles.start_at +
+// the polled team_battle_answers rows, so nothing needs to broadcast
+// "next question" live.
 export function computeQuestionSchedule(
   battle: TeamBattle,
   answers: TeamBattleAnswer[],
@@ -53,18 +53,15 @@ export function computeQuestionSchedule(
   numQuestions: number
 ): number[] {
   const perQMs = battle.seconds_per_question * 1000
-  const accepted = participants.filter(p => p.status === 'accepted')
   let t = new Date(battle.start_at).getTime()
   const ends: number[] = []
   for (let q = 0; q < numQuestions; q++) {
     const scheduledEnd = t + perQMs
     const qAnswers = answers.filter(a => a.question_index === q)
-    const answeredIds = new Set(qAnswers.map(a => a.user_id))
-    const everyoneAnswered = accepted.length > 0 && accepted.every(p => answeredIds.has(p.user_id))
     let end = scheduledEnd
-    if (everyoneAnswered) {
-      const latestAnswer = Math.max(...qAnswers.map(a => new Date(a.created_at).getTime()))
-      end = Math.min(scheduledEnd, Math.max(t, latestAnswer + ADVANCE_BUFFER_MS))
+    if (qAnswers.length > 0) {
+      const earliestAnswer = Math.min(...qAnswers.map(a => new Date(a.created_at).getTime()))
+      end = Math.min(scheduledEnd, Math.max(t, earliestAnswer + ADVANCE_BUFFER_MS))
     }
     ends.push(end)
     t = end

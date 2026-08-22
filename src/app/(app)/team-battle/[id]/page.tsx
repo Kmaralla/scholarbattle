@@ -16,7 +16,7 @@ import {
   computeTeamScores,
 } from '@/lib/teamBattle'
 
-const POLL_MS = 1200
+const POLL_MS = 500
 const TICK_MS = 250
 
 export default function TeamBattlePage() {
