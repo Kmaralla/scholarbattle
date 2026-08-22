@@ -137,54 +137,6 @@ create table if not exists public.season_results (
   created_at timestamptz not null default now()
 );
 
--- ── Party Mode (Phase 1 — lobby only, no live battle loop yet) ──
--- A host creates a room with a shareable code, sets subject/grade/time/team
--- count/ranked, and others join and pick a team.
--- mode: 'teams' (team-based lobby) or 'tournament' (single-elimination
--- bracket of ordinary 1v1 battles — reuses the existing battles table /
--- BattleRoom / reward pipeline, not a new N-player game loop).
-create table if not exists public.party_rooms (
-  id uuid primary key default gen_random_uuid(),
-  code text unique not null,
-  host_id uuid references public.users(id) on delete cascade not null,
-  subject text not null,
-  grade_level integer not null,
-  seconds_per_question integer not null default 15,
-  mode text not null default 'teams' check (mode in ('teams','tournament')),
-  team_count integer not null default 2,
-  team_size integer,
-  max_players integer,
-  ranked boolean not null default false,
-  status text not null default 'lobby' check (status in ('lobby','in_progress','completed','cancelled')),
-  created_at timestamptz not null default now()
-);
-
-create table if not exists public.party_participants (
-  id uuid primary key default gen_random_uuid(),
-  room_id uuid references public.party_rooms(id) on delete cascade not null,
-  user_id uuid references public.users(id) on delete cascade not null,
-  team_number integer not null,
-  joined_at timestamptz not null default now(),
-  unique(room_id, user_id)
-);
-
-create table if not exists public.party_tournament_matches (
-  id uuid primary key default gen_random_uuid(),
-  room_id uuid references public.party_rooms(id) on delete cascade not null,
-  round integer not null,
-  slot integer not null,
-  player_a_id uuid references public.users(id),
-  player_b_id uuid references public.users(id),
-  battle_id uuid references public.battles(id),
-  winner_id uuid references public.users(id),
-  created_at timestamptz not null default now(),
-  unique(room_id, round, slot)
-);
-
-create index if not exists party_participants_room_idx on public.party_participants (room_id);
-create index if not exists party_rooms_code_idx on public.party_rooms (code);
-create index if not exists party_tournament_matches_room_idx on public.party_tournament_matches (room_id, round);
-
 -- ── Row Level Security ───────────────────────────────────────────
 alter table public.users enable row level security;
 alter table public.questions enable row level security;
@@ -196,9 +148,6 @@ alter table public.messages enable row level security;
 alter table public.report_cards enable row level security;
 alter table public.seasons enable row level security;
 alter table public.season_results enable row level security;
-alter table public.party_rooms enable row level security;
-alter table public.party_participants enable row level security;
-alter table public.party_tournament_matches enable row level security;
 
 -- Users
 create policy "Users are viewable by everyone" on public.users for select using (true);
@@ -238,24 +187,6 @@ create policy "Users insert own report cards" on public.report_cards for insert 
 -- Seasons — public read only; all writes happen via rollover_season_if_due()
 create policy "Seasons are viewable by everyone" on public.seasons for select using (true);
 create policy "Season results are viewable by everyone" on public.season_results for select using (true);
-
--- Party Mode
-create policy "Party rooms are viewable by everyone" on public.party_rooms for select using (true);
-create policy "Hosts can create their own room" on public.party_rooms for insert with check (auth.uid() = host_id);
-create policy "Hosts can update their own room" on public.party_rooms for update using (auth.uid() = host_id);
-create policy "Party participants are viewable by everyone" on public.party_participants for select using (true);
-create policy "Users can join as themselves" on public.party_participants for insert with check (auth.uid() = user_id);
-create policy "Users can update their own team" on public.party_participants for update using (auth.uid() = user_id);
-create policy "Users can leave a room" on public.party_participants for delete using (auth.uid() = user_id);
-
-create policy "Tournament matches are viewable by everyone" on public.party_tournament_matches for select using (true);
-create policy "Host can create tournament matches" on public.party_tournament_matches for insert with check (
-  exists (select 1 from public.party_rooms where id = room_id and host_id = auth.uid())
-);
-create policy "Match participants or host can update winner" on public.party_tournament_matches for update using (
-  auth.uid() = player_a_id or auth.uid() = player_b_id
-  or exists (select 1 from public.party_rooms where id = room_id and host_id = auth.uid())
-);
 
 -- ── Indexes ──────────────────────────────────────────────────────
 create index if not exists users_elo_rating_idx on public.users (elo_rating desc);
@@ -545,65 +476,6 @@ begin
 
   get diagnostics v_updated = row_count;
   return v_updated > 0;
-end;
-$$;
-
--- Bracket generation needs the HOST to create battles between two OTHER
--- paired players, but the battles table's insert policy only allows
--- auth.uid() = challenger_id. This bypasses that for the host specifically,
--- checking host-ness explicitly instead. p_pairings is a JSON array of
--- { slot, player_a, player_b, question_ids, bye_winner }.
-create or replace function public.create_tournament_matches(
-  p_room_id uuid,
-  p_round integer,
-  p_pairings jsonb
-)
-returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_uid uuid := auth.uid();
-  v_room record;
-  pairing jsonb;
-  v_battle_id uuid;
-  v_player_a uuid;
-  v_player_b uuid;
-  v_bye_winner uuid;
-  v_qids integer[];
-begin
-  if v_uid is null then
-    raise exception 'not authenticated';
-  end if;
-
-  select * into v_room from public.party_rooms where id = p_room_id;
-  if v_room is null then
-    raise exception 'room not found';
-  end if;
-  if v_room.host_id != v_uid then
-    raise exception 'only the host can generate bracket rounds';
-  end if;
-
-  for pairing in select * from jsonb_array_elements(p_pairings)
-  loop
-    v_player_a := nullif(pairing->>'player_a', '')::uuid;
-    v_player_b := nullif(pairing->>'player_b', '')::uuid;
-    v_bye_winner := nullif(pairing->>'bye_winner', '')::uuid;
-    v_battle_id := null;
-
-    if v_player_a is not null and v_player_b is not null then
-      select coalesce(array_agg(x::integer), '{}') into v_qids
-      from jsonb_array_elements_text(coalesce(pairing->'question_ids', '[]'::jsonb)) as x;
-
-      insert into public.battles (challenger_id, opponent_id, subject, grade_level, status, challenger_score, opponent_score, question_ids)
-      values (v_player_a, v_player_b, v_room.subject, v_room.grade_level, 'in_progress', 0, 0, v_qids)
-      returning id into v_battle_id;
-    end if;
-
-    insert into public.party_tournament_matches (room_id, round, slot, player_a_id, player_b_id, battle_id, winner_id)
-    values (p_room_id, p_round, (pairing->>'slot')::integer, v_player_a, v_player_b, v_battle_id, v_bye_winner);
-  end loop;
 end;
 $$;
 
