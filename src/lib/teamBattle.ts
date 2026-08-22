@@ -70,14 +70,17 @@ export function computeQuestionSchedule(
 }
 
 // Which question index should be showing right now, from the schedule above.
+// `now` should be server-corrected time (see clockOffsetMs below), not a
+// raw Date.now(), or two devices with clocks a few seconds apart will
+// disagree about where in the schedule they are.
 export function currentQuestionIndex(
   battle: TeamBattle,
   answers: TeamBattleAnswer[],
   participants: TeamBattleParticipant[],
-  numQuestions: number
+  numQuestions: number,
+  now: number = Date.now()
 ): number {
-  if (msUntilStart(battle) > 0) return -1
-  const now = Date.now()
+  if (msUntilStart(battle, now) > 0) return -1
   const ends = computeQuestionSchedule(battle, answers, participants, numQuestions)
   for (let q = 0; q < numQuestions; q++) {
     if (now < ends[q]) return q
@@ -85,8 +88,8 @@ export function currentQuestionIndex(
   return numQuestions
 }
 
-export function msUntilStart(battle: TeamBattle): number {
-  return new Date(battle.start_at).getTime() - Date.now()
+export function msUntilStart(battle: TeamBattle, now: number = Date.now()): number {
+  return new Date(battle.start_at).getTime() - now
 }
 
 // A team scores a question's point only if EVERY accepted member answered

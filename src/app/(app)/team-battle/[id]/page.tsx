@@ -38,6 +38,27 @@ export default function TeamBattlePage() {
   const [answeredIndex, setAnsweredIndex] = useState(-1)
   const questionStartRef = useRef<number>(Date.now())
   const lastQIndexRef = useRef<number>(-2)
+  const clockOffsetRef = useRef<number>(0) // server time minus this device's Date.now()
+
+  // Two devices' system clocks can be a few seconds apart. All schedule
+  // math below compares against a shared absolute server timestamp
+  // (start_at / answer created_at), so we correct this device's Date.now()
+  // by its offset from the DB server's clock once up front.
+  useEffect(() => {
+    async function syncClock() {
+      const t0 = Date.now()
+      const { data } = await supabase.rpc('server_now')
+      const t1 = Date.now()
+      if (!data) return
+      const serverMs = new Date(data).getTime()
+      clockOffsetRef.current = serverMs - (t0 + t1) / 2
+    }
+    syncClock()
+  }, [])
+
+  function now() {
+    return Date.now() + clockOffsetRef.current
+  }
 
   const loadAll = useCallback(async () => {
     const [{ data: battleRow }, { data: parts }, { data: ans }] = await Promise.all([
@@ -86,8 +107,8 @@ export default function TeamBattlePage() {
     return () => { clearInterval(clockInterval); clearInterval(pollInterval) }
   }, [battle, loadAll])
 
-  const qIndex = battle ? currentQuestionIndex(battle, answers, participants, questions.length) : -1
-  const startsInMs = battle ? msUntilStart(battle) : 0
+  const qIndex = battle ? currentQuestionIndex(battle, answers, participants, questions.length, now()) : -1
+  const startsInMs = battle ? msUntilStart(battle, now()) : 0
   const me = participants.find(p => p.user_id === userId)
   const scores = battle ? computeTeamScores(answers, participants, Math.min(qIndex + 1, questions.length)) : {}
   const teamNumbers = [...new Set(participants.filter(p => p.status === 'accepted').map(p => p.team_number))].sort()
@@ -214,8 +235,8 @@ export default function TeamBattlePage() {
   const q = questions[qIndex]
   const questionSeconds = battle.seconds_per_question
   const schedule = computeQuestionSchedule(battle, answers, participants, questions.length)
-  const endTime = schedule[qIndex] ?? Date.now()
-  const timeLeft = Math.max(0, Math.ceil((endTime - Date.now()) / 1000))
+  const endTime = schedule[qIndex] ?? now()
+  const timeLeft = Math.max(0, Math.ceil((endTime - now()) / 1000))
   const alreadyAnswered = answeredIndex === qIndex
 
   return (
