@@ -40,12 +40,17 @@ export default function TeamBattlePage() {
   const lastQIndexRef = useRef<number>(-2)
 
   const loadAll = useCallback(async () => {
-    const [{ data: parts }, { data: ans }] = await Promise.all([
+    const [{ data: battleRow }, { data: parts }, { data: ans }] = await Promise.all([
+      supabase.from('team_battles').select('*').eq('id', id).maybeSingle(),
       supabase.from('team_battle_participants')
         .select('*, users!team_battle_participants_user_id_fkey(username, avatar_url, equipped_frame)')
         .eq('team_battle_id', id),
       supabase.from('team_battle_answers').select('*').eq('team_battle_id', id),
     ])
+    // start_at can shift slightly right after creation (host finishes
+    // sending invites before locking in the countdown) — keep it in sync
+    // so every participant's clock is derived from the same value.
+    if (battleRow) setBattle(battleRow)
     if (parts) {
       setParticipants(parts.map((row: any) => ({
         ...row,

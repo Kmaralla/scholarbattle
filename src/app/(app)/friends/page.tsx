@@ -218,6 +218,14 @@ export default function FriendsPage() {
         supabase.removeChannel(ch)
       }
 
+      // Only start the countdown once every invite has actually gone out —
+      // otherwise the seconds spent sending invites eat into the window
+      // invited friends have to notice, accept, and load the battle page
+      // before start_at, and they'd land mid-match already behind.
+      await supabase.from('team_battles')
+        .update({ start_at: new Date(Date.now() + 12000).toISOString() })
+        .eq('id', battleId)
+
       router.push(`/team-battle/${battleId}`)
     } catch (err: any) {
       console.error('[TeamBattle] create failed:', err)
