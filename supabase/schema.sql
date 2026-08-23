@@ -338,14 +338,13 @@ begin
     from public.users
     where season_wins > 0
     order by season_wins desc, elo_rating desc
-    limit 10
+    limit 3
   loop
     rnk := rnk + 1;
     reward := case
       when rnk = 1 then 200
       when rnk = 2 then 150
       when rnk = 3 then 100
-      else 50
     end;
 
     insert into public.season_results (season_id, user_id, rank, season_wins, coins_awarded)
