@@ -967,6 +967,30 @@ export function getQuestionsForBattle(subject: Subject, gradeLevel: number, coun
   return arr.slice(0, count)
 }
 
+// Hangman / Word Scramble need a single alphabetic word as the answer —
+// most math questions (and some multi-word answers elsewhere) don't fit,
+// so this filters down to usable questions first, falling back to nearest
+// grade, then to any subject, so there's always enough content.
+export function getWordGameQuestions(subject: Subject, gradeLevel: number, count = 8): Omit<Question, 'id'>[] {
+  const isWordAnswer = (q: { correct_answer: string }) => /^[a-zA-Z]{3,}$/.test(q.correct_answer.trim())
+
+  let pool = SEED_QUESTIONS.filter(q => q.subject === subject && q.grade_level === gradeLevel && isWordAnswer(q))
+
+  if (pool.length < count) {
+    pool = SEED_QUESTIONS.filter(q => q.grade_level === gradeLevel && isWordAnswer(q))
+  }
+  if (pool.length < count) {
+    pool = SEED_QUESTIONS.filter(isWordAnswer)
+  }
+
+  const arr = [...pool]
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr.slice(0, count)
+}
+
 // Returns the global indices into SEED_QUESTIONS for a picked set
 export function pickQuestionIndices(subject: Subject, gradeLevel: number, count = 10, topic?: string): number[] {
   let pool = SEED_QUESTIONS.map((q, i) => ({ q, i })).filter(({ q }) => q.subject === subject && q.grade_level === gradeLevel)

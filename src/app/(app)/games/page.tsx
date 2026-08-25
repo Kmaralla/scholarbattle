@@ -186,6 +186,7 @@ export default function GamesPage() {
       </div>
 
       <p className="text-xs text-center text-white/20">Win battles to earn 🪙 coins and unlock more games!</p>
+      <p className="text-xs text-center text-white/30 font-semibold">✨ More games coming soon!</p>
     </div>
   )
 }

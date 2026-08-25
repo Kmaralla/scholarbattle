@@ -30,6 +30,26 @@ export const GAMES: GameDef[] = [
     fun: 5,
     color: 'from-rose-400 to-pink-600',
   },
+  {
+    id: 'hangman',
+    name: 'Hangman',
+    description: 'Guess the word letter by letter before you run out of guesses',
+    emoji: '🪢',
+    coinCost: 0,
+    subjects: ['all'],
+    fun: 4,
+    color: 'from-amber-400 to-orange-600',
+  },
+  {
+    id: 'word-scramble',
+    name: 'Word Scramble',
+    description: 'Unscramble the letters to reveal the answer',
+    emoji: '🔤',
+    coinCost: 0,
+    subjects: ['all'],
+    fun: 4,
+    color: 'from-teal-400 to-emerald-600',
+  },
 ]
 
 export const COIN_REWARDS = {
