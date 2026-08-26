@@ -28,7 +28,7 @@ create table if not exists public.users (
 -- the app currently serves questions from a static bank in code) ──
 create table if not exists public.questions (
   id uuid primary key default gen_random_uuid(),
-  subject text not null check (subject in ('math','science','history','english')),
+  subject text not null check (subject in ('math','science','history','english','accelerated_math')),
   grade_level integer not null,
   question_text text not null,
   type text not null check (type in ('multiple_choice','typed')),

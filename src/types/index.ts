@@ -1,5 +1,5 @@
 export type RankTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond'
-export type Subject = 'math' | 'science' | 'history' | 'english'
+export type Subject = 'math' | 'science' | 'history' | 'english' | 'accelerated_math'
 export type BattleStatus = 'pending' | 'accepted' | 'in_progress' | 'completed' | 'declined'
 export type FriendshipStatus = 'pending' | 'accepted'
 export type QuestionType = 'multiple_choice' | 'typed'
@@ -89,6 +89,7 @@ export const SUBJECT_COLORS: Record<Subject, string> = {
   science: 'bg-green-100 text-green-800 border-green-300',
   history: 'bg-blue-100 text-blue-800 border-blue-300',
   english: 'bg-purple-100 text-purple-800 border-purple-300',
+  accelerated_math: 'bg-orange-100 text-orange-800 border-orange-300',
 }
 
 export function getRankTier(elo: number): RankTier {

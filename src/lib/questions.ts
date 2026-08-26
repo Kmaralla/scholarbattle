@@ -690,6 +690,42 @@ export const SEED_QUESTIONS: Omit<Question, 'id'>[] = [
   { subject: 'history', grade_level: 12, question_text: 'What was the significance of the Civil Rights Act of 1964?', type: 'multiple_choice', options: ['It gave women the vote', 'It prohibited discrimination based on race, color, religion, sex, or national origin — a landmark in US civil rights', 'It ended the Civil War', 'It created affirmative action only'], correct_answer: 'It prohibited discrimination based on race, color, religion, sex, or national origin — a landmark in US civil rights', explanation: 'The Civil Rights Act of 1964 (signed by LBJ) outlawed discrimination based on race, color, religion, sex, or national origin in employment and public accommodations. It created the EEOC (Equal Employment Opportunity Commission). Combined with the Voting Rights Act (1965) and 24th Amendment (poll tax banned), it dismantled Jim Crow\'s legal structure.', difficulty: 3, source: 'curated' },
   { subject: 'history', grade_level: 12, question_text: 'What were the philosophical foundations of the US Constitution?', type: 'multiple_choice', options: ['Biblical law only', 'Enlightenment ideas from Locke, Montesquieu, and Rousseau, plus English common law and colonial experience', 'Ancient Roman law only', 'Pure democracy from Athens'], correct_answer: 'Enlightenment ideas from Locke, Montesquieu, and Rousseau, plus English common law and colonial experience', explanation: 'The Constitution drew from: Locke (natural rights, social contract, consent of the governed), Montesquieu (separation of powers, checks and balances), English common law and Magna Carta, colonial self-governance experience. The Framers also studied ancient republics (Rome, Greece) and specifically designed to prevent tyranny through structural safeguards.', difficulty: 4, source: 'curated' },
   { subject: 'history', grade_level: 12, question_text: 'What is historiography?', type: 'multiple_choice', options: ['Writing history books', 'The study of how history has been written and interpreted — how historians\' perspectives shape historical narratives', 'Ancient history', 'A type of biography'], correct_answer: 'The study of how history has been written and interpreted — how historians\' perspectives shape historical narratives', explanation: 'Historiography examines HOW history is written: What sources do historians use? What questions do they ask? How do their backgrounds/time periods shape interpretations? Example: the Civil War was once taught as "Lost Cause" (noble South defending states\' rights) vs. modern scholarship emphasizing slavery\'s central role. Historical interpretation evolves as new evidence and perspectives emerge.', difficulty: 4, source: 'curated' },
+
+  // ── ACCELERATED MATH Grade 6 — Unit 1: Integers ──────────────────
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'What is -8 + 15?', type: 'typed', options: null, correct_answer: '7', explanation: 'Adding a positive to a negative: find the difference between the absolute values (15 - 8 = 7) and keep the sign of the larger absolute value (positive). -8 + 15 = 7.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'What is -3 - (-7)?', type: 'typed', options: null, correct_answer: '4', explanation: 'Subtracting a negative is the same as adding its opposite: -3 - (-7) = -3 + 7 = 4.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'What is the absolute value of -12?', type: 'typed', options: null, correct_answer: '12', explanation: 'Absolute value is a number\'s distance from zero, always non-negative. |-12| = 12.', difficulty: 1, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'Which integer is greater: -5 or -9?', type: 'multiple_choice', options: ['-5', '-9', 'They are equal', 'Cannot be compared'], correct_answer: '-5', explanation: 'On a number line, numbers further right are greater. -5 is to the right of -9 (closer to zero), so -5 > -9.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'What is -6 × 4?', type: 'typed', options: null, correct_answer: '-24', explanation: 'A negative times a positive is negative. 6 × 4 = 24, so -6 × 4 = -24.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'What is -20 ÷ -5?', type: 'typed', options: null, correct_answer: '4', explanation: 'A negative divided by a negative is positive. 20 ÷ 5 = 4, so -20 ÷ -5 = 4.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'What is the opposite (additive inverse) of -17?', type: 'typed', options: null, correct_answer: '17', explanation: 'The opposite of a number is the same distance from zero but on the other side. The opposite of -17 is 17, since -17 + 17 = 0.', difficulty: 1, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'On a number line, which is farther from zero: -8 or 5?', type: 'multiple_choice', options: ['-8', '5', 'They are equally far', 'Cannot be determined'], correct_answer: '-8', explanation: 'Distance from zero is absolute value: |-8| = 8 and |5| = 5. Since 8 > 5, -8 is farther from zero.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'What is -14 + (-6)?', type: 'typed', options: null, correct_answer: '-20', explanation: 'Adding two negatives: add their absolute values (14 + 6 = 20) and keep the negative sign. -14 + (-6) = -20.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'What is 9 - 15?', type: 'typed', options: null, correct_answer: '-6', explanation: 'Think of it as 9 + (-15). The difference between the absolute values (15 - 9 = 6) keeps the sign of the larger absolute value (negative). 9 - 15 = -6.', difficulty: 2, source: 'curated' },
+
+  // ── ACCELERATED MATH Grade 7 — Unit 1: Exponents, Roots, Polynomials and Radicals ──
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'What is 3^4?', type: 'typed', options: null, correct_answer: '81', explanation: '3^4 means 3 multiplied by itself 4 times: 3 × 3 × 3 × 3 = 81.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'What is the square root of 144?', type: 'typed', options: null, correct_answer: '12', explanation: 'The square root of a number is what, multiplied by itself, gives that number. 12 × 12 = 144, so √144 = 12.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'Simplify: 2^3 × 2^2', type: 'typed', options: null, correct_answer: '32', explanation: 'When multiplying powers with the same base, add the exponents: 2^3 × 2^2 = 2^5 = 32.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'What is 5^0?', type: 'typed', options: null, correct_answer: '1', explanation: 'Any nonzero number raised to the power of 0 equals 1. This keeps the exponent rules consistent (5^1 ÷ 5^1 = 5^0 = 1).', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'What is the cube root of 27?', type: 'typed', options: null, correct_answer: '3', explanation: 'The cube root asks what number multiplied by itself 3 times gives 27. 3 × 3 × 3 = 27, so ∛27 = 3.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'Simplify (x^3)(x^4) using the exponent rules.', type: 'multiple_choice', options: ['x^7', 'x^12', 'x^1', 'x^3'], correct_answer: 'x^7', explanation: 'When multiplying powers with the same base, add the exponents: x^3 × x^4 = x^(3+4) = x^7.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'What is 10^-2 written as a decimal?', type: 'typed', options: null, correct_answer: '0.01', explanation: 'A negative exponent means 1 over the positive power: 10^-2 = 1/10^2 = 1/100 = 0.01.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'What is √81?', type: 'typed', options: null, correct_answer: '9', explanation: '9 × 9 = 81, so the square root of 81 is 9.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'Simplify: x^6 ÷ x^2', type: 'multiple_choice', options: ['x^4', 'x^8', 'x^3', 'x^12'], correct_answer: 'x^4', explanation: 'When dividing powers with the same base, subtract the exponents: x^6 ÷ x^2 = x^(6-2) = x^4.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'What is 2^5?', type: 'typed', options: null, correct_answer: '32', explanation: '2^5 means 2 multiplied by itself 5 times: 2 × 2 × 2 × 2 × 2 = 32.', difficulty: 2, source: 'curated' },
+
+  // ── ACCELERATED MATH Grade 8 — Unit 1: Expressions ──────────────
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Simplify: 3x + 5x', type: 'typed', options: null, correct_answer: '8x', explanation: 'These are like terms (same variable, same power), so add the coefficients: 3x + 5x = 8x.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Simplify: 4(x + 3)', type: 'typed', options: null, correct_answer: '4x + 12', explanation: 'Distribute the 4 to each term inside the parentheses: 4 × x + 4 × 3 = 4x + 12.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Simplify: 7x - 2x + 3', type: 'typed', options: null, correct_answer: '5x + 3', explanation: 'Combine the like terms (7x and -2x): 7x - 2x = 5x, leaving 5x + 3.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Evaluate 2x + 5 when x = 4.', type: 'typed', options: null, correct_answer: '13', explanation: 'Substitute x = 4: 2(4) + 5 = 8 + 5 = 13.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Simplify: -3(2x - 4)', type: 'typed', options: null, correct_answer: '-6x + 12', explanation: 'Distribute -3 to each term: -3 × 2x = -6x, and -3 × -4 = +12, giving -6x + 12.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Combine like terms: 6y + 3 - 2y + 7', type: 'typed', options: null, correct_answer: '4y + 10', explanation: 'Group like terms: (6y - 2y) + (3 + 7) = 4y + 10.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Simplify: 5(x - 1) + 2x', type: 'typed', options: null, correct_answer: '7x - 5', explanation: 'Distribute first: 5x - 5 + 2x. Then combine like terms: (5x + 2x) - 5 = 7x - 5.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'What property justifies a(b + c) = ab + ac?', type: 'multiple_choice', options: ['Distributive Property', 'Commutative Property', 'Associative Property', 'Identity Property'], correct_answer: 'Distributive Property', explanation: 'The Distributive Property says multiplying a sum by a number is the same as multiplying each addend by that number and adding the results: a(b + c) = ab + ac.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Evaluate 3x^2 when x = 2.', type: 'typed', options: null, correct_answer: '12', explanation: 'Substitute x = 2: 3(2)^2 = 3 × 4 = 12. Remember to apply the exponent before multiplying.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Simplify: 2(3x + 1) - x', type: 'typed', options: null, correct_answer: '5x + 2', explanation: 'Distribute first: 6x + 2 - x. Then combine like terms: (6x - x) + 2 = 5x + 2.', difficulty: 3, source: 'curated' },
 ]
 
 export type TopicEntry = { label: string; emoji: string; keywords: string[] }
@@ -750,6 +786,30 @@ const GRADE_TOPICS: Record<Subject, GradeBand[]> = {
         { label: 'Advanced Algebra', emoji: '🔣', keywords: ['logarithm', 'exponential', 'complex number', 'matrix', 'sequence', 'series', 'arithmetic', 'geometric', 'sigma'] },
         { label: 'Trigonometry', emoji: '📐', keywords: ['sine', 'cosine', 'tangent', 'radian', 'identity', 'unit circle', 'law of sines', 'law of cosines', 'amplitude'] },
         { label: 'Statistics', emoji: '📊', keywords: ['hypothesis', 'regression', 'distribution', 'confidence interval', 'z-score', 'binomial', 'normal', 'correlation'] },
+      ],
+    },
+  ],
+
+  // First-unit topics per grade in a real Accelerated Math sequence
+  // (6th covers all of 6th + first half of 7th grade math, etc.) —
+  // https://desana.forsyth.k12.ga.us/academics/mathematics/accelerated-mathematics
+  accelerated_math: [
+    {
+      min: 6, max: 6,
+      topics: [
+        { label: 'Integers', emoji: '➖', keywords: ['integer', 'negative', 'positive', 'absolute value', 'opposite', 'number line'] },
+      ],
+    },
+    {
+      min: 7, max: 7,
+      topics: [
+        { label: 'Exponents & Radicals', emoji: '🔺', keywords: ['exponent', 'power', 'square root', 'cube root', 'radical', 'polynomial', 'base'] },
+      ],
+    },
+    {
+      min: 8, max: 12,
+      topics: [
+        { label: 'Expressions', emoji: '🔣', keywords: ['simplify', 'expression', 'combine like terms', 'distribute', 'distributive', 'coefficient', 'term', 'evaluate'] },
       ],
     },
   ],

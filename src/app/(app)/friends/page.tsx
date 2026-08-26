@@ -555,13 +555,13 @@ export default function FriendsPage() {
             <div>
               <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-2">Subject</p>
               <div className="grid grid-cols-2 gap-1.5">
-                {(['math', 'science', 'history', 'english'] as Subject[]).map(s => (
+                {(['math', 'science', 'history', 'english', 'accelerated_math'] as Subject[]).map(s => (
                   <button
                     key={s}
                     onClick={() => setTbSubject(s)}
                     className={cn('py-2 rounded-xl border-2 text-xs font-semibold capitalize transition-all', tbSubject === s ? 'border-violet-400 bg-violet-500/20 text-white' : 'border-white/10 bg-white/5 text-white/70')}
                   >
-                    {s}
+                    {s === 'accelerated_math' ? 'Accel. Math' : s}
                   </button>
                 ))}
               </div>

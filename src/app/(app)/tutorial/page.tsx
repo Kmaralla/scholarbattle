@@ -295,6 +295,9 @@ const TUTORIALS: Record<Subject, Record<string, Topic[]>> = {
       },
     ],
   },
+  // Not offered in the Tutorials picker yet — no curated video content
+  // exists for this track. Kept here only so the Subject union type checks.
+  accelerated_math: {},
 }
 
 function getGradeBand(grade: number): string {

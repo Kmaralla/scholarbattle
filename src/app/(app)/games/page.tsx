@@ -12,6 +12,7 @@ const SUBJECTS: { id: Subject; label: string; emoji: string }[] = [
   { id: 'science', label: 'Science', emoji: '🔬' },
   { id: 'history', label: 'History', emoji: '📜' },
   { id: 'english', label: 'English', emoji: '📖' },
+  { id: 'accelerated_math', label: 'Accel. Math', emoji: '🚀' },
 ]
 const GRADES = [3, 4, 5, 6, 7, 8, 9, 10]
 

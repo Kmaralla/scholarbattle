@@ -81,7 +81,10 @@ export const COACH: Coach = {
     : `${score}/${total} — much to learn still. But every great scholar started exactly where you are.`,
 }
 
-const SUBJECTS: Subject[] = ['math', 'science', 'history', 'english']
+const SUBJECTS: Subject[] = ['math', 'science', 'history', 'english', 'accelerated_math']
+const SUBJECT_LABELS: Record<Subject, string> = {
+  math: 'math', science: 'science', history: 'history', english: 'english', accelerated_math: 'Accel. Math',
+}
 const GRADES = Array.from({ length: 12 }, (_, i) => i + 1)
 
 export default function TrainingPage() {
@@ -141,7 +144,7 @@ export default function TrainingPage() {
                     : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
                 )}
               >
-                {s}
+                {SUBJECT_LABELS[s]}
               </button>
             ))}
           </div>
