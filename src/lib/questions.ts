@@ -713,7 +713,8 @@ export const SEED_QUESTIONS: Omit<Question, 'id'>[] = [
   { subject: 'accelerated_math', grade_level: 7, question_text: 'What is 10^-2 written as a decimal?', type: 'typed', options: null, correct_answer: '0.01', explanation: 'A negative exponent means 1 over the positive power: 10^-2 = 1/10^2 = 1/100 = 0.01.', difficulty: 3, source: 'curated' },
   { subject: 'accelerated_math', grade_level: 7, question_text: 'What is √81?', type: 'typed', options: null, correct_answer: '9', explanation: '9 × 9 = 81, so the square root of 81 is 9.', difficulty: 2, source: 'curated' },
   { subject: 'accelerated_math', grade_level: 7, question_text: 'Simplify: x^6 ÷ x^2', type: 'multiple_choice', options: ['x^4', 'x^8', 'x^3', 'x^12'], correct_answer: 'x^4', explanation: 'When dividing powers with the same base, subtract the exponents: x^6 ÷ x^2 = x^(6-2) = x^4.', difficulty: 3, source: 'curated' },
-  { subject: 'accelerated_math', grade_level: 7, question_text: 'What is 2^5?', type: 'typed', options: null, correct_answer: '32', explanation: '2^5 means 2 multiplied by itself 5 times: 2 × 2 × 2 × 2 × 2 = 32.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'Write 4,500 in scientific notation.', type: 'multiple_choice', options: ['4.5 × 10^3', '45 × 10^2', '4.5 × 10^2', '0.45 × 10^4'], correct_answer: '4.5 × 10^3', explanation: 'Scientific notation writes a number as a value between 1 and 10 times a power of 10. Moving the decimal in 4500 left 3 places gives 4.5 × 10^3.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'What is 6.2 × 10^4 written in standard form?', type: 'typed', options: null, correct_answer: '62000', explanation: 'A positive exponent means move the decimal right that many places: 6.2 × 10^4 = 62,000.', difficulty: 3, source: 'curated' },
 
   // ── ACCELERATED MATH Grade 8 — Unit 1: Expressions ──────────────
   { subject: 'accelerated_math', grade_level: 8, question_text: 'Simplify: 3x + 5x', type: 'typed', options: null, correct_answer: '8x', explanation: 'These are like terms (same variable, same power), so add the coefficients: 3x + 5x = 8x.', difficulty: 2, source: 'curated' },
@@ -726,6 +727,8 @@ export const SEED_QUESTIONS: Omit<Question, 'id'>[] = [
   { subject: 'accelerated_math', grade_level: 8, question_text: 'What property justifies a(b + c) = ab + ac?', type: 'multiple_choice', options: ['Distributive Property', 'Commutative Property', 'Associative Property', 'Identity Property'], correct_answer: 'Distributive Property', explanation: 'The Distributive Property says multiplying a sum by a number is the same as multiplying each addend by that number and adding the results: a(b + c) = ab + ac.', difficulty: 2, source: 'curated' },
   { subject: 'accelerated_math', grade_level: 8, question_text: 'Evaluate 3x^2 when x = 2.', type: 'typed', options: null, correct_answer: '12', explanation: 'Substitute x = 2: 3(2)^2 = 3 × 4 = 12. Remember to apply the exponent before multiplying.', difficulty: 3, source: 'curated' },
   { subject: 'accelerated_math', grade_level: 8, question_text: 'Simplify: 2(3x + 1) - x', type: 'typed', options: null, correct_answer: '5x + 2', explanation: 'Distribute first: 6x + 2 - x. Then combine like terms: (6x - x) + 2 = 5x + 2.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Which expression is equivalent to 3(x + 4) + 2x?', type: 'multiple_choice', options: ['5x + 12', '3x + 12', '5x + 4', '6x'], correct_answer: '5x + 12', explanation: 'Distribute first: 3x + 12 + 2x. Then combine like terms: (3x + 2x) + 12 = 5x + 12.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Write 0.00073 in scientific notation.', type: 'multiple_choice', options: ['7.3 × 10^-4', '7.3 × 10^4', '73 × 10^-5', '0.73 × 10^-3'], correct_answer: '7.3 × 10^-4', explanation: 'For a number less than 1, the exponent is negative. Moving the decimal in 0.00073 right 4 places gives 7.3 × 10^-4.', difficulty: 3, source: 'curated' },
 ]
 
 export type TopicEntry = { label: string; emoji: string; keywords: string[] }
@@ -790,9 +793,10 @@ const GRADE_TOPICS: Record<Subject, GradeBand[]> = {
     },
   ],
 
-  // First-unit topics per grade in a real Accelerated Math sequence
-  // (6th covers all of 6th + first half of 7th grade math, etc.) —
-  // https://desana.forsyth.k12.ga.us/academics/mathematics/accelerated-mathematics
+  // First-unit topics per grade in Forsyth County Schools' real
+  // Accelerated Math sequence (6th covers all of 6th + first half of
+  // 7th grade math, etc.) — confirmed against both DeSana Middle's
+  // published sequence and Liberty Middle's district-wide course path.
   accelerated_math: [
     {
       min: 6, max: 6,
@@ -803,13 +807,13 @@ const GRADE_TOPICS: Record<Subject, GradeBand[]> = {
     {
       min: 7, max: 7,
       topics: [
-        { label: 'Exponents & Radicals', emoji: '🔺', keywords: ['exponent', 'power', 'square root', 'cube root', 'radical', 'polynomial', 'base'] },
+        { label: 'Exponents & Radicals', emoji: '🔺', keywords: ['exponent', 'exponent rule', 'power', 'scientific notation', 'square root', 'cube root', 'radical', 'polynomial', 'base'] },
       ],
     },
     {
       min: 8, max: 12,
       topics: [
-        { label: 'Expressions', emoji: '🔣', keywords: ['simplify', 'expression', 'combine like terms', 'distribute', 'distributive', 'coefficient', 'term', 'evaluate'] },
+        { label: 'Expressions', emoji: '🔣', keywords: ['simplify', 'expression', 'algebraic expression', 'equivalent expression', 'combine like terms', 'distribute', 'distributive', 'scientific notation', 'coefficient', 'term', 'evaluate'] },
       ],
     },
   ],
