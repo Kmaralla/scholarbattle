@@ -703,6 +703,27 @@ export const SEED_QUESTIONS: Omit<Question, 'id'>[] = [
   { subject: 'accelerated_math', grade_level: 6, question_text: 'What is -14 + (-6)?', type: 'typed', options: null, correct_answer: '-20', explanation: 'Adding two negatives: add their absolute values (14 + 6 = 20) and keep the negative sign. -14 + (-6) = -20.', difficulty: 2, source: 'curated' },
   { subject: 'accelerated_math', grade_level: 6, question_text: 'What is 9 - 15?', type: 'typed', options: null, correct_answer: '-6', explanation: 'Think of it as 9 + (-15). The difference between the absolute values (15 - 9 = 6) keeps the sign of the larger absolute value (negative). 9 - 15 = -6.', difficulty: 2, source: 'curated' },
 
+  // ── ACCELERATED MATH Grade 6 — Ratios, Rates & Proportions ──────
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'A car travels 240 miles in 4 hours. What is its unit rate in miles per hour?', type: 'typed', options: null, correct_answer: '60', explanation: 'A unit rate compares a quantity to 1 unit of another. 240 miles ÷ 4 hours = 60 miles per hour.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'Write the ratio 8:12 in simplest form.', type: 'typed', options: null, correct_answer: '2:3', explanation: 'Divide both numbers by their greatest common factor (4): 8÷4 : 12÷4 = 2:3.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'If 3 apples cost $6, how much would 5 apples cost at the same rate?', type: 'typed', options: null, correct_answer: '10', explanation: 'The unit price is $6 ÷ 3 = $2 per apple. 5 apples × $2 = $10.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'Solve the proportion: 3/4 = x/12. What is x?', type: 'typed', options: null, correct_answer: '9', explanation: 'Cross-multiply: 3 × 12 = 4 × x, so 36 = 4x, and x = 9.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'A recipe uses a ratio of 2 cups flour to 3 cups sugar. If you use 6 cups of sugar, how many cups of flour are needed?', type: 'typed', options: null, correct_answer: '4', explanation: 'The ratio 2:3 scales up: 6 cups sugar is 3 (the sugar amount) × 2, so flour is 2 × 2 = 4 cups.', difficulty: 3, source: 'curated' },
+
+  // ── ACCELERATED MATH Grade 6 — Expressions & One-Step Equations ──
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'Solve for x: x + 7 = 15', type: 'typed', options: null, correct_answer: '8', explanation: 'Subtract 7 from both sides: x = 15 - 7 = 8.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'Solve for x: 5x = 35', type: 'typed', options: null, correct_answer: '7', explanation: 'Divide both sides by 5: x = 35 ÷ 5 = 7.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'Solve for x: x - 9 = 2', type: 'typed', options: null, correct_answer: '11', explanation: 'Add 9 to both sides: x = 2 + 9 = 11.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'Solve for x: x/3 = 6', type: 'typed', options: null, correct_answer: '18', explanation: 'Multiply both sides by 3: x = 6 × 3 = 18.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'Write an expression for "five more than a number n."', type: 'typed', options: null, correct_answer: 'n + 5', explanation: '"More than" means addition. Five more than n is written as n + 5.', difficulty: 2, source: 'curated' },
+
+  // ── ACCELERATED MATH Grade 6 — Area, Volume & Statistics ────────
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'What is the area of a rectangle with length 8 and width 5?', type: 'typed', options: null, correct_answer: '40', explanation: 'Area of a rectangle is length × width: 8 × 5 = 40.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'What is the volume of a cube with side length 4?', type: 'typed', options: null, correct_answer: '64', explanation: 'Volume of a cube is side³: 4 × 4 × 4 = 64.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'Find the mean of: 4, 8, 6, 10, 12', type: 'typed', options: null, correct_answer: '8', explanation: 'Mean is the sum divided by the count: (4+8+6+10+12) ÷ 5 = 40 ÷ 5 = 8.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'Find the median of: 3, 7, 9, 2, 5', type: 'typed', options: null, correct_answer: '5', explanation: 'Sort the data first: 2, 3, 5, 7, 9. The median is the middle value: 5.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 6, question_text: 'What is the range of the data set: 12, 5, 9, 20, 3?', type: 'typed', options: null, correct_answer: '17', explanation: 'Range is the largest value minus the smallest: 20 - 3 = 17.', difficulty: 2, source: 'curated' },
+
   // ── ACCELERATED MATH Grade 7 — Unit 1: Exponents, Roots, Polynomials and Radicals ──
   { subject: 'accelerated_math', grade_level: 7, question_text: 'What is 3^4?', type: 'typed', options: null, correct_answer: '81', explanation: '3^4 means 3 multiplied by itself 4 times: 3 × 3 × 3 × 3 = 81.', difficulty: 2, source: 'curated' },
   { subject: 'accelerated_math', grade_level: 7, question_text: 'What is the square root of 144?', type: 'typed', options: null, correct_answer: '12', explanation: 'The square root of a number is what, multiplied by itself, gives that number. 12 × 12 = 144, so √144 = 12.', difficulty: 2, source: 'curated' },
@@ -715,6 +736,27 @@ export const SEED_QUESTIONS: Omit<Question, 'id'>[] = [
   { subject: 'accelerated_math', grade_level: 7, question_text: 'Simplify: x^6 ÷ x^2', type: 'multiple_choice', options: ['x^4', 'x^8', 'x^3', 'x^12'], correct_answer: 'x^4', explanation: 'When dividing powers with the same base, subtract the exponents: x^6 ÷ x^2 = x^(6-2) = x^4.', difficulty: 3, source: 'curated' },
   { subject: 'accelerated_math', grade_level: 7, question_text: 'Write 4,500 in scientific notation.', type: 'multiple_choice', options: ['4.5 × 10^3', '45 × 10^2', '4.5 × 10^2', '0.45 × 10^4'], correct_answer: '4.5 × 10^3', explanation: 'Scientific notation writes a number as a value between 1 and 10 times a power of 10. Moving the decimal in 4500 left 3 places gives 4.5 × 10^3.', difficulty: 3, source: 'curated' },
   { subject: 'accelerated_math', grade_level: 7, question_text: 'What is 6.2 × 10^4 written in standard form?', type: 'typed', options: null, correct_answer: '62000', explanation: 'A positive exponent means move the decimal right that many places: 6.2 × 10^4 = 62,000.', difficulty: 3, source: 'curated' },
+
+  // ── ACCELERATED MATH Grade 7 — Multi-Step Equations & Inequalities ──
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'Solve for x: 2x + 5 = 17', type: 'typed', options: null, correct_answer: '6', explanation: 'Subtract 5 from both sides: 2x = 12. Divide by 2: x = 6.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'Solve for x: 3(x + 2) = 21', type: 'typed', options: null, correct_answer: '5', explanation: 'Distribute: 3x + 6 = 21. Subtract 6: 3x = 15. Divide by 3: x = 5.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'Solve for x: 5x - 4 = 2x + 11', type: 'typed', options: null, correct_answer: '5', explanation: 'Subtract 2x from both sides: 3x - 4 = 11. Add 4: 3x = 15. Divide by 3: x = 5.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'Solve the inequality: x + 4 > 10', type: 'typed', options: null, correct_answer: 'x > 6', explanation: 'Subtract 4 from both sides: x > 10 - 4, so x > 6.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'Solve the inequality: -2x < 8', type: 'typed', options: null, correct_answer: 'x > -4', explanation: 'Divide both sides by -2. Dividing an inequality by a negative number flips the inequality sign: x > -4.', difficulty: 4, source: 'curated' },
+
+  // ── ACCELERATED MATH Grade 7 — Pythagorean Theorem, Area & Volume ──
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'A right triangle has legs of length 3 and 4. What is the length of the hypotenuse?', type: 'typed', options: null, correct_answer: '5', explanation: 'Using the Pythagorean Theorem a² + b² = c²: 3² + 4² = 9 + 16 = 25, and √25 = 5.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'A right triangle has a hypotenuse of 13 and one leg of 5. What is the length of the other leg?', type: 'typed', options: null, correct_answer: '12', explanation: 'Using a² + b² = c²: 5² + b² = 13², so 25 + b² = 169, b² = 144, and b = 12.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'What is the area of a triangle with base 10 and height 6?', type: 'typed', options: null, correct_answer: '30', explanation: 'Area of a triangle is ½ × base × height: ½ × 10 × 6 = 30.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'What is the volume of a rectangular prism with length 5, width 4, and height 3?', type: 'typed', options: null, correct_answer: '60', explanation: 'Volume of a rectangular prism is length × width × height: 5 × 4 × 3 = 60.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'Is a triangle with sides 6, 8, and 10 a right triangle?', type: 'multiple_choice', options: ['Yes', 'No', 'Cannot be determined', 'Only if it is also isosceles'], correct_answer: 'Yes', explanation: 'Check if a² + b² = c²: 6² + 8² = 36 + 64 = 100, and 10² = 100. Since they match, it is a right triangle.', difficulty: 3, source: 'curated' },
+
+  // ── ACCELERATED MATH Grade 7 — Functions & Linear Equations ─────
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'What is the slope of the line y = 3x + 2?', type: 'typed', options: null, correct_answer: '3', explanation: 'In slope-intercept form y = mx + b, m is the slope. Here m = 3.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'What is the y-intercept of y = -4x + 7?', type: 'typed', options: null, correct_answer: '7', explanation: 'In slope-intercept form y = mx + b, b is the y-intercept. Here b = 7.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'A line has a slope of 2 and passes through (0, 5). What is its equation in slope-intercept form?', type: 'typed', options: null, correct_answer: 'y = 2x + 5', explanation: 'Since the line passes through (0, 5), the y-intercept b = 5. With slope m = 2, the equation is y = 2x + 5.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'For the function f(x) = 2x + 1, what is f(3)?', type: 'typed', options: null, correct_answer: '7', explanation: 'Substitute x = 3: f(3) = 2(3) + 1 = 6 + 1 = 7.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 7, question_text: 'In a function, can one input have two different outputs?', type: 'multiple_choice', options: ['No', 'Yes', 'Only for linear functions', 'Only for quadratic functions'], correct_answer: 'No', explanation: 'A function assigns exactly one output to each input. If one input had two outputs, it would not be a function.', difficulty: 3, source: 'curated' },
 
   // ── ACCELERATED MATH Grade 8 — Unit 1: Expressions ──────────────
   { subject: 'accelerated_math', grade_level: 8, question_text: 'Simplify: 3x + 5x', type: 'typed', options: null, correct_answer: '8x', explanation: 'These are like terms (same variable, same power), so add the coefficients: 3x + 5x = 8x.', difficulty: 2, source: 'curated' },
@@ -729,6 +771,27 @@ export const SEED_QUESTIONS: Omit<Question, 'id'>[] = [
   { subject: 'accelerated_math', grade_level: 8, question_text: 'Simplify: 2(3x + 1) - x', type: 'typed', options: null, correct_answer: '5x + 2', explanation: 'Distribute first: 6x + 2 - x. Then combine like terms: (6x - x) + 2 = 5x + 2.', difficulty: 3, source: 'curated' },
   { subject: 'accelerated_math', grade_level: 8, question_text: 'Which expression is equivalent to 3(x + 4) + 2x?', type: 'multiple_choice', options: ['5x + 12', '3x + 12', '5x + 4', '6x'], correct_answer: '5x + 12', explanation: 'Distribute first: 3x + 12 + 2x. Then combine like terms: (3x + 2x) + 12 = 5x + 12.', difficulty: 3, source: 'curated' },
   { subject: 'accelerated_math', grade_level: 8, question_text: 'Write 0.00073 in scientific notation.', type: 'multiple_choice', options: ['7.3 × 10^-4', '7.3 × 10^4', '73 × 10^-5', '0.73 × 10^-3'], correct_answer: '7.3 × 10^-4', explanation: 'For a number less than 1, the exponent is negative. Moving the decimal in 0.00073 right 4 places gives 7.3 × 10^-4.', difficulty: 3, source: 'curated' },
+
+  // ── ACCELERATED MATH Grade 8 — Linear Relationships & Functions ──
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'What is the slope of the line passing through (2, 3) and (4, 7)?', type: 'typed', options: null, correct_answer: '2', explanation: 'Slope is the change in y over the change in x: (7 - 3) / (4 - 2) = 4/2 = 2.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Write the equation of a line with slope 3 and y-intercept -2.', type: 'typed', options: null, correct_answer: 'y = 3x - 2', explanation: 'Slope-intercept form is y = mx + b. With m = 3 and b = -2, the equation is y = 3x - 2.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'What is the rate of change for the linear relationship y = -5x + 1?', type: 'typed', options: null, correct_answer: '-5', explanation: 'In y = mx + b, m is the rate of change (slope). Here m = -5, meaning y decreases by 5 for every increase of 1 in x.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'For the function f(x) = 4x - 3, what is f(2)?', type: 'typed', options: null, correct_answer: '5', explanation: 'Substitute x = 2: f(2) = 4(2) - 3 = 8 - 3 = 5.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'The points (1,2), (2,4), and (3,6) all lie on the same line. What is its slope?', type: 'typed', options: null, correct_answer: '2', explanation: 'Slope between any two points: (4 - 2) / (2 - 1) = 2/1 = 2. Checking with the third point confirms it stays consistent.', difficulty: 3, source: 'curated' },
+
+  // ── ACCELERATED MATH Grade 8 — Quadratic & Exponential Functions ──
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Does the parabola y = x² - 4 open upward or downward?', type: 'multiple_choice', options: ['Upward', 'Downward', 'Neither', 'It is not a parabola'], correct_answer: 'Upward', explanation: 'When the coefficient of x² is positive, the parabola opens upward. Here the coefficient is +1.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'What are the zeros of y = (x - 3)(x + 2)?', type: 'multiple_choice', options: ['x = 3 and x = -2', 'x = -3 and x = 2', 'x = 3 and x = 2', 'x = -3 and x = -2'], correct_answer: 'x = 3 and x = -2', explanation: 'Zeros occur where each factor equals 0: x - 3 = 0 gives x = 3, and x + 2 = 0 gives x = -2.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Does y = 2^x represent exponential growth or decay?', type: 'multiple_choice', options: ['Growth', 'Decay', 'Neither', 'Linear, not exponential'], correct_answer: 'Growth', explanation: 'When the base is greater than 1, the function grows as x increases. 2 > 1, so this is exponential growth.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'Does y = (1/2)^x represent exponential growth or decay?', type: 'multiple_choice', options: ['Decay', 'Growth', 'Neither', 'Linear, not exponential'], correct_answer: 'Decay', explanation: 'When the base is between 0 and 1, the function shrinks as x increases. 1/2 is between 0 and 1, so this is exponential decay.', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'What is the value of y = 2^x when x = 3?', type: 'typed', options: null, correct_answer: '8', explanation: 'Substitute x = 3: y = 2^3 = 2 × 2 × 2 = 8.', difficulty: 2, source: 'curated' },
+
+  // ── ACCELERATED MATH Grade 8 — Transformations & Right Triangle Trig ──
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'If the point (3, 4) is reflected over the x-axis, what are its new coordinates?', type: 'multiple_choice', options: ['(3, -4)', '(-3, 4)', '(-3, -4)', '(4, 3)'], correct_answer: '(3, -4)', explanation: 'Reflecting over the x-axis keeps the x-coordinate the same and flips the sign of the y-coordinate: (3, 4) → (3, -4).', difficulty: 2, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'A triangle is translated 3 units right and 2 units up. If point A starts at (1, 1), where is A\' after the translation?', type: 'multiple_choice', options: ['(4, 3)', '(3, 4)', '(1, 1)', '(-2, -1)'], correct_answer: '(4, 3)', explanation: 'A translation adds the given amounts to each coordinate: (1 + 3, 1 + 2) = (4, 3).', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'In a right triangle, which trig ratio equals opposite/hypotenuse?', type: 'multiple_choice', options: ['Sine', 'Cosine', 'Tangent', 'Secant'], correct_answer: 'Sine', explanation: 'SOH-CAH-TOA: Sine = Opposite/Hypotenuse, Cosine = Adjacent/Hypotenuse, Tangent = Opposite/Adjacent.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'In a right triangle, which trig ratio equals adjacent/hypotenuse?', type: 'multiple_choice', options: ['Cosine', 'Sine', 'Tangent', 'Cotangent'], correct_answer: 'Cosine', explanation: 'SOH-CAH-TOA: Cosine = Adjacent/Hypotenuse. Sine uses the opposite side; tangent compares opposite and adjacent.', difficulty: 3, source: 'curated' },
+  { subject: 'accelerated_math', grade_level: 8, question_text: 'A right triangle has a 30° angle and a hypotenuse of 10. Using sin(30°) = 0.5, what is the length of the side opposite the 30° angle?', type: 'typed', options: null, correct_answer: '5', explanation: 'Sine = opposite/hypotenuse, so opposite = sine × hypotenuse = 0.5 × 10 = 5.', difficulty: 4, source: 'curated' },
 ]
 
 export type TopicEntry = { label: string; emoji: string; keywords: string[] }
@@ -802,18 +865,27 @@ const GRADE_TOPICS: Record<Subject, GradeBand[]> = {
       min: 6, max: 6,
       topics: [
         { label: 'Integers', emoji: '➖', keywords: ['integer', 'negative', 'positive', 'absolute value', 'opposite', 'number line'] },
+        { label: 'Ratios & Proportions', emoji: '⚖️', keywords: ['ratio', 'rate', 'proportion', 'unit rate', 'scale', 'cups', 'per hour'] },
+        { label: 'Expressions & Equations', emoji: '🔣', keywords: ['solve for', 'expression', 'equation', 'variable', 'more than'] },
+        { label: 'Area, Volume & Statistics', emoji: '📊', keywords: ['area', 'volume', 'cube', 'rectangle', 'mean', 'median', 'range', 'data set'] },
       ],
     },
     {
       min: 7, max: 7,
       topics: [
         { label: 'Exponents & Radicals', emoji: '🔺', keywords: ['exponent', 'exponent rule', 'power', 'scientific notation', 'square root', 'cube root', 'radical', 'polynomial', 'base'] },
+        { label: 'Equations & Inequalities', emoji: '⚖️', keywords: ['solve for', 'inequality', 'solve the inequality', 'equation'] },
+        { label: 'Pythagorean Theorem & Geometry', emoji: '📐', keywords: ['pythagorean', 'hypotenuse', 'right triangle', 'area of a triangle', 'volume of a', 'prism'] },
+        { label: 'Functions & Linear Equations', emoji: '📈', keywords: ['slope', 'y-intercept', 'function', 'f(x)', 'linear', 'slope-intercept'] },
       ],
     },
     {
       min: 8, max: 12,
       topics: [
         { label: 'Expressions', emoji: '🔣', keywords: ['simplify', 'expression', 'algebraic expression', 'equivalent expression', 'combine like terms', 'distribute', 'distributive', 'scientific notation', 'coefficient', 'term', 'evaluate'] },
+        { label: 'Linear Relationships & Functions', emoji: '📈', keywords: ['slope', 'rate of change', 'y-intercept', 'linear', 'f(x)', 'passing through'] },
+        { label: 'Quadratic & Exponential Functions', emoji: '📉', keywords: ['parabola', 'quadratic', 'zeros', 'exponential', 'growth', 'decay'] },
+        { label: 'Transformations & Trigonometry', emoji: '📐', keywords: ['reflect', 'translat', 'rotation', 'dilation', 'coordinates', 'sine', 'cosine', 'tangent', 'trig', 'hypotenuse'] },
       ],
     },
   ],
