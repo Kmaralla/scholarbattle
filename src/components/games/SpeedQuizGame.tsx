@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { getQuestionsForBattle } from '@/lib/questions'
 import { Subject } from '@/types'
-import { clipOptionDisplay } from '@/lib/utils'
+import { clipOptionDisplay, getEffectiveSeconds } from '@/lib/utils'
 
 const TIME_PER_Q = 8
 
@@ -24,9 +24,13 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
   }, [])
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Long questions (dense history/civics prompts especially) need more
+  // than the standard 8s just to read — bump those up to at least 30s.
+  const questionSeconds = getEffectiveSeconds(questions[index]?.question_text ?? '', TIME_PER_Q)
+
   useEffect(() => {
     if (phase !== 'playing') return
-    setTimeLeft(TIME_PER_Q)
+    setTimeLeft(questionSeconds)
     const interval = setInterval(() => {
       setTimeLeft(t => {
         if (t <= 1) { clearInterval(interval); advance(null); return 0 }
@@ -81,7 +85,7 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
     <div className="max-w-lg mx-auto p-4 flex flex-col items-center justify-center min-h-[70vh] gap-5 text-center">
       <div className="text-6xl float">🏎️</div>
       <h2 className="text-2xl font-black text-white">Speed Quiz</h2>
-      <p className="text-white/50 text-sm">10 questions · {TIME_PER_Q} seconds each · Go as fast as you can!</p>
+      <p className="text-white/50 text-sm">10 questions · {TIME_PER_Q}s each (longer questions get more time) · Go as fast as you can!</p>
       {highScore > 0 && <p className="text-yellow-300 font-bold text-sm">🏆 Your best: {highScore}/{questions.length}</p>}
       <button onClick={start} className="px-10 py-4 bg-rose-500 hover:bg-rose-400 text-white rounded-2xl font-black text-lg transition-all hover:scale-105">
         Start!
@@ -113,7 +117,7 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
 
   const q = questions[index]
   const opts = q.type === 'multiple_choice' && q.options ? (q.options as string[]) : null
-  const timerPct = (timeLeft / TIME_PER_Q) * 100
+  const timerPct = (timeLeft / questionSeconds) * 100
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-4 pb-8">

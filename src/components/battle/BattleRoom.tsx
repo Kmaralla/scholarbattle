@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Question, User, Subject } from '@/types'
-import { cn, gradeLabel, clipOptionDisplay } from '@/lib/utils'
+import { cn, gradeLabel, clipOptionDisplay, getEffectiveSeconds } from '@/lib/utils'
 import { sounds } from '@/lib/sounds'
 
 const TOTAL_QUESTIONS = 10
@@ -83,10 +83,13 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
   const [shuffledOptions, setShuffledOptions] = useState<string[]>([])
 
   const q = questions[qIndex]
+  // Long questions (dense history/civics prompts especially) need more than
+  // a short chosen timeout just to read — bump those up to at least 30s.
+  const effectiveSeconds = getEffectiveSeconds(q?.question_text ?? '', SECONDS_PER_QUESTION)
 
   // ── Reset per question ───────────────────────────────────────────────────────
   useEffect(() => {
-    setTimeLeft(SECONDS_PER_QUESTION)
+    setTimeLeft(effectiveSeconds)
     setAnswered(false);        answeredRef.current         = false
     setMyCorrect(false);       myCorrectRef.current        = false
     setOpponentAnswered(false); opponentAnsweredRef.current = false
@@ -300,7 +303,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
 
   if (!q) return null
 
-  const timerPct       = (timeLeft / SECONDS_PER_QUESTION) * 100
+  const timerPct       = (timeLeft / effectiveSeconds) * 100
   const myAnswerCorrect = (selectedAnswer || typedAnswer)
     ? (selectedAnswer ?? typedAnswer).toLowerCase() === q.correct_answer.toLowerCase()
     : false

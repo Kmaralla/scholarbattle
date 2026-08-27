@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { cn, clipOptionDisplay } from '@/lib/utils'
+import { cn, clipOptionDisplay, getEffectiveSeconds } from '@/lib/utils'
 import { Question } from '@/types'
 import { getQuestionsByIndices } from '@/lib/questions'
 import { UserAvatar } from '@/components/profile/UserAvatar'
@@ -107,7 +107,8 @@ export default function TeamBattlePage() {
     return () => { clearInterval(clockInterval); clearInterval(pollInterval) }
   }, [battle, loadAll])
 
-  const qIndex = battle ? currentQuestionIndex(battle, answers, participants, questions.length, now()) : -1
+  const questionTexts = questions.map(q => q.question_text)
+  const qIndex = battle ? currentQuestionIndex(battle, answers, participants, questions.length, now(), questionTexts) : -1
   const startsInMs = battle ? msUntilStart(battle, now()) : 0
   const me = participants.find(p => p.user_id === userId)
   const scores = battle ? computeTeamScores(answers, participants, Math.min(qIndex + 1, questions.length)) : {}
@@ -233,8 +234,8 @@ export default function TeamBattlePage() {
   }
 
   const q = questions[qIndex]
-  const questionSeconds = battle.seconds_per_question
-  const schedule = computeQuestionSchedule(battle, answers, participants, questions.length)
+  const questionSeconds = getEffectiveSeconds(q?.question_text ?? '', battle.seconds_per_question)
+  const schedule = computeQuestionSchedule(battle, answers, participants, questions.length, questionTexts)
   const endTime = schedule[qIndex] ?? now()
   const timeLeft = Math.max(0, Math.ceil((endTime - now()) / 1000))
   const alreadyAnswered = answeredIndex === qIndex

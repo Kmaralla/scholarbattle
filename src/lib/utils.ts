@@ -27,3 +27,19 @@ export function clipOptionDisplay(options: string[], maxExtra = 22): string[] {
   const cap = minLen + maxExtra
   return options.map(o => o.length > cap ? o.slice(0, cap - 1) + '…' : o)
 }
+
+const LONG_QUESTION_CHARS = 100
+const LONG_QUESTION_SECONDS = 30
+
+/**
+ * Long questions (dense history/civics prompts especially) need more
+ * than a short base timer to even read, let alone answer — so any
+ * question over LONG_QUESTION_CHARS gets bumped up to at least 30s,
+ * regardless of whatever shorter per-question time was chosen.
+ */
+export function getEffectiveSeconds(questionText: string, baseSeconds: number): number {
+  if (questionText.length > LONG_QUESTION_CHARS) {
+    return Math.max(baseSeconds, LONG_QUESTION_SECONDS)
+  }
+  return baseSeconds
+}

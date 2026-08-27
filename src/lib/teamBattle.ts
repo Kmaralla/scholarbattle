@@ -35,6 +35,19 @@ export interface TeamBattleAnswer {
 }
 
 const ADVANCE_BUFFER_MS = 1000
+const LONG_QUESTION_CHARS = 100
+const LONG_QUESTION_SECONDS = 30
+
+// Long questions (dense history/civics prompts especially) need more than
+// a short chosen per-question time just to read — see getEffectiveSeconds
+// in lib/utils, duplicated here to avoid this shared lib importing from
+// the app's utils module.
+function effectiveSecondsFor(questionText: string | undefined, baseSeconds: number): number {
+  if (questionText && questionText.length > LONG_QUESTION_CHARS) {
+    return Math.max(baseSeconds, LONG_QUESTION_SECONDS)
+  }
+  return baseSeconds
+}
 
 // Builds the actual (not just nominally-scheduled) end time for every
 // question in order. A question ends at its full time allowance UNLESS
@@ -50,12 +63,13 @@ export function computeQuestionSchedule(
   battle: TeamBattle,
   answers: TeamBattleAnswer[],
   participants: TeamBattleParticipant[],
-  numQuestions: number
+  numQuestions: number,
+  questionTexts: string[] = []
 ): number[] {
-  const perQMs = battle.seconds_per_question * 1000
   let t = new Date(battle.start_at).getTime()
   const ends: number[] = []
   for (let q = 0; q < numQuestions; q++) {
+    const perQMs = effectiveSecondsFor(questionTexts[q], battle.seconds_per_question) * 1000
     const scheduledEnd = t + perQMs
     const qAnswers = answers.filter(a => a.question_index === q)
     let end = scheduledEnd
@@ -78,10 +92,11 @@ export function currentQuestionIndex(
   answers: TeamBattleAnswer[],
   participants: TeamBattleParticipant[],
   numQuestions: number,
-  now: number = Date.now()
+  now: number = Date.now(),
+  questionTexts: string[] = []
 ): number {
   if (msUntilStart(battle, now) > 0) return -1
-  const ends = computeQuestionSchedule(battle, answers, participants, numQuestions)
+  const ends = computeQuestionSchedule(battle, answers, participants, numQuestions, questionTexts)
   for (let q = 0; q < numQuestions; q++) {
     if (now < ends[q]) return q
   }
