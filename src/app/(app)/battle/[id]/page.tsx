@@ -118,8 +118,11 @@ export default function BattlePage() {
           if (retryIndices.length === 0) { setLoadError('Could not sync questions. Please try again.'); return }
           questionList = getQuestionsByIndices(retryIndices)
         }
+      } else if (existingIndices.length > 0) {
+        // Solo practice — use the (possibly topic-filtered) questions picked at creation
+        questionList = getQuestionsByIndices(existingIndices)
       } else {
-        // Solo practice — random questions
+        // Fallback for old battles created before topics were pre-picked
         questionList = getQuestionsForBattle(battleData.subject as Subject, battleData.grade_level)
       }
 

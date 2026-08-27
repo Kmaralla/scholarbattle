@@ -8,6 +8,7 @@ import { Swords } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { pickQuestionIndices } from '@/lib/questions'
 
 const DIFFICULTIES: { value: BotDifficulty; label: string; desc: string }[] = [
   { value: 'easy',   label: '🟢 Easy',   desc: 'Slow & sometimes wrong' },
@@ -37,7 +38,7 @@ export default function BattlePage() {
       status: 'in_progress',
       challenger_score: 0,
       opponent_score: 0,
-      question_ids: [],
+      question_ids: pickQuestionIndices(subject, grade, 10, topic),
     }).select().single()
 
     if (battle) {

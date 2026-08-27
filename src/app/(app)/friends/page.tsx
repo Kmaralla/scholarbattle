@@ -159,9 +159,9 @@ export default function FriendsPage() {
     setRemovingId(null)
   }
 
-  async function handleStartBattle(subject: Subject, grade: number) {
+  async function handleStartBattle(subject: Subject, grade: number, topic: string) {
     if (!challenging || !currentUser) return
-    const questionIndices = pickQuestionIndices(subject, grade, 10)
+    const questionIndices = pickQuestionIndices(subject, grade, 10, topic)
     const { data: battle } = await supabase.from('battles').insert({
       challenger_id: currentUser.id, opponent_id: challenging.id,
       subject, grade_level: grade, status: 'pending',
