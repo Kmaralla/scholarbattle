@@ -226,9 +226,7 @@ export function TrainingSession({
 
   const questionSeconds = qIndex === mode.questions - 1 ? 5 : Math.max(10, mode.seconds - qIndex * 10)
   const timerPct = (timeLeft / questionSeconds) * 100
-  const myAnswerCorrect = selectedAnswer
-    ? selectedAnswer.toLowerCase() === q?.correct_answer?.toLowerCase()
-    : typedAnswer.toLowerCase() === q?.correct_answer?.toLowerCase()
+  const myAnswerCorrect = q ? normalizeAnswer(selectedAnswer || typedAnswer) === normalizeAnswer(q.correct_answer) : false
 
   // Checking today's puzzle status with the server
   if (isPuzzle && puzzleStatus === 'checking') {
