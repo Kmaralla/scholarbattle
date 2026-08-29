@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Question, User, Subject } from '@/types'
-import { cn, gradeLabel, clipOptionDisplay, getEffectiveSeconds } from '@/lib/utils'
+import { cn, gradeLabel, clipOptionDisplay, getEffectiveSeconds, normalizeAnswer } from '@/lib/utils'
 import { sounds } from '@/lib/sounds'
 
 const TOTAL_QUESTIONS = 10
@@ -209,7 +209,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
     if (botTimerRef.current) clearTimeout(botTimerRef.current)
     setAnswered(true)
 
-    const isCorrect = !!answer && answer.trim().toLowerCase() === q.correct_answer.trim().toLowerCase()
+    const isCorrect = !!answer && normalizeAnswer(answer) === normalizeAnswer(q.correct_answer)
     const timeTaken = Date.now() - startTime.current
 
     myCorrectRef.current = isCorrect
@@ -305,7 +305,7 @@ export function BattleRoom({ battleId, questions, currentUser, opponent, isSolo,
 
   const timerPct       = (timeLeft / effectiveSeconds) * 100
   const myAnswerCorrect = (selectedAnswer || typedAnswer)
-    ? (selectedAnswer ?? typedAnswer).toLowerCase() === q.correct_answer.toLowerCase()
+    ? normalizeAnswer(selectedAnswer ?? typedAnswer) === normalizeAnswer(q.correct_answer)
     : false
   const botAlreadyScored = botAnsweredFirst && botWasCorrect
 

@@ -43,3 +43,12 @@ export function getEffectiveSeconds(questionText: string, baseSeconds: number): 
   }
   return baseSeconds
 }
+
+/**
+ * Normalizes a typed answer for comparison: case-insensitive, and all
+ * whitespace stripped (not just trimmed) so "y = 2x + 5" and "y=2x+5"
+ * are treated as the same answer.
+ */
+export function normalizeAnswer(s: string): string {
+  return s.toLowerCase().replace(/\s+/g, '')
+}

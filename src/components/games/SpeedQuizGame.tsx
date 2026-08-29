@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { getQuestionsForBattle } from '@/lib/questions'
 import { Subject } from '@/types'
-import { clipOptionDisplay, getEffectiveSeconds } from '@/lib/utils'
+import { clipOptionDisplay, getEffectiveSeconds, normalizeAnswer } from '@/lib/utils'
 
 const TIME_PER_Q = 8
 
@@ -59,7 +59,7 @@ export function SpeedQuizGame({ subject, grade, onExit }: { subject: Subject; gr
 
   function advance(answer: string | null) {
     const q = questions[index]
-    const correct = answer !== null && answer.trim().toLowerCase() === q.correct_answer.trim().toLowerCase()
+    const correct = answer !== null && normalizeAnswer(answer) === normalizeAnswer(q.correct_answer)
     if (correct) {
       setScore(s => s + 1)
       setStreak(s => { const n = s + 1; setBestStreak(b => Math.max(b, n)); return n })

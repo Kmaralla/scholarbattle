@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { cn, clipOptionDisplay } from '@/lib/utils'
+import { cn, clipOptionDisplay, normalizeAnswer } from '@/lib/utils'
 import { getQuestionsForBattle } from '@/lib/questions'
 import { Subject } from '@/types'
 import { createClient } from '@/lib/supabase/client'
@@ -159,14 +159,14 @@ export function TrainingSession({
   function handleChoiceSubmit() {
     if (!selectedAnswer || answered) return
     clearInterval(timerRef.current!)
-    registerAnswer(selectedAnswer.toLowerCase() === q.correct_answer.toLowerCase())
+    registerAnswer(normalizeAnswer(selectedAnswer) === normalizeAnswer(q.correct_answer))
   }
 
   function handleTypedSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (answered || !typedAnswer.trim()) return
     clearInterval(timerRef.current!)
-    registerAnswer(typedAnswer.trim().toLowerCase() === q.correct_answer.toLowerCase())
+    registerAnswer(normalizeAnswer(typedAnswer) === normalizeAnswer(q.correct_answer))
   }
 
   function applyHint() {

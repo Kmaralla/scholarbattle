@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { cn, clipOptionDisplay, getEffectiveSeconds } from '@/lib/utils'
+import { cn, clipOptionDisplay, getEffectiveSeconds, normalizeAnswer } from '@/lib/utils'
 import { Question } from '@/types'
 import { getQuestionsByIndices } from '@/lib/questions'
 import { UserAvatar } from '@/components/profile/UserAvatar'
@@ -132,7 +132,7 @@ export default function TeamBattlePage() {
     if (answeredIndex === qIndex) return
     setAnsweredIndex(qIndex)
     const q = questions[qIndex]
-    const isCorrect = answer.trim().toLowerCase() === q.correct_answer.trim().toLowerCase()
+    const isCorrect = normalizeAnswer(answer) === normalizeAnswer(q.correct_answer)
     const timeMs = Date.now() - questionStartRef.current
     await supabase.from('team_battle_answers').insert({
       team_battle_id: battle.id,
