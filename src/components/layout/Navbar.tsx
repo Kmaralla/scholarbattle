@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/components/ThemeProvider'
+import { useOnlineUsers } from '@/components/PresenceTracker'
 
 const SECTIONS = [
   {
@@ -41,6 +42,7 @@ export function Navbar() {
   const [pendingInvites, setPendingInvites] = useState(0)
   const { theme, toggle } = useTheme()
   const supabase = createClient()
+  const onlineUsers = useOnlineUsers()
 
   // Load coins
   useEffect(() => {
@@ -110,6 +112,12 @@ export function Navbar() {
               <span className="text-sm">🪙</span>
               <span className="text-sm font-black text-yellow-300">{coins}</span>
             </div>
+            {onlineUsers.size > 0 && (
+              <div className="flex items-center gap-1 bg-green-400/10 border border-green-400/20 rounded-full px-3 py-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-xs font-black text-green-400">{onlineUsers.size}</span>
+              </div>
+            )}
             <button
               onClick={toggle}
               className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center hover:bg-white/20 transition-all"
@@ -161,6 +169,12 @@ export function Navbar() {
                 : <Moon className="w-3.5 h-3.5 text-indigo-600" />}
             </button>
           </div>
+          {onlineUsers.size > 0 && (
+            <div className="mt-3 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
+              <span className="text-xs text-green-400 font-bold">{onlineUsers.size} online</span>
+            </div>
+          )}
           {coins !== null && (
             <div className="mt-2.5 flex items-center justify-between gap-2 bg-yellow-400/10 border border-yellow-400/20 rounded-xl px-3 py-1.5">
               <span className="text-xs text-yellow-400/60 font-medium">🪙 Coins</span>
